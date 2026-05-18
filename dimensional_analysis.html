@@ -87,6 +87,30 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
   <canvas id="c3d"></canvas>
   <canvas id="clbl"></canvas>
   <div id="tip"></div>
+  <div id="preface" style="position:absolute;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(6,6,26,.97);padding:24px;overflow-y:auto">
+    <div style="max-width:600px;font:'Courier New',monospace;color:#aab;line-height:1.75">
+      <div style="font:bold 13px 'Courier New',monospace;color:#8899ff;letter-spacing:.08em;margin-bottom:18px;text-transform:uppercase">Dimensional Analysis · L M T Exponent Space</div>
+      <p style="font:13px/1.8 Georgia,serif;color:#c8cce0;margin-bottom:14px">
+        Welcome, Behrooz. What you are about to explore is, in a precise sense, a <em>semantic embedding</em> — except the embedding space predates machine learning by two centuries, and the geometry is exact rather than learned.
+      </p>
+      <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:14px">
+        Every physical quantity — force, energy, pressure, viscosity — can be expressed as a product of powers of three base dimensions: <strong style="color:#aaccff">Length (L)</strong>, <strong style="color:#aaccff">Mass (M)</strong>, and <strong style="color:#aaccff">Time (T)</strong>. Those three integer exponents form a coordinate. This visualisation places 85 quantities from classical physics at their exact coordinates in that three-dimensional lattice, coloured perceptually via OKLAB so that visual distance tracks dimensional distance.
+      </p>
+      <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:14px">
+        The structure that emerges is not decorative. Quantities sharing a point are <em>dimensionally identical</em> — they are the kinds of conflationary near-misses that make formula retrieval hard: torque and energy both sit at L²M¹T⁻², yet they are physically distinct. Quantities connected by a unit vector step differ by exactly one factor of L, M, or T — meaning they are related by differentiation or integration with respect to distance, mass, or time. The axes are, in this sense, differential operators made geometric.
+      </p>
+      <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:14px">
+        For someone working at the intersection of formula search and mathematical information retrieval, this space has an immediate practical reading. Dimensional exponents are a compact, language-independent, noise-free feature vector for any formula that carries physical units. Two formulae that share a dimensional coordinate are candidates for semantic equivalence — or deliberate ambiguity — regardless of how they are typeset, which symbol names are used, or which unit system the author preferred. A retrieval system aware of this lattice can filter, cluster, and rank formula candidates at zero inference cost before any heavier model is applied.
+      </p>
+      <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:14px">
+        The origin — the single point at (0, 0, 0) — is particularly worth noting. It is the home of all dimensionless quantities: strain, Mach number, Reynolds number, angles. These are the quantities that encode <em>ratios</em>, the normalized comparisons that appear most naturally in the kinds of lookup and question-answering tasks ARQMath was designed to study.
+      </p>
+      <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:20px">
+        Hover over any sphere for a tooltip. Use the controls panel (⚙ top right) to adjust projection, label style, and rotation. Keyboard: arrow keys orbit, <kbd style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:1px 5px;border-radius:3px;font-size:11px">Space</kbd> pauses, <kbd style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:1px 5px;border-radius:3px;font-size:11px">R</kbd> resets.
+      </p>
+      <button onclick="document.getElementById('preface').style.display='none'" style="background:rgba(80,110,220,.22);border:1px solid rgba(100,140,255,.4);border-radius:7px;color:#aaccff;font:12px 'Courier New',monospace;padding:10px 28px;cursor:pointer;letter-spacing:.06em;transition:background .15s" onmouseover="this.style.background='rgba(80,110,220,.4)'" onmouseout="this.style.background='rgba(80,110,220,.22)'">Enter the space →</button>
+    </div>
+  </div>
   <div id="info">
     <div style="font:bold 10px 'Courier New',monospace;color:#8899ff;letter-spacing:.04em">DIMENSIONAL ANALYSIS</div>
     <div style="font:8.5px 'Courier New',monospace;color:#2c3f60;margin-top:2px">Physical metrics · L M T exponent space · OKLAB color</div>
