@@ -720,11 +720,31 @@ function animate(){
     const cM=coordToColor(0,Math.max(-1,Math.min(1,n)),0);let[mx,my]=toSc(0,n,0);drawLbl(mx+13,my+8,String(n),cM.r,cM.g,cM.b,false,true);
     const cT=coordToColor(0,0,Math.max(-4,Math.min(1,n)));let[tx,ty]=toSc(0,0,n);drawLbl(tx,ty+24,String(n),cT.r,cT.g,cT.b,false,true);
   });
+  // Pre-compute hover sets once — shared by label pass and 3D highlight pass
+  const anyHov=!!(hovered||hoveredFormula);
+  const activeFos=new Set(), activePts=new Set();
+  if(anyHov){
+    if(hoveredFormula){
+      activeFos.add(hoveredFormula);
+      PTS.forEach(pt=>{if(pt.key===hoveredFormula.fromKey||pt.key===hoveredFormula.toKey)activePts.add(pt);});
+    }
+    if(hovered){
+      activePts.add(hovered);
+      formulaObjs.forEach(fo=>{
+        if(fo.fromKey===hovered.key||fo.toKey===hovered.key){
+          activeFos.add(fo);
+          PTS.forEach(pt=>{if(pt.key===fo.fromKey||pt.key===fo.toKey)activePts.add(pt);});
+        }
+      });
+    }
+  }
+
   if(labelsVis!=='hidden'){
-    lc.globalAlpha=labelsVis==='low'?0.3:1;
+    const baseAlpha=labelsVis==='low'?0.3:1;
     PTS.map(pt=>{const[sx,sy,z]=toSc(pt.L,pt.M,pt.T);return{pt,sx,sy,z};})
       .sort((a,b)=>b.z-a.z)
       .forEach(({pt,sx,sy})=>{
+        lc.globalAlpha=anyHov?(activePts.has(pt)?1:0.12):baseAlpha;
         const{r,g,b}=pt.col,isH=hovered===pt,n=pt.entries.length;
         drawLbl(sx,sy,n>1?`${pt.entries[0]} +${n-1}`:pt.entries[0],r,g,b,isH,false);
         if(n>1&&!isH){lc.font=`8px ${lblFont}`;lc.fillStyle=`rgba(${r},${g},${b},.55)`;lc.fillText(`×${n}`,sx,sy+(lblSize*.8));}
@@ -732,39 +752,25 @@ function animate(){
     lc.globalAlpha=1;
   }
   if(showFormulas){
-    formulaObjs.forEach(({def,mid,midCol})=>{
-      const[sx,sy]=toSc(mid.x,mid.y,mid.z);
+    formulaObjs.forEach(fo=>{
+      if(!fo.g.visible) return;
+      const[sx,sy]=toSc(fo.mid.x,fo.mid.y,fo.mid.z);
+      lc.globalAlpha=anyHov?(activeFos.has(fo)?1:0.10):1;
       lc.font=`bold ${Math.max(7,lblSize-1)}px ${lblFont}`;
       lc.textAlign='center';
       lc.strokeStyle='rgba(4,4,20,.97)';
       lc.lineWidth=2.8;
       lc.lineJoin='round';
-      lc.strokeText(def.label,sx,sy-6);
-      lc.fillStyle=`rgb(${midCol.r},${midCol.g},${midCol.b})`;
-      lc.fillText(def.label,sx,sy-6);
+      lc.strokeText(fo.def.label,sx,sy-6);
+      lc.fillStyle=`rgb(${fo.midCol.r},${fo.midCol.g},${fo.midCol.b})`;
+      lc.fillText(fo.def.label,sx,sy-6);
     });
+    lc.globalAlpha=1;
   }
   lc.shadowBlur=0;
 
-  // ── Hover highlights ──────────────────────────────────────────────────────────
+  // ── 3D hover highlights ───────────────────────────────────────────────────────
   if(showFormulas){
-    const anyHov=hovered||hoveredFormula;
-    const activeFos=new Set(), activePts=new Set();
-    if(anyHov){
-      if(hoveredFormula){
-        activeFos.add(hoveredFormula);
-        PTS.forEach(pt=>{if(pt.key===hoveredFormula.fromKey||pt.key===hoveredFormula.toKey)activePts.add(pt);});
-      }
-      if(hovered){
-        activePts.add(hovered);
-        formulaObjs.forEach(fo=>{
-          if(fo.fromKey===hovered.key||fo.toKey===hovered.key){
-            activeFos.add(fo);
-            PTS.forEach(pt=>{if(pt.key===fo.fromKey||pt.key===fo.toKey)activePts.add(pt);});
-          }
-        });
-      }
-    }
     formulaObjs.forEach(fo=>{
       if(!fo.g.visible) return;
       const op=anyHov?(activeFos.has(fo)?1.0:0.10):0.72;
