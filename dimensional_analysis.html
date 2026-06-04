@@ -268,11 +268,14 @@ PTS.forEach(pt=>{
   const r=0.085+Math.min(pt.entries.length-1,7)*0.022;
   pt.lum=(0.299*col.r+0.587*col.g+0.114*col.b)/255;
   const vis=new THREE.Mesh(new THREE.SphereGeometry(r,20,20),
-    new THREE.MeshPhongMaterial({color:col.hex,emissive:col.hex,emissiveIntensity:0.15,shininess:110}));
-  vis.position.set(pt.L,pt.M,pt.T); scene.add(vis);
-  if(pt.M!==0) scene.add(new THREE.Line(
+    new THREE.MeshPhongMaterial({color:col.hex,emissive:col.hex,emissiveIntensity:0.15,shininess:110,transparent:true}));
+  vis.position.set(pt.L,pt.M,pt.T); scene.add(vis); pt.vis=vis;
+  let projLine=null;
+  if(pt.M!==0){projLine=new THREE.Line(
     new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(pt.L,0,pt.T),new THREE.Vector3(pt.L,pt.M,pt.T)]),
-    new THREE.LineBasicMaterial({color:col.hex,transparent:true,opacity:0.2})));
+    new THREE.LineBasicMaterial({color:col.hex,transparent:true,opacity:0.2}));
+    scene.add(projLine);}
+  pt.projLine=projLine;
   const rim=new THREE.Mesh(new THREE.SphereGeometry(r*1.28,14,14),
     new THREE.MeshBasicMaterial({color:0x00000a,side:THREE.BackSide,transparent:true,opacity:0,depthWrite:false}));
   rim.position.set(pt.L,pt.M,pt.T); rim.visible=false; scene.add(rim); pt.rim=rim;
@@ -286,6 +289,15 @@ PTS.forEach(pt=>{
     new THREE.MeshBasicMaterial({transparent:true,opacity:0}));
   pick.position.set(pt.L,pt.M,pt.T); pick.userData=pt; scene.add(pick); pickMeshes.push(pick);
 });
+
+let metricsVis='full', labelsVis='full';
+function applyMetricsVis(){
+  PTS.forEach(pt=>{
+    const h=metricsVis==='hidden',l=metricsVis==='low';
+    pt.vis.visible=!h; pt.vis.material.opacity=l?0.18:1; pt.vis.material.needsUpdate=true;
+    if(pt.projLine){pt.projLine.visible=!h;pt.projLine.material.opacity=l?0.06:0.2;pt.projLine.material.needsUpdate=true;}
+  });
+}
 
 // ── Formula Arrows ────────────────────────────────────────────────────────────
 // Each formula A × B = C maps as: arrow from A's point to C's point in exponent space,
@@ -309,11 +321,22 @@ const formulaObjs=[];
     dir.normalize();
     const shaftLen=total-MARGIN*2-HEAD;
     if(shaftLen<=0.05) return;
-    const mat=new THREE.MeshPhongMaterial({color:def.hex,emissive:def.hex,emissiveIntensity:0.3,transparent:true,opacity:0.72,depthWrite:false});
+    const sc=coordToColor(...def.from),ec=coordToColor(...def.to);
+    // Gradient shaft via vertex colors
+    const shaftGeo=new THREE.CylinderGeometry(SR,SR,shaftLen,6,1);
+    const pa=shaftGeo.attributes.position,cb=new Float32Array(pa.count*3);
+    for(let i=0;i<pa.count;i++){
+      const t=Math.max(0,Math.min(1,pa.getY(i)/shaftLen+0.5));
+      cb[i*3]=(sc.r/255)*(1-t)+(ec.r/255)*t;
+      cb[i*3+1]=(sc.g/255)*(1-t)+(ec.g/255)*t;
+      cb[i*3+2]=(sc.b/255)*(1-t)+(ec.b/255)*t;
+    }
+    shaftGeo.setAttribute('color',new THREE.BufferAttribute(cb,3));
     const g=new THREE.Group();
-    const shaft=new THREE.Mesh(new THREE.CylinderGeometry(SR,SR,shaftLen,6),mat);
+    const shaft=new THREE.Mesh(shaftGeo,new THREE.MeshPhongMaterial({vertexColors:true,transparent:true,opacity:0.72,depthWrite:false}));
     shaft.position.y=shaftLen/2; g.add(shaft);
-    const cone=new THREE.Mesh(new THREE.ConeGeometry(0.065,HEAD,8),mat.clone());
+    const cone=new THREE.Mesh(new THREE.ConeGeometry(0.065,HEAD,8),
+      new THREE.MeshPhongMaterial({color:ec.hex,emissive:ec.hex,emissiveIntensity:0.3,transparent:true,opacity:0.72,depthWrite:false}));
     cone.position.y=shaftLen+HEAD/2; g.add(cone);
     g.position.copy(s.clone().addScaledVector(dir,MARGIN));
     const up=new THREE.Vector3(0,1,0);
@@ -321,7 +344,8 @@ const formulaObjs=[];
     else g.quaternion.setFromUnitVectors(up,dir);
     scene.add(g);
     const mid=new THREE.Vector3(...def.from).lerp(new THREE.Vector3(...def.to),0.5);
-    formulaObjs.push({g,def,mid});
+    const midCol={r:Math.round((sc.r+ec.r)/2),g:Math.round((sc.g+ec.g)/2),b:Math.round((sc.b+ec.b)/2)};
+    formulaObjs.push({g,def,mid,midCol});
   });
 })();
 
@@ -496,6 +520,26 @@ function updFov(s){
   panel.appendChild(acc('LABELS',div,true));
 })();
 
+// Visibility
+(()=>{
+  const div=document.createElement('div');
+  function mkVRow(label,getV,setV){
+    const row=document.createElement('div'); row.className='prow'; row.style.marginBottom='4px';
+    const lbl=document.createElement('span'); lbl.className='pl'; lbl.style.minWidth='40px'; lbl.textContent=label;
+    const segs=document.createElement('div'); segs.className='segs'; segs.style.flex='1';
+    [['Full','full'],['Low','low'],['Off','hidden']].forEach(([l,v])=>{
+      const btn=document.createElement('button'); btn.className='seg'+(v===getV()?' on':''); btn.textContent=l; btn.dataset.v=v;
+      btn.addEventListener('click',()=>{setV(v);segs.querySelectorAll('.seg').forEach(b=>b.classList.toggle('on',b.dataset.v===v));});
+      btn.addEventListener('mousedown',e=>e.stopPropagation());
+      segs.appendChild(btn);
+    });
+    row.append(lbl,segs); return row;
+  }
+  div.appendChild(mkVRow('Spheres',()=>metricsVis,v=>{metricsVis=v;applyMetricsVis();}));
+  div.appendChild(mkVRow('Labels',()=>labelsVis,v=>{labelsVis=v;}));
+  panel.appendChild(acc('VISIBILITY',div,true));
+})();
+
 // View
 (()=>{
   const div=document.createElement('div');
@@ -541,9 +585,10 @@ function updFov(s){
   FORMULA_DEFS.forEach(def=>{
     const row=document.createElement('div');
     row.style.cssText='display:flex;align-items:center;gap:6px;margin:4px 0;';
-    const hex='#'+def.hex.toString(16).padStart(6,'0');
-    row.innerHTML=`<span style="display:inline-block;width:18px;height:3px;background:${hex};border-radius:2px;flex-shrink:0"></span>`+
-      `<span style="color:${hex};font:bold 9px 'Courier New',monospace;flex-shrink:0">${def.label}</span>`+
+    const sc=coordToColor(...def.from),ec=coordToColor(...def.to);
+    const midCss=`rgb(${Math.round((sc.r+ec.r)/2)},${Math.round((sc.g+ec.g)/2)},${Math.round((sc.b+ec.b)/2)})`;
+    row.innerHTML=`<span style="display:inline-block;width:18px;height:3px;background:linear-gradient(to right,${sc.css},${ec.css});border-radius:2px;flex-shrink:0"></span>`+
+      `<span style="color:${midCss};font:bold 9px 'Courier New',monospace;flex-shrink:0">${def.label}</span>`+
       `<span style="color:#2a3a55;font-size:8px">${def.desc}</span>`;
     list.appendChild(row);
   });
@@ -619,25 +664,27 @@ function animate(){
     const cM=coordToColor(0,Math.max(-1,Math.min(1,n)),0);let[mx,my]=toSc(0,n,0);drawLbl(mx+13,my+8,String(n),cM.r,cM.g,cM.b,false,true);
     const cT=coordToColor(0,0,Math.max(-4,Math.min(1,n)));let[tx,ty]=toSc(0,0,n);drawLbl(tx,ty+24,String(n),cT.r,cT.g,cT.b,false,true);
   });
-  PTS.map(pt=>{const[sx,sy,z]=toSc(pt.L,pt.M,pt.T);return{pt,sx,sy,z};})
-    .sort((a,b)=>b.z-a.z)
-    .forEach(({pt,sx,sy})=>{
-      const{r,g,b}=pt.col,isH=hovered===pt,n=pt.entries.length;
-      drawLbl(sx,sy,n>1?`${pt.entries[0]} +${n-1}`:pt.entries[0],r,g,b,isH,false);
-      if(n>1&&!isH){lc.font=`8px ${lblFont}`;lc.fillStyle=`rgba(${r},${g},${b},.55)`;lc.fillText(`×${n}`,sx,sy+(lblSize*.8));}
-    });
+  if(labelsVis!=='hidden'){
+    lc.globalAlpha=labelsVis==='low'?0.3:1;
+    PTS.map(pt=>{const[sx,sy,z]=toSc(pt.L,pt.M,pt.T);return{pt,sx,sy,z};})
+      .sort((a,b)=>b.z-a.z)
+      .forEach(({pt,sx,sy})=>{
+        const{r,g,b}=pt.col,isH=hovered===pt,n=pt.entries.length;
+        drawLbl(sx,sy,n>1?`${pt.entries[0]} +${n-1}`:pt.entries[0],r,g,b,isH,false);
+        if(n>1&&!isH){lc.font=`8px ${lblFont}`;lc.fillStyle=`rgba(${r},${g},${b},.55)`;lc.fillText(`×${n}`,sx,sy+(lblSize*.8));}
+      });
+    lc.globalAlpha=1;
+  }
   if(showFormulas){
-    formulaObjs.forEach(({def,mid})=>{
+    formulaObjs.forEach(({def,mid,midCol})=>{
       const[sx,sy]=toSc(mid.x,mid.y,mid.z);
-      const c=new THREE.Color(def.hex);
-      const fr=Math.round(c.r*255),fg=Math.round(c.g*255),fb=Math.round(c.b*255);
-      lc.font=`bold 8.5px ${lblFont}`;
+      lc.font=`bold ${Math.max(7,lblSize-1)}px ${lblFont}`;
       lc.textAlign='center';
       lc.strokeStyle='rgba(4,4,20,.97)';
       lc.lineWidth=2.8;
       lc.lineJoin='round';
       lc.strokeText(def.label,sx,sy-6);
-      lc.fillStyle=`rgba(${fr},${fg},${fb},1)`;
+      lc.fillStyle=`rgb(${midCol.r},${midCol.g},${midCol.b})`;
       lc.fillText(def.label,sx,sy-6);
     });
   }
