@@ -268,7 +268,7 @@ PTS.forEach(pt=>{
   const r=0.085+Math.min(pt.entries.length-1,7)*0.022;
   pt.lum=(0.299*col.r+0.587*col.g+0.114*col.b)/255;
   const vis=new THREE.Mesh(new THREE.SphereGeometry(r,20,20),
-    new THREE.MeshPhongMaterial({color:col.hex,emissive:col.hex,emissiveIntensity:0.15,shininess:110,transparent:true}));
+    new THREE.MeshPhongMaterial({color:col.hex,emissive:col.hex,emissiveIntensity:0.15,shininess:110}));
   vis.position.set(pt.L,pt.M,pt.T); scene.add(vis); pt.vis=vis;
   let projLine=null;
   if(pt.M!==0){projLine=new THREE.Line(
@@ -294,7 +294,7 @@ let metricsVis='full', labelsVis='full';
 function applyMetricsVis(){
   PTS.forEach(pt=>{
     const h=metricsVis==='hidden',l=metricsVis==='low';
-    pt.vis.visible=!h; pt.vis.material.opacity=l?0.18:1; pt.vis.material.needsUpdate=true;
+    pt.vis.visible=!h; pt.vis.material.opacity=l?0.18:1; pt.vis.material.transparent=l; pt.vis.material.needsUpdate=true;
     if(pt.projLine){pt.projLine.visible=!h;pt.projLine.material.opacity=l?0.06:0.2;pt.projLine.material.needsUpdate=true;}
   });
 }
@@ -367,10 +367,10 @@ PTS.forEach(pt=>{pt.key=`${pt.L},${pt.M},${pt.T}`;});
     }
     shaftGeo.setAttribute('color',new THREE.BufferAttribute(cb,3));
     const shaftMat=new THREE.MeshPhongMaterial({vertexColors:true,transparent:true,opacity:0.72,depthWrite:false});
-    const coneMat=new THREE.MeshPhongMaterial({color:ec.hex,emissive:ec.hex,emissiveIntensity:0.3,transparent:true,opacity:0.72,depthWrite:false});
+    const coneMat=new THREE.MeshPhongMaterial({color:ec.hex,emissive:ec.hex,emissiveIntensity:0.3,transparent:true,opacity:0.72,depthWrite:false,side:THREE.DoubleSide});
     const g=new THREE.Group();
-    const shaft=new THREE.Mesh(shaftGeo,shaftMat); shaft.position.y=shaftLen/2; g.add(shaft);
-    const cone=new THREE.Mesh(new THREE.ConeGeometry(0.065,HEAD,8),coneMat); cone.position.y=shaftLen+HEAD/2; g.add(cone);
+    const shaft=new THREE.Mesh(shaftGeo,shaftMat); shaft.position.y=shaftLen/2; shaft.renderOrder=2; g.add(shaft);
+    const cone=new THREE.Mesh(new THREE.ConeGeometry(0.065,HEAD,8),coneMat); cone.position.y=shaftLen+HEAD/2; cone.renderOrder=2; g.add(cone);
     // Invisible pick cylinder (wider than shaft for easier hover)
     const pickLen=shaftLen+HEAD;
     const pm=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.13,pickLen,6),
@@ -776,7 +776,8 @@ function animate(){
       PTS.forEach(pt=>{
         if(!pt.vis.visible) return;
         const op=anyHov?(activePts.has(pt)?1.0:Math.min(baseOp,0.15)):baseOp;
-        if(pt.vis.material.opacity!==op){pt.vis.material.opacity=op;pt.vis.material.needsUpdate=true;}
+        const tr=op<1;
+        if(pt.vis.material.opacity!==op||pt.vis.material.transparent!==tr){pt.vis.material.opacity=op;pt.vis.material.transparent=tr;pt.vis.material.needsUpdate=true;}
       });
     }
   }
