@@ -268,7 +268,7 @@ PTS.forEach(pt=>{
   const r=0.085+Math.min(pt.entries.length-1,7)*0.022;
   pt.lum=(0.299*col.r+0.587*col.g+0.114*col.b)/255;
   const vis=new THREE.Mesh(new THREE.SphereGeometry(r,20,20),
-    new THREE.MeshPhongMaterial({color:col.hex,emissive:col.hex,emissiveIntensity:0.15,shininess:110,transparent:true}));
+    new THREE.MeshPhongMaterial({color:col.hex,emissive:col.hex,emissiveIntensity:0.15,shininess:110}));
   vis.position.set(pt.L,pt.M,pt.T); scene.add(vis); pt.vis=vis;
   let projLine=null;
   if(pt.M!==0){projLine=new THREE.Line(
@@ -294,7 +294,7 @@ let metricsVis='full', labelsVis='full';
 function applyMetricsVis(){
   PTS.forEach(pt=>{
     const h=metricsVis==='hidden',l=metricsVis==='low';
-    pt.vis.visible=!h; pt.vis.material.opacity=l?0.18:1; pt.vis.material.needsUpdate=true;
+    pt.vis.visible=!h; pt.vis.material.opacity=l?0.18:1; pt.vis.material.transparent=l; pt.vis.material.needsUpdate=true;
     if(pt.projLine){pt.projLine.visible=!h;pt.projLine.material.opacity=l?0.06:0.2;pt.projLine.material.needsUpdate=true;}
   });
 }
@@ -349,41 +349,75 @@ const formulaObjs=[], formulaPickMeshes=[];
 // Pre-cache point keys for fast lookup
 PTS.forEach(pt=>{pt.key=`${pt.L},${pt.M},${pt.T}`;});
 (()=>{
-  const MARGIN=0.22,HEAD=0.25,SR=0.025;
-  FORMULA_DEFS.forEach(def=>{
-    const s=new THREE.Vector3(...def.from),e=new THREE.Vector3(...def.to);
-    const dir=e.clone().sub(s),total=dir.length();
+  const MARGIN=0.22, HEAD=0.25, TAU=Math.PI*2;
+  // Group by unordered endpoint pair — arrows between the same two points (in either direction) bundle together
+  const segMap=new Map();
+  FORMULA_DEFS.forEach((def,idx)=>{
+    const a=def.from.join(','), b=def.to.join(',');
+    const k=a<b?`${a}|${b}`:`${b}|${a}`;
+    if(!segMap.has(k)) segMap.set(k,[]);
+    segMap.get(k).push(idx);
+  });
+  // Precompute a canonical perpendicular frame per segment so all arrows in a bundle share the same offset axes
+  const segFrames=new Map();
+  segMap.forEach((indices,k)=>{
+    const d=FORMULA_DEFS[indices[0]];
+    const a=d.from.join(','), b=d.to.join(',');
+    const cf=a<b?d.from:d.to, ct=a<b?d.to:d.from;
+    const cd=new THREE.Vector3(...ct).sub(new THREE.Vector3(...cf)).normalize();
+    const up=new THREE.Vector3(0,1,0);
+    const q=new THREE.Quaternion();
+    if(Math.abs(cd.dot(up))>0.9999){if(cd.y<0) q.set(0,0,1,0);}
+    else q.setFromUnitVectors(up,cd);
+    segFrames.set(k,{lx:new THREE.Vector3(1,0,0).applyQuaternion(q),lz:new THREE.Vector3(0,0,1).applyQuaternion(q)});
+  });
+  FORMULA_DEFS.forEach((def,defIdx)=>{
+    const a=def.from.join(','), b=def.to.join(',');
+    const segKey=a<b?`${a}|${b}`:`${b}|${a}`;
+    const bundle=segMap.get(segKey);
+    const n=bundle.length, bi=bundle.indexOf(defIdx);
+    const SR=n===1?0.025:Math.max(0.010,0.025-n*0.003);
+    const CR=Math.max(0.035,0.065*(SR/0.025));
+    const bundleR=n===1?0:0.04+n*0.02;
+    const s=new THREE.Vector3(...def.from), e=new THREE.Vector3(...def.to);
+    const dir=e.clone().sub(s), total=dir.length();
     dir.normalize();
     const shaftLen=total-MARGIN*2-HEAD;
     if(shaftLen<=0.05) return;
-    const sc=coordToColor(...def.from),ec=coordToColor(...def.to);
+    const sc=coordToColor(...def.from), ec=coordToColor(...def.to);
     const shaftGeo=new THREE.CylinderGeometry(SR,SR,shaftLen,6,1);
-    const pa=shaftGeo.attributes.position,cb=new Float32Array(pa.count*3);
-    for(let i=0;i<pa.count;i++){
-      const t=Math.max(0,Math.min(1,pa.getY(i)/shaftLen+0.5));
-      cb[i*3]=(sc.r/255)*(1-t)+(ec.r/255)*t;
-      cb[i*3+1]=(sc.g/255)*(1-t)+(ec.g/255)*t;
-      cb[i*3+2]=(sc.b/255)*(1-t)+(ec.b/255)*t;
+    const pa=shaftGeo.attributes.position, cb=new Float32Array(pa.count*3);
+    for(let j=0;j<pa.count;j++){
+      const t=Math.max(0,Math.min(1,pa.getY(j)/shaftLen+0.5));
+      cb[j*3]=(sc.r/255)*(1-t)+(ec.r/255)*t;
+      cb[j*3+1]=(sc.g/255)*(1-t)+(ec.g/255)*t;
+      cb[j*3+2]=(sc.b/255)*(1-t)+(ec.b/255)*t;
     }
     shaftGeo.setAttribute('color',new THREE.BufferAttribute(cb,3));
     const shaftMat=new THREE.MeshPhongMaterial({vertexColors:true,transparent:true,opacity:0.72,depthWrite:false});
-    const coneMat=new THREE.MeshPhongMaterial({color:ec.hex,emissive:ec.hex,emissiveIntensity:0.3,transparent:true,opacity:0.72,depthWrite:false});
+    const coneMat=new THREE.MeshPhongMaterial({color:ec.hex,emissive:ec.hex,emissiveIntensity:0.3,transparent:true,opacity:0.72,depthWrite:false,side:THREE.DoubleSide});
     const g=new THREE.Group();
-    const shaft=new THREE.Mesh(shaftGeo,shaftMat); shaft.position.y=shaftLen/2; g.add(shaft);
-    const cone=new THREE.Mesh(new THREE.ConeGeometry(0.065,HEAD,8),coneMat); cone.position.y=shaftLen+HEAD/2; g.add(cone);
-    // Invisible pick cylinder (wider than shaft for easier hover)
+    const shaft=new THREE.Mesh(shaftGeo,shaftMat); shaft.position.y=shaftLen/2; shaft.renderOrder=2; g.add(shaft);
+    const cone=new THREE.Mesh(new THREE.ConeGeometry(CR,HEAD,8),coneMat); cone.position.y=shaftLen+HEAD/2; cone.renderOrder=2; g.add(cone);
     const pickLen=shaftLen+HEAD;
     const pm=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.13,pickLen,6),
-      new THREE.MeshBasicMaterial({transparent:true,opacity:0}));
+      new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
     pm.position.y=pickLen/2; g.add(pm);
     g.position.copy(s.clone().addScaledVector(dir,MARGIN));
     const up=new THREE.Vector3(0,1,0);
     if(Math.abs(dir.dot(up))>0.9999){if(dir.y<0)g.rotation.z=Math.PI;}
     else g.quaternion.setFromUnitVectors(up,dir);
+    if(n>1){
+      const angle=bi*TAU/n;
+      const{lx,lz}=segFrames.get(segKey);
+      g.position.addScaledVector(lx,bundleR*Math.cos(angle));
+      g.position.addScaledVector(lz,bundleR*Math.sin(angle));
+    }
     scene.add(g);
-    const mid=new THREE.Vector3(...def.from).lerp(new THREE.Vector3(...def.to),0.5);
+    // World-space midpoint of shaft (including bundle offset) — used for label positioning
+    const mid=new THREE.Vector3(0,shaftLen/2,0).applyQuaternion(g.quaternion).add(g.position);
     const midCol={r:Math.round((sc.r+ec.r)/2),g:Math.round((sc.g+ec.g)/2),b:Math.round((sc.b+ec.b)/2)};
-    const fromKey=def.from.join(','),toKey=def.to.join(',');
+    const fromKey=def.from.join(','), toKey=def.to.join(',');
     const fo={g,def,mid,midCol,shaftMat,coneMat,fromKey,toKey};
     formulaObjs.push(fo);
     pm.userData={__fo:fo}; formulaPickMeshes.push(pm);
@@ -421,8 +455,8 @@ function toSc(x,y,z){
 }
 function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();}
 function cStroke(r,g,b){return(0.299*r+0.587*g+0.114*b)/255>.55?'rgba(0,0,8,.95)':'rgba(255,255,255,.85)';}
-function drawLbl(sx,sy,text,r,g,b,isH,isBadge=false){
-  const sz=isBadge?Math.max(7,lblSize-1.5):(isH?lblSize+2.5:lblSize);
+function drawLbl(sx,sy,text,r,g,b,isH,isBadge=false,sizeBoost=0){
+  const sz=isBadge?Math.max(7,lblSize-1.5):(lblSize+sizeBoost);
   lc.font=`${(isH&&!isBadge)?'bold ':''}${sz}px ${lblFont}`;
   lc.textAlign='center';
   const fill=`rgba(${r},${g},${b},${isH?1:.9})`;
@@ -720,51 +754,61 @@ function animate(){
     const cM=coordToColor(0,Math.max(-1,Math.min(1,n)),0);let[mx,my]=toSc(0,n,0);drawLbl(mx+13,my+8,String(n),cM.r,cM.g,cM.b,false,true);
     const cT=coordToColor(0,0,Math.max(-4,Math.min(1,n)));let[tx,ty]=toSc(0,0,n);drawLbl(tx,ty+24,String(n),cT.r,cT.g,cT.b,false,true);
   });
+  // Pre-compute hover sets once — shared by label pass and 3D highlight pass
+  const anyHov=!!(hovered||hoveredFormula);
+  const activeFos=new Set(), activePts=new Set();
+  if(anyHov){
+    if(hoveredFormula){
+      activeFos.add(hoveredFormula);
+      PTS.forEach(pt=>{if(pt.key===hoveredFormula.fromKey||pt.key===hoveredFormula.toKey)activePts.add(pt);});
+    }
+    if(hovered){
+      activePts.add(hovered);
+      formulaObjs.forEach(fo=>{
+        if(fo.fromKey===hovered.key||fo.toKey===hovered.key){
+          activeFos.add(fo);
+          PTS.forEach(pt=>{if(pt.key===fo.fromKey||pt.key===fo.toKey)activePts.add(pt);});
+        }
+      });
+    }
+  }
+
   if(labelsVis!=='hidden'){
-    lc.globalAlpha=labelsVis==='low'?0.3:1;
+    const baseAlpha=labelsVis==='low'?0.3:1;
     PTS.map(pt=>{const[sx,sy,z]=toSc(pt.L,pt.M,pt.T);return{pt,sx,sy,z};})
       .sort((a,b)=>b.z-a.z)
       .forEach(({pt,sx,sy})=>{
-        const{r,g,b}=pt.col,isH=hovered===pt,n=pt.entries.length;
-        drawLbl(sx,sy,n>1?`${pt.entries[0]} +${n-1}`:pt.entries[0],r,g,b,isH,false);
+        const isActive=activePts.has(pt), isDirect=hovered===pt;
+        lc.globalAlpha=anyHov?(isActive?1:0.12):baseAlpha;
+        const{r,g,b}=pt.col,isH=isDirect,n=pt.entries.length;
+        const boost=anyHov?(isDirect?4:isActive?2:0):0;
+        drawLbl(sx,sy,n>1?`${pt.entries[0]} +${n-1}`:pt.entries[0],r,g,b,isH,false,boost);
         if(n>1&&!isH){lc.font=`8px ${lblFont}`;lc.fillStyle=`rgba(${r},${g},${b},.55)`;lc.fillText(`×${n}`,sx,sy+(lblSize*.8));}
       });
     lc.globalAlpha=1;
   }
   if(showFormulas){
-    formulaObjs.forEach(({def,mid,midCol})=>{
-      const[sx,sy]=toSc(mid.x,mid.y,mid.z);
-      lc.font=`bold ${Math.max(7,lblSize-1)}px ${lblFont}`;
+    formulaObjs.forEach(fo=>{
+      if(!fo.g.visible) return;
+      const[sx,sy]=toSc(fo.mid.x,fo.mid.y,fo.mid.z);
+      const foActive=activeFos.has(fo), foDirect=hoveredFormula===fo;
+      lc.globalAlpha=anyHov?(foActive?1:0.10):1;
+      const foBoost=anyHov?(foDirect?3:foActive?2:0):0;
+      lc.font=`bold ${Math.max(7,lblSize-1+foBoost)}px ${lblFont}`;
       lc.textAlign='center';
       lc.strokeStyle='rgba(4,4,20,.97)';
       lc.lineWidth=2.8;
       lc.lineJoin='round';
-      lc.strokeText(def.label,sx,sy-6);
-      lc.fillStyle=`rgb(${midCol.r},${midCol.g},${midCol.b})`;
-      lc.fillText(def.label,sx,sy-6);
+      lc.strokeText(fo.def.label,sx,sy-6);
+      lc.fillStyle=`rgb(${fo.midCol.r},${fo.midCol.g},${fo.midCol.b})`;
+      lc.fillText(fo.def.label,sx,sy-6);
     });
+    lc.globalAlpha=1;
   }
   lc.shadowBlur=0;
 
-  // ── Hover highlights ──────────────────────────────────────────────────────────
+  // ── 3D hover highlights ───────────────────────────────────────────────────────
   if(showFormulas){
-    const anyHov=hovered||hoveredFormula;
-    const activeFos=new Set(), activePts=new Set();
-    if(anyHov){
-      if(hoveredFormula){
-        activeFos.add(hoveredFormula);
-        PTS.forEach(pt=>{if(pt.key===hoveredFormula.fromKey||pt.key===hoveredFormula.toKey)activePts.add(pt);});
-      }
-      if(hovered){
-        activePts.add(hovered);
-        formulaObjs.forEach(fo=>{
-          if(fo.fromKey===hovered.key||fo.toKey===hovered.key){
-            activeFos.add(fo);
-            PTS.forEach(pt=>{if(pt.key===fo.fromKey||pt.key===fo.toKey)activePts.add(pt);});
-          }
-        });
-      }
-    }
     formulaObjs.forEach(fo=>{
       if(!fo.g.visible) return;
       const op=anyHov?(activeFos.has(fo)?1.0:0.10):0.72;
@@ -776,7 +820,8 @@ function animate(){
       PTS.forEach(pt=>{
         if(!pt.vis.visible) return;
         const op=anyHov?(activePts.has(pt)?1.0:Math.min(baseOp,0.15)):baseOp;
-        if(pt.vis.material.opacity!==op){pt.vis.material.opacity=op;pt.vis.material.needsUpdate=true;}
+        const tr=op<1;
+        if(pt.vis.material.opacity!==op||pt.vis.material.transparent!==tr){pt.vis.material.opacity=op;pt.vis.material.transparent=tr;pt.vis.material.needsUpdate=true;}
       });
     }
   }
