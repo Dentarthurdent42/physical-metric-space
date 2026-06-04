@@ -374,7 +374,7 @@ PTS.forEach(pt=>{pt.key=`${pt.L},${pt.M},${pt.T}`;});
     // Invisible pick cylinder (wider than shaft for easier hover)
     const pickLen=shaftLen+HEAD;
     const pm=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.13,pickLen,6),
-      new THREE.MeshBasicMaterial({transparent:true,opacity:0}));
+      new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
     pm.position.y=pickLen/2; g.add(pm);
     g.position.copy(s.clone().addScaledVector(dir,MARGIN));
     const up=new THREE.Vector3(0,1,0);
