@@ -80,6 +80,39 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
   color:#aaaacc;text-align:center;touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;transition:background .12s}
 .pbtn:hover,.pbtn:active{background:rgba(255,255,255,.1)}
+.pbtn.on{background:rgba(80,110,220,.25);border-color:rgba(100,140,255,.45);color:#aaccff}
+#drawBtn{position:absolute;top:58px;left:12px;z-index:6;padding:8px 12px;border-radius:7px;
+  border:1px solid rgba(255,255,255,.1);background:rgba(4,4,18,.88);cursor:pointer;
+  font:11px 'Courier New',monospace;color:#aabbee;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;transition:background .12s}
+#drawBtn:hover{background:rgba(16,16,48,.95)}
+#drawBtn.on{background:rgba(80,110,220,.3);border-color:rgba(100,140,255,.5);color:#cce0ff}
+#drawHint{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:6;display:none;
+  max-width:calc(100% - 32px);padding:6px 12px;border-radius:7px;background:rgba(40,50,120,.85);
+  border:1px solid rgba(120,150,255,.35);font:11px 'Courier New',monospace;color:#dde6ff;
+  pointer-events:none;text-align:center}
+#vcard{position:absolute;left:12px;bottom:40px;z-index:20;display:none;width:330px;
+  max-width:calc(100% - 32px);max-height:50%;overflow-y:auto;padding:10px 12px;
+  background:rgba(4,4,18,.97);border:1px solid rgba(255,255,255,.14);border-radius:9px;
+  font:11px/1.5 'Courier New',monospace;color:#dde;box-shadow:0 6px 28px rgba(0,0,0,.8)}
+.vhead{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:bold;font-size:12px}
+.vx{background:none;border:none;color:#667;cursor:pointer;font-size:13px;padding:2px 4px}
+.vx:hover{color:#ccd}
+.vsub{color:#667;font-size:10px;margin:3px 0 6px}
+.vlbl{color:#3d5280;font-size:9px;letter-spacing:.08em;text-transform:uppercase;margin:8px 0 2px}
+.veq{padding:4px 6px;margin:2px 0;border-radius:5px;cursor:copy;color:#eef;font-weight:bold;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.veq:hover{background:rgba(100,130,255,.18);border-color:rgba(120,150,255,.35)}
+.veq.alt{font-weight:normal;color:#bbc}
+.veq.gen{font-weight:normal;color:#99aacc}
+.veq.known{font-weight:normal;color:#8fb;font-size:10px}
+.vfoot{color:#334;font-size:8.5px;margin-top:6px}
+.vrow{display:flex;align-items:center;gap:6px;margin:4px 0}
+.vrow .veq{flex:1;font-size:9px;font-weight:normal;padding:3px 5px}
+#toast{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:60;
+  max-width:calc(100% - 32px);padding:5px 12px;border-radius:6px;background:rgba(30,40,90,.95);
+  border:1px solid rgba(120,150,255,.35);font:11px 'Courier New',monospace;color:#dde6ff;
+  pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -91,6 +124,10 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
     <div style="font:bold 10px 'Courier New',monospace;color:#8899ff;letter-spacing:.04em">DIMENSIONAL ANALYSIS</div>
     <div style="font:8.5px 'Courier New',monospace;color:#2c3f60;margin-top:2px">Physical metrics · L M T exponent space · OKLAB color</div>
   </div>
+  <button id="drawBtn" title="Draw a vector between two points (V)">✎ Draw vector</button>
+  <div id="drawHint"></div>
+  <div id="vcard"></div>
+  <div id="toast"></div>
   <div id="badge"></div>
   <div id="panel" class="closed"></div>
   <div id="tab"><span class="ti">⚙</span><span class="tl">Controls</span></div>
@@ -344,12 +381,46 @@ const FORMULA_DEFS=[
   {label:'λl = m',    from:[-1,1,0], to:[0,1,0],   desc:'lin. density × length = mass'},
   {label:'ṁt = m',   from:[0,1,-1], to:[0,1,0],   desc:'mass flow × time = mass'},
 ];
+// Builds a gradient arrow from one exponent coordinate to another, oriented along +Y of its group.
+// Caller adds the group to the scene (after applying any bundle offset).
+function makeArrow(from,to,{SR,CR,opacity,emissive=0}){
+  const MARGIN=0.22, HEAD=0.25;
+  const s=new THREE.Vector3(...from), e=new THREE.Vector3(...to);
+  const dir=e.clone().sub(s), total=dir.length();
+  dir.normalize();
+  const shaftLen=total-MARGIN*2-HEAD;
+  if(shaftLen<=0.05) return null;
+  const sc=coordToColor(...from), ec=coordToColor(...to);
+  const shaftGeo=new THREE.CylinderGeometry(SR,SR,shaftLen,6,1);
+  const pa=shaftGeo.attributes.position, cb=new Float32Array(pa.count*3);
+  for(let j=0;j<pa.count;j++){
+    const t=Math.max(0,Math.min(1,pa.getY(j)/shaftLen+0.5));
+    cb[j*3]=(sc.r/255)*(1-t)+(ec.r/255)*t;
+    cb[j*3+1]=(sc.g/255)*(1-t)+(ec.g/255)*t;
+    cb[j*3+2]=(sc.b/255)*(1-t)+(ec.b/255)*t;
+  }
+  shaftGeo.setAttribute('color',new THREE.BufferAttribute(cb,3));
+  const shaftMat=new THREE.MeshPhongMaterial({vertexColors:true,emissive:0xffffff,emissiveIntensity:emissive,transparent:true,opacity,depthWrite:false});
+  const coneMat=new THREE.MeshPhongMaterial({color:ec.hex,emissive:ec.hex,emissiveIntensity:0.3+emissive,transparent:true,opacity,depthWrite:false,side:THREE.DoubleSide});
+  const g=new THREE.Group();
+  const shaft=new THREE.Mesh(shaftGeo,shaftMat); shaft.position.y=shaftLen/2; shaft.renderOrder=2; g.add(shaft);
+  const cone=new THREE.Mesh(new THREE.ConeGeometry(CR,HEAD,8),coneMat); cone.position.y=shaftLen+HEAD/2; cone.renderOrder=2; g.add(cone);
+  const pickLen=shaftLen+HEAD;
+  const pm=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.13,pickLen,6),
+    new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
+  pm.position.y=pickLen/2; g.add(pm);
+  g.position.copy(s.clone().addScaledVector(dir,MARGIN));
+  const up=new THREE.Vector3(0,1,0);
+  if(Math.abs(dir.dot(up))>0.9999){if(dir.y<0)g.rotation.z=Math.PI;}
+  else g.quaternion.setFromUnitVectors(up,dir);
+  return{g,shaftMat,coneMat,pm,shaftLen,sc,ec};
+}
 let showFormulas=true;
 const formulaObjs=[], formulaPickMeshes=[];
 // Pre-cache point keys for fast lookup
 PTS.forEach(pt=>{pt.key=`${pt.L},${pt.M},${pt.T}`;});
 (()=>{
-  const MARGIN=0.22, HEAD=0.25, TAU=Math.PI*2;
+  const TAU=Math.PI*2;
   // Group by unordered endpoint pair — arrows between the same two points (in either direction) bundle together
   const segMap=new Map();
   FORMULA_DEFS.forEach((def,idx)=>{
@@ -379,34 +450,9 @@ PTS.forEach(pt=>{pt.key=`${pt.L},${pt.M},${pt.T}`;});
     const SR=n===1?0.025:Math.max(0.010,0.025-n*0.003);
     const CR=Math.max(0.035,0.065*(SR/0.025));
     const bundleR=n===1?0:0.04+n*0.02;
-    const s=new THREE.Vector3(...def.from), e=new THREE.Vector3(...def.to);
-    const dir=e.clone().sub(s), total=dir.length();
-    dir.normalize();
-    const shaftLen=total-MARGIN*2-HEAD;
-    if(shaftLen<=0.05) return;
-    const sc=coordToColor(...def.from), ec=coordToColor(...def.to);
-    const shaftGeo=new THREE.CylinderGeometry(SR,SR,shaftLen,6,1);
-    const pa=shaftGeo.attributes.position, cb=new Float32Array(pa.count*3);
-    for(let j=0;j<pa.count;j++){
-      const t=Math.max(0,Math.min(1,pa.getY(j)/shaftLen+0.5));
-      cb[j*3]=(sc.r/255)*(1-t)+(ec.r/255)*t;
-      cb[j*3+1]=(sc.g/255)*(1-t)+(ec.g/255)*t;
-      cb[j*3+2]=(sc.b/255)*(1-t)+(ec.b/255)*t;
-    }
-    shaftGeo.setAttribute('color',new THREE.BufferAttribute(cb,3));
-    const shaftMat=new THREE.MeshPhongMaterial({vertexColors:true,transparent:true,opacity:0.72,depthWrite:false});
-    const coneMat=new THREE.MeshPhongMaterial({color:ec.hex,emissive:ec.hex,emissiveIntensity:0.3,transparent:true,opacity:0.72,depthWrite:false,side:THREE.DoubleSide});
-    const g=new THREE.Group();
-    const shaft=new THREE.Mesh(shaftGeo,shaftMat); shaft.position.y=shaftLen/2; shaft.renderOrder=2; g.add(shaft);
-    const cone=new THREE.Mesh(new THREE.ConeGeometry(CR,HEAD,8),coneMat); cone.position.y=shaftLen+HEAD/2; cone.renderOrder=2; g.add(cone);
-    const pickLen=shaftLen+HEAD;
-    const pm=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.13,pickLen,6),
-      new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
-    pm.position.y=pickLen/2; g.add(pm);
-    g.position.copy(s.clone().addScaledVector(dir,MARGIN));
-    const up=new THREE.Vector3(0,1,0);
-    if(Math.abs(dir.dot(up))>0.9999){if(dir.y<0)g.rotation.z=Math.PI;}
-    else g.quaternion.setFromUnitVectors(up,dir);
+    const arrow=makeArrow(def.from,def.to,{SR,CR,opacity:0.72});
+    if(!arrow) return;
+    const{g,shaftMat,coneMat,pm,shaftLen,sc,ec}=arrow;
     if(n>1){
       const angle=bi*TAU/n;
       const{lx,lz}=segFrames.get(segKey);
@@ -423,6 +469,138 @@ PTS.forEach(pt=>{pt.key=`${pt.L},${pt.M},${pt.T}`;});
     pm.userData={__fo:fo}; formulaPickMeshes.push(pm);
   });
 })();
+
+// ── User Vectors ──────────────────────────────────────────────────────────────
+// The user picks any two points A → B. The displacement Δ = B − A in exponent space is the
+// dimension you must multiply A by to get B, so [B] = [A] · L^ΔL M^ΔM T^ΔT. We then look for
+// named quantities with dimension Δ (multiply) or −Δ (divide) to phrase it as a physical equation.
+const PT_BY_KEY=new Map(PTS.map(p=>[p.key,p]));
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const supStr=n=>String(n).split('').map(c=>SUP[c]).join('');
+function dimStr(L,M,T){
+  const parts=[];
+  [['L',L],['M',M],['T',T]].forEach(([s,e])=>{if(e)parts.push(e===1?s:s+supStr(e));});
+  return parts.join('·')||'1';
+}
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nm=pt=>pt.entries[0];
+function vectorEquations(a,b){
+  const dL=b.L-a.L, dM=b.M-a.M, dT=b.T-a.T;
+  const delta=dimStr(dL,dM,dT);
+  const A=nm(a), B=nm(b);
+  const named=[];   // [{eq, short}]
+  const mul=PT_BY_KEY.get(`${dL},${dM},${dT}`), div=PT_BY_KEY.get(`${-dL},${-dM},${-dT}`);
+  if(mul) named.push({eq:`${B} = ${A} × ${nm(mul)}`,short:`× ${nm(mul)}`});
+  if(div) named.push({eq:`${B} = ${A} ÷ ${nm(div)}`,short:`÷ ${nm(div)}`});
+  // Prefer the factor with fewer negative exponents: "÷ Time" reads better than "× Frequency"
+  const negs=p=>[p.L,p.M,p.T].filter(e=>e<0).length;
+  if(mul&&div&&negs(div)<negs(mul)) named.reverse();
+  // No single named factor — try two named factors (P×Q or P÷Q)
+  if(!named.length){
+    const seen=new Set(), isZero=p=>!p.L&&!p.M&&!p.T;
+    for(const P of PTS){
+      if(isZero(P)) continue;
+      const Q=PT_BY_KEY.get(`${dL-P.L},${dM-P.M},${dT-P.T}`);
+      if(Q&&!isZero(Q)){const k=[P.key,Q.key].sort().join('|');
+        if(!seen.has(k)){seen.add(k);named.push({eq:`${B} = ${A} × ${nm(P)} × ${nm(Q)}`,short:`× ${nm(P)} × ${nm(Q)}`});}}
+      const R=PT_BY_KEY.get(`${P.L-dL},${P.M-dM},${P.T-dT}`);
+      if(R&&!isZero(R)&&R!==P) named.push({eq:`${B} = ${A} × ${nm(P)} ÷ ${nm(R)}`,short:`× ${nm(P)} ÷ ${nm(R)}`});
+      if(named.length>=4) break;
+    }
+  }
+  const generic=`[${B}] = [${A}] · ${delta}`;
+  const known=[];
+  FORMULA_DEFS.forEach(d=>{
+    const f=d.from.join(','), t=d.to.join(',');
+    if(f===a.key&&t===b.key) known.push(`${d.label}  (${d.desc})`);
+    else if(f===b.key&&t===a.key) known.push(`${d.label}  (inverse: ${d.desc})`);
+  });
+  return{dL,dM,dT,delta,named,generic,known,
+    primary:named.length?named[0].eq:generic,
+    short:named.length?named[0].short:`× ${delta}`};
+}
+
+const userVecs=[], uvPickMeshes=[];
+let drawMode=false, drawStart=null, selectedUV=null;
+function addUserVector(a,b){
+  const existing=userVecs.find(u=>u.from===a&&u.to===b);
+  if(existing){showCard(existing);return existing;}
+  const arrow=makeArrow([a.L,a.M,a.T],[b.L,b.M,b.T],{SR:0.036,CR:0.09,opacity:0.95,emissive:0.15});
+  if(!arrow) return null;
+  const{g,shaftMat,coneMat,pm,shaftLen,sc,ec}=arrow;
+  scene.add(g);
+  const mid=new THREE.Vector3(0,shaftLen/2,0).applyQuaternion(g.quaternion).add(g.position);
+  const midCol={r:Math.round((sc.r+ec.r)/2),g:Math.round((sc.g+ec.g)/2),b:Math.round((sc.b+ec.b)/2)};
+  const uv={from:a,to:b,g,shaftMat,coneMat,pm,mid,midCol,sc,ec,eq:vectorEquations(a,b)};
+  pm.userData={__uv:uv}; uvPickMeshes.push(pm); userVecs.push(uv);
+  showCard(uv); renderVecList();
+  return uv;
+}
+function removeUserVector(uv){
+  scene.remove(uv.g);
+  uv.g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose();});
+  userVecs.splice(userVecs.indexOf(uv),1);
+  uvPickMeshes.splice(uvPickMeshes.indexOf(uv.pm),1);
+  if(hoveredUV===uv) hoveredUV=null;
+  if(selectedUV===uv) hideCard();
+  renderVecList();
+}
+
+// ── Clipboard ─────────────────────────────────────────────────────────────────
+const toastEl=document.getElementById('toast');
+let toastTimer=0;
+function toast(msg){
+  toastEl.textContent=msg; toastEl.style.opacity='1';
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>{toastEl.style.opacity='0';},1600);
+}
+async function copyText(t){
+  try{await navigator.clipboard.writeText(t);}
+  catch{
+    const ta=document.createElement('textarea'); ta.value=t; ta.style.cssText='position:fixed;opacity:0;';
+    document.body.appendChild(ta); ta.select();
+    try{document.execCommand('copy');}catch{}
+    ta.remove();
+  }
+  toast(`Copied: ${t}`);
+}
+// Any element with data-copy copies its value on click
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-copy]');
+  if(el) copyText(el.dataset.copy);
+});
+
+// ── Vector card ───────────────────────────────────────────────────────────────
+const vcard=document.getElementById('vcard');
+function showCard(uv){
+  selectedUV=uv;
+  const{from:a,to:b,eq,sc,ec}=uv;
+  const sgn=n=>n>0?`+${n}`:String(n);
+  const row=(t,cls='veq')=>`<div class="${cls}" data-copy="${esc(t)}" title="Click to copy">${esc(t)}</div>`;
+  vcard.innerHTML=
+    `<div class="vhead"><span><span style="color:${sc.css}">${esc(nm(a))}</span> <span style="color:#556">→</span> <span style="color:${ec.css}">${esc(nm(b))}</span></span><button class="vx" id="vcardX" title="Close">✕</button></div>`+
+    `<div class="vsub">Δ = (${sgn(eq.dL)}, ${sgn(eq.dM)}, ${sgn(eq.dT)}) = ${esc(eq.delta)}</div>`+
+    (eq.named.length?eq.named.map((n,i)=>row(n.eq,i?'veq alt':'veq')).join(''):'<div class="vsub">No named quantity spans this step.</div>')+
+    row(eq.generic,'veq gen')+
+    (eq.known.length?`<div class="vlbl">Known formulas</div>`+eq.known.map(k=>row(k,'veq known')).join(''):'')+
+    `<div class="vfoot">click an equation to copy</div>`;
+  vcard.style.display='block';
+  document.getElementById('vcardX').addEventListener('click',hideCard);
+}
+function hideCard(){selectedUV=null;vcard.style.display='none';}
+
+// ── Draw mode ─────────────────────────────────────────────────────────────────
+const drawBtn=document.getElementById('drawBtn'), drawHint=document.getElementById('drawHint');
+let panelDrawBtn=null;
+function updateDrawUI(){
+  const txt=drawMode?'✕ Stop drawing':'✎ Draw vector';
+  drawBtn.textContent=txt; drawBtn.classList.toggle('on',drawMode);
+  if(panelDrawBtn){panelDrawBtn.textContent=txt;panelDrawBtn.classList.toggle('on',drawMode);}
+  c3d.style.cursor=drawMode?'crosshair':'';
+  drawHint.style.display=drawMode?'block':'none';
+  drawHint.textContent=!drawMode?'':drawStart?`From ${nm(drawStart)} — click the end point (Esc to cancel)`:'Click a start point';
+}
+function setDrawMode(on){drawMode=on;drawStart=null;updateDrawUI();}
+drawBtn.addEventListener('click',()=>setDrawMode(!drawMode));
 
 // ── Labels ────────────────────────────────────────────────────────────────────
 let lblSize=9.5, lblFont="'Courier New',monospace", lblEffect='halo';
@@ -487,21 +665,28 @@ function drawLbl(sx,sy,text,r,g,b,isH,isBadge=false,sizeBoost=0){
 
 // ── Picking ───────────────────────────────────────────────────────────────────
 const ray=new THREE.Raycaster(), mouse=new THREE.Vector2();
-let hovered=null, hoveredFormula=null;
-function pick(e){
-  const src=e.touches?e.touches[0]:e;
-  mouse.x=(src.clientX/W)*2-1; mouse.y=-(src.clientY/H)*2+1;
+let hovered=null, hoveredFormula=null, hoveredUV=null, lastMouse=null;
+// Returns {pt, fo, uv} for whatever is under the given client coordinates (at most one is set).
+// While drawing, only points are pickable so arrows never block endpoint selection.
+function hitAt(cx,cy){
+  mouse.x=(cx/W)*2-1; mouse.y=-(cy/H)*2+1;
   ray.setFromCamera(mouse,activeCamera);
-  const allHits=[...ray.intersectObjects(formulaPickMeshes),...ray.intersectObjects(pickMeshes)]
-    .sort((a,b)=>a.distance-b.distance);
-  const hit=allHits.length?allHits[0].object.userData:null;
-  const newFo=(hit&&hit.__fo)?hit.__fo:null;
-  const newPt=(hit&&!hit.__fo)?hit:null;
-  if(newPt!==hovered||newFo!==hoveredFormula){
-    hovered=newPt; hoveredFormula=newFo;
+  const targets=drawMode?pickMeshes:[...(showFormulas?formulaPickMeshes:[]),...uvPickMeshes,...pickMeshes];
+  const hits=ray.intersectObjects(targets).sort((a,b)=>a.distance-b.distance);
+  const hit=hits.length?hits[0].object.userData:null;
+  return{fo:hit&&hit.__fo||null,uv:hit&&hit.__uv||null,pt:hit&&!hit.__fo&&!hit.__uv?hit:null};
+}
+function pick(e,force=false){
+  const src=e.touches?e.touches[0]:e;
+  lastMouse={x:src.clientX,y:src.clientY};
+  const{pt:newPt,fo:newFo,uv:newUV}=hitAt(src.clientX,src.clientY);
+  if(force||newPt!==hovered||newFo!==hoveredFormula||newUV!==hoveredUV){
+    hovered=newPt; hoveredFormula=newFo; hoveredUV=newUV;
     if(newPt){
       const c=newPt.col;
-      tip.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="display:inline-block;width:13px;height:13px;border-radius:3px;background:${c.css};flex-shrink:0"></span><span style="color:${c.css};font-weight:bold">L<sup>${newPt.L}</sup>·M<sup>${newPt.M}</sup>·T<sup>${newPt.T}</sup> <span style="font-weight:normal;color:#667;font-size:10px">(${newPt.entries.length})</span></span></div><div style="color:#334;font-size:8.5px;margin-bottom:4px">OKLAB L=${c.oL.toFixed(2)} a=${c.oa.toFixed(3)} b=${c.ob.toFixed(3)}</div><div style="color:#99aacc;font-size:10px;line-height:1.8">${newPt.entries.map(n=>`• ${n}`).join('<br>')}</div>`;
+      const preview=(drawMode&&drawStart&&drawStart!==newPt)
+        ?`<div style="color:#cce0ff;font-weight:bold;margin-bottom:5px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:4px">${esc(vectorEquations(drawStart,newPt).primary)}</div>`:'';
+      tip.innerHTML=preview+`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="display:inline-block;width:13px;height:13px;border-radius:3px;background:${c.css};flex-shrink:0"></span><span style="color:${c.css};font-weight:bold">L<sup>${newPt.L}</sup>·M<sup>${newPt.M}</sup>·T<sup>${newPt.T}</sup> <span style="font-weight:normal;color:#667;font-size:10px">(${newPt.entries.length})</span></span></div><div style="color:#334;font-size:8.5px;margin-bottom:4px">OKLAB L=${c.oL.toFixed(2)} a=${c.oa.toFixed(3)} b=${c.ob.toFixed(3)}</div><div style="color:#99aacc;font-size:10px;line-height:1.8">${newPt.entries.map(n=>`• ${n}`).join('<br>')}</div>`;
     } else if(newFo){
       const d=newFo.def,sc=coordToColor(...d.from),ec=coordToColor(...d.to);
       const fp=PTS.find(p=>p.key===newFo.fromKey),tp=PTS.find(p=>p.key===newFo.toKey);
@@ -511,16 +696,42 @@ function pick(e){
         `<span style="color:${sc.css}">${fp?fp.entries[0]:'?'}</span>`+
         `<span style="color:#334"> → </span>`+
         `<span style="color:${ec.css}">${tp?tp.entries[0]:'?'}</span></div>`;
+    } else if(newUV){
+      const{eq,sc,ec}=newUV;
+      tip.innerHTML=`<div style="font:bold 11px 'Courier New',monospace;color:#eef;margin-bottom:4px">${esc(eq.primary)}</div>`+
+        `<div style="font-size:9px;color:#667;margin-bottom:4px">Δ = ${esc(eq.delta)}</div>`+
+        `<div style="font-size:9px"><span style="color:${sc.css}">${esc(nm(newUV.from))}</span><span style="color:#334"> → </span><span style="color:${ec.css}">${esc(nm(newUV.to))}</span></div>`+
+        `<div style="font-size:8px;color:#445;margin-top:4px">click to copy · open details</div>`;
     }
   }
-  if(newPt||newFo){tip.style.display='block';tip.style.left=Math.min(src.clientX+14,W-244)+'px';tip.style.top=Math.max(4,src.clientY-60)+'px';}
+  if(newPt||newFo||newUV){tip.style.display='block';tip.style.left=Math.min(src.clientX+14,W-244)+'px';tip.style.top=Math.max(4,src.clientY-60)+'px';}
   else tip.style.display='none';
 }
 c3d.addEventListener('mousemove',pick);
 c3d.addEventListener('mouseenter',()=>{controls.autoRotate=false;});
-c3d.addEventListener('mouseleave',()=>{controls.autoRotate=autoRotOn;hovered=null;hoveredFormula=null;tip.style.display='none';});
+c3d.addEventListener('mouseleave',()=>{controls.autoRotate=autoRotOn;hovered=null;hoveredFormula=null;hoveredUV=null;lastMouse=null;tip.style.display='none';});
 c3d.addEventListener('touchmove',e=>{if(e.touches.length===1)pick(e);},{passive:true});
-c3d.addEventListener('touchend',()=>{hovered=null;hoveredFormula=null;tip.style.display='none';});
+c3d.addEventListener('touchend',()=>{hovered=null;hoveredFormula=null;hoveredUV=null;tip.style.display='none';});
+
+// ── Click (tap) handling — distinguished from orbit drags by pointer travel ──
+let downAt=null;
+c3d.addEventListener('pointerdown',e=>{if(e.isPrimary)downAt={x:e.clientX,y:e.clientY};});
+c3d.addEventListener('pointerup',e=>{
+  if(!e.isPrimary||!downAt) return;
+  const moved=Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y); downAt=null;
+  if(moved>6) return;
+  const{pt,fo,uv}=hitAt(e.clientX,e.clientY);
+  if(drawMode){
+    if(!pt){drawStart=null;updateDrawUI();return;}
+    if(!drawStart||drawStart===pt){drawStart=drawStart===pt?null:pt;}
+    else{addUserVector(drawStart,pt);drawStart=null;}
+    updateDrawUI(); pick(e,true);
+    return;
+  }
+  if(uv){showCard(uv);copyText(uv.eq.primary);}
+  else if(fo) copyText(fo.def.label);
+  else if(pt) copyText(pt.entries.join(', '));
+});
 
 // ── Panel ─────────────────────────────────────────────────────────────────────
 let rotBtn, fovSlider, fovValLbl;
@@ -651,7 +862,7 @@ function updFov(s){
   rb.addEventListener('mousedown',e=>e.stopPropagation());
   row.append(rotBtn,rb);
   const hint=document.createElement('div'); hint.style.cssText='font-size:8px;color:#1e2a40;margin-top:6px;line-height:1.8;';
-  hint.textContent='←→↑↓ orbit · scroll/pinch zoom · Space pause · R reset';
+  hint.textContent='←→↑↓ orbit · scroll/pinch zoom · Space pause · R reset · V draw vector · click a label to copy';
   div.append(row,hint);
   panel.appendChild(acc('VIEW',div,true));
 })();
@@ -690,6 +901,37 @@ function updFov(s){
   panel.appendChild(acc('FORMULAS',div,true));
 })();
 
+// Vectors
+const vecList=document.createElement('div');
+function renderVecList(){
+  vecList.innerHTML='';
+  if(!userVecs.length){
+    vecList.innerHTML='<div style="font-size:8.5px;color:#2a3a55;line-height:1.6;margin-top:6px">Turn on drawing, then click any two points. The arrow\'s exponent difference is the factor that turns one quantity into the other.</div>';
+    return;
+  }
+  userVecs.forEach(uv=>{
+    const row=document.createElement('div'); row.className='vrow';
+    const eq=document.createElement('div'); eq.className='veq'; eq.textContent=uv.eq.primary;
+    eq.dataset.copy=uv.eq.primary; eq.title='Click to copy';
+    eq.style.color=`rgb(${uv.midCol.r},${uv.midCol.g},${uv.midCol.b})`;
+    eq.addEventListener('click',()=>showCard(uv));
+    const x=document.createElement('button'); x.className='vx'; x.textContent='✕'; x.title='Delete vector';
+    x.addEventListener('click',()=>removeUserVector(uv));
+    row.append(eq,x); vecList.appendChild(row);
+  });
+}
+(()=>{
+  const div=document.createElement('div');
+  const row=document.createElement('div'); row.className='prow';
+  panelDrawBtn=document.createElement('button'); panelDrawBtn.className='pbtn';
+  panelDrawBtn.addEventListener('click',()=>setDrawMode(!drawMode));
+  const clr=document.createElement('button'); clr.className='pbtn'; clr.textContent='Clear all';
+  clr.addEventListener('click',()=>[...userVecs].forEach(removeUserVector));
+  row.append(panelDrawBtn,clr); div.append(row,vecList);
+  panel.appendChild(acc('VECTORS',div,true));
+  updateDrawUI(); renderVecList();
+})();
+
 // ── Toggle ────────────────────────────────────────────────────────────────────
 let panelOpen=false;
 function openPanel(){panelOpen=true;panel.classList.remove('closed');tab.classList.add('open');tab.querySelector('.ti').textContent='✕';tab.querySelector('.tl').textContent='Close';}
@@ -700,6 +942,7 @@ if(window.innerWidth>600) openPanel();
 // ── Keyboard ──────────────────────────────────────────────────────────────────
 const KEYS={};
 window.addEventListener('keydown',e=>{
+  if(e.target.closest&&e.target.closest('input,select,textarea')) return;
   KEYS[e.key]=true;
   if(e.key===' '){autoRotOn=!autoRotOn;controls.autoRotate=autoRotOn;rotBtn.textContent=autoRotOn?'⏸ Pause':'▶ Rotate';rotBtn.style.color=autoRotOn?'#88aaff':'#aaaacc';e.preventDefault();}
   if(e.key==='r'||e.key==='R'){
@@ -708,6 +951,12 @@ window.addEventListener('keydown',e=>{
     orthoCam.zoom=1;orthoCam.updateProjectionMatrix();
     controls.target.copy(TARGET);controls.update();
     const sv=Math.round(Math.pow((INIT_FOV-2)/88,1/1.3)*100);fovSlider.value=sv;updFov(sv);
+  }
+  if(e.key==='v'||e.key==='V') setDrawMode(!drawMode);
+  if(e.key==='Escape'){
+    if(drawStart){drawStart=null;updateDrawUI();}
+    else if(drawMode) setDrawMode(false);
+    else hideCard();
   }
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
 });
@@ -755,13 +1004,14 @@ function animate(){
     const cT=coordToColor(0,0,Math.max(-4,Math.min(1,n)));let[tx,ty]=toSc(0,0,n);drawLbl(tx,ty+24,String(n),cT.r,cT.g,cT.b,false,true);
   });
   // Pre-compute hover sets once — shared by label pass and 3D highlight pass
-  const anyHov=!!(hovered||hoveredFormula);
+  const anyHov=!!(hovered||hoveredFormula||hoveredUV);
   const activeFos=new Set(), activePts=new Set();
   if(anyHov){
     if(hoveredFormula){
       activeFos.add(hoveredFormula);
       PTS.forEach(pt=>{if(pt.key===hoveredFormula.fromKey||pt.key===hoveredFormula.toKey)activePts.add(pt);});
     }
+    if(hoveredUV){activePts.add(hoveredUV.from);activePts.add(hoveredUV.to);}
     if(hovered){
       activePts.add(hovered);
       formulaObjs.forEach(fo=>{
@@ -805,9 +1055,38 @@ function animate(){
     });
     lc.globalAlpha=1;
   }
+  userVecs.forEach(uv=>{
+    const[sx,sy]=toSc(uv.mid.x,uv.mid.y,uv.mid.z);
+    const isH=hoveredUV===uv||selectedUV===uv;
+    lc.globalAlpha=anyHov&&hoveredUV!==uv&&!activePts.has(uv.from)?0.25:1;
+    const sz=lblSize+(isH?2:0.5);
+    lc.font=`bold ${sz}px ${lblFont}`; lc.textAlign='center';
+    const m=lc.measureText(uv.eq.short),p=5,y0=sy+sz+8;
+    lc.fillStyle='rgba(8,10,34,.92)'; rrect(lc,sx-m.width/2-p,y0-sz*.85,m.width+p*2,sz*1.45,5); lc.fill();
+    lc.strokeStyle=isH?'rgba(220,230,255,.9)':'rgba(220,230,255,.45)'; lc.lineWidth=isH?1.4:.9; lc.stroke();
+    lc.fillStyle=`rgb(${uv.midCol.r},${uv.midCol.g},${uv.midCol.b})`; lc.fillText(uv.eq.short,sx,y0);
+  });
+  lc.globalAlpha=1;
+  // Rubber-band preview from the chosen start point to the cursor (snaps to a hovered point)
+  if(drawMode&&drawStart){
+    const[ax,ay]=toSc(drawStart.L,drawStart.M,drawStart.T);
+    lc.strokeStyle='rgba(220,230,255,.95)'; lc.lineWidth=2;
+    lc.beginPath(); lc.arc(ax,ay,11,0,Math.PI*2); lc.stroke();
+    let end=null;
+    if(hovered&&hovered!==drawStart){const[bx,by]=toSc(hovered.L,hovered.M,hovered.T);end=[bx,by];}
+    else if(lastMouse) end=[lastMouse.x,lastMouse.y];
+    if(end){
+      lc.setLineDash([6,5]); lc.strokeStyle=drawStart.col.css; lc.lineWidth=2;
+      lc.beginPath(); lc.moveTo(ax,ay); lc.lineTo(end[0],end[1]); lc.stroke(); lc.setLineDash([]);
+    }
+  }
   lc.shadowBlur=0;
 
   // ── 3D hover highlights ───────────────────────────────────────────────────────
+  userVecs.forEach(uv=>{
+    const op=anyHov?(hoveredUV===uv||activePts.has(uv.from)&&activePts.has(uv.to)?1:0.25):0.95;
+    if(uv.shaftMat.opacity!==op){uv.shaftMat.opacity=op;uv.coneMat.opacity=op;}
+  });
   if(showFormulas){
     formulaObjs.forEach(fo=>{
       if(!fo.g.visible) return;
