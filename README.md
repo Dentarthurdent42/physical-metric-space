@@ -30,6 +30,8 @@ The visualization helps show that dimensional analysis is not just a bookkeeping
 - **Color encoding in OKLAB space** tied to dimensional coordinates
 - **Grouped metrics** when multiple physical quantities share the same dimensional signature
 - **Keyboard and mouse controls** for orbiting, zooming, and resetting the view
+- **Draw vectors** between any two points to see the equation that connects them — the exponent difference is the factor that turns one quantity into the other (e.g. Force → Energy gives `Energy = Force × Length`)
+- **Click to copy** any point's names, formula label, or vector equation to the clipboard
 
 ## Why this exists
 
@@ -72,6 +74,9 @@ Then open the local address in your browser.
 - **Arrow keys** — orbit with keyboard
 - **Space** — pause / resume rotation
 - **R** — reset the view
+- **V** (or the ✎ Draw vector button) — toggle vector drawing; click a start point, then an end point
+- **Esc** — cancel the vector in progress / leave drawing mode
+- **Click** a point, formula arrow, or drawn vector — copy its label / equation
 
 ## Project goal
 
