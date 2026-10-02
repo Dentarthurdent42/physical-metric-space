@@ -57,7 +57,7 @@ This project explores the idea that dimensional exponents form a useful embeddin
 Because this project is a standalone HTML app, you can usually run it by opening the file directly in a browser:
 
 ```bash
-open dimensional_analysis.html
+open index.html
 ```
 
 Or serve it locally with a simple static server:
