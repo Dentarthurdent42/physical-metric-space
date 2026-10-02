@@ -1,5 +1,7 @@
 # physical-metric-space
 
+**[Live demo → dentarthurdent42.github.io/physical-metric-space](https://dentarthurdent42.github.io/physical-metric-space/)**
+
 An interactive visualization of **dimensional analysis as a geometric space**.
 
 This project maps physical quantities into a 3D coordinate system defined by exponents of the base dimensions:
