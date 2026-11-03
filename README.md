@@ -33,7 +33,8 @@ The visualization helps show that dimensional analysis is not just a bookkeeping
 - **Grouped metrics** when multiple physical quantities share the same dimensional signature
 - **Keyboard and mouse controls** for orbiting, zooming, and resetting the view
 - **Draw vectors** between any two points to see the equation that connects them — the exponent difference is the factor that turns one quantity into the other (e.g. Force → Energy gives `Energy = Force × Length`)
-- **Calculus operators** — pick d/dt, ∫dt, ∂/∂x (∇), ∇², ∫dx, ∫dA, ∫dV and more to see the operator as a field of parallel arrows. A derivative or integral is a fixed shift in exponent space, so chains like Length → Velocity → Acceleration → Jerk show up as straight lines. Gradient, divergence and curl share the same L⁻¹ shift; they differ in tensor rank, which L·M·T exponents can't see
+- **Calculus operators** — pick d/dt, ∫dt, ∂/∂x (∇), ∇², ∫dx, ∫dA, ∫dV and more to see the operator as a field of parallel arrows. A derivative or integral is a fixed shift in exponent space, so chains like Length → Velocity → Acceleration → Jerk show up as straight lines. Gradient, divergence and curl share the same L⁻¹ shift; they differ in tensor rank, which L·M·T exponents can't see. √ and x² scale the vector about the origin instead of shifting it
+- **Fractional exponents** — quantities like fracture toughness (M·L⁻¹ᐟ²·T⁻²), sorptivity (L·T⁻¹ᐟ²) and Gaussian charge (L³ᐟ²·M¹ᐟ²·T⁻¹) sit between lattice points; exponents display as fractions
 - **Click to copy** any point's names, formula label, or vector equation to the clipboard
 
 ## Why this exists

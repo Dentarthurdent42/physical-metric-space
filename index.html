@@ -321,10 +321,18 @@ scene.add(new THREE.Mesh(new THREE.SphereGeometry(0.07,12,12),
   new THREE.MeshPhongMaterial({color:coordToColor(0,0,0).hex})));
 
 // ── Data ──────────────────────────────────────────────────────────────────────
-const RAW=[['Length',1,0,0],['Displacement',1,0,0],['Wavelength',1,0,0],['Arm / Lever',1,0,0],['Area',2,0,0],['Cross-section',2,0,0],['Volume',3,0,0],['Wavenumber',-1,0,0],['Curvature',-1,0,0],['Velocity',1,0,-1],['Speed of Light',1,0,-1],['Acceleration',1,0,-2],['Free-fall g',1,0,-2],['Jerk',1,0,-3],['Snap / Jounce',1,0,-4],['Vol. Flow Rate',3,0,-1],['Kinematic Viscosity',2,0,-1],['Diffusivity',2,0,-1],['Thermal Diffusivity',2,0,-1],['Spec. Ang. Mom.',2,0,-1],['Grav. Potential',2,0,-2],['Specific Energy',2,0,-2],['Absorbed Dose (Gy)',2,0,-2],['Dose Equivalent',2,0,-2],['Std. Grav. Param GM',3,0,-2],['Strain',0,0,0],['Angle (rad)',0,0,0],['Mach Number',0,0,0],['Reynolds Number',0,0,0],['Coeff. of Restitution',0,0,0],['Time',0,0,1],['Period',0,0,1],['Half-life',0,0,1],['Frequency',0,0,-1],['Angular Velocity',0,0,-1],['Angular Frequency ω',0,0,-1],['Radioactivity (Bq)',0,0,-1],['Vorticity',0,0,-1],['Strain Rate',0,0,-1],['Angular Acceleration',0,0,-2],['Mass',0,1,0],['Linear Density',-1,1,0],['Surface Density',-2,1,0],['Volume Density',-3,1,0],['Moment of Inertia',2,1,0],['Specific Volume',3,-1,0],['Mass Flow Rate',0,1,-1],['Mech. Impedance',0,1,-1],['Mech. Admittance',0,-1,1],['Momentum',1,1,-1],['Impulse',1,1,-1],['Angular Momentum',2,1,-1],['Action (ℏ)',2,1,-1],['Angular Impulse',2,1,-1],['Force',1,1,-2],['Weight',1,1,-2],['Drag',1,1,-2],['Thrust',1,1,-2],['Tension',1,1,-2],['Lift',1,1,-2],['Energy',2,1,-2],['Work',2,1,-2],['Heat (Q)',2,1,-2],['Torque',2,1,-2],['Enthalpy',2,1,-2],['Helmholtz Energy',2,1,-2],['Power',2,1,-3],['Radiant Flux',2,1,-3],['Luminosity',2,1,-3],['Pressure',-1,1,-2],['Stress',-1,1,-2],["Young's Modulus",-1,1,-2],['Shear Modulus',-1,1,-2],['Bulk Modulus',-1,1,-2],['Energy Density',-1,1,-2],['Pressure Gradient',-2,1,-2],['Force Density',-2,1,-2],['Mass Flux (ρv)',-2,1,-1],['Yield Strength',-1,1,-2],['Surface Tension',0,1,-2],['Spring Constant',0,1,-2],['Stiffness',0,1,-2],['Dynamic Viscosity',-1,1,-1],['Intensity (W/m²)',0,1,-3],['Power Density',-1,1,-3],['Spec. Power (W/kg)',2,0,-3],['Irradiance',0,1,-3],['Grav. Constant G',3,-1,-2]];
+const RAW=[['Length',1,0,0],['Displacement',1,0,0],['Wavelength',1,0,0],['Arm / Lever',1,0,0],['Area',2,0,0],['Cross-section',2,0,0],['Volume',3,0,0],['Wavenumber',-1,0,0],['Curvature',-1,0,0],['Velocity',1,0,-1],['Speed of Light',1,0,-1],['Acceleration',1,0,-2],['Free-fall g',1,0,-2],['Jerk',1,0,-3],['Snap / Jounce',1,0,-4],['Vol. Flow Rate',3,0,-1],['Kinematic Viscosity',2,0,-1],['Diffusivity',2,0,-1],['Thermal Diffusivity',2,0,-1],['Spec. Ang. Mom.',2,0,-1],['Grav. Potential',2,0,-2],['Specific Energy',2,0,-2],['Absorbed Dose (Gy)',2,0,-2],['Dose Equivalent',2,0,-2],['Std. Grav. Param GM',3,0,-2],['Energy Spectrum E(k)',3,0,-2],['Sorptivity',1,0,-0.5],['Accel. Noise Density',1,0,-1.5],['Angle Random Walk',0,0,-0.5],['Strain',0,0,0],['Angle (rad)',0,0,0],['Mach Number',0,0,0],['Reynolds Number',0,0,0],['Coeff. of Restitution',0,0,0],['Time',0,0,1],['Period',0,0,1],['Half-life',0,0,1],['Frequency',0,0,-1],['Angular Velocity',0,0,-1],['Angular Frequency ω',0,0,-1],['Radioactivity (Bq)',0,0,-1],['Vorticity',0,0,-1],['Strain Rate',0,0,-1],['Angular Acceleration',0,0,-2],['Mass',0,1,0],['Linear Density',-1,1,0],['Surface Density',-2,1,0],['Volume Density',-3,1,0],['Moment of Inertia',2,1,0],['Specific Volume',3,-1,0],['Mass Flow Rate',0,1,-1],['Mech. Impedance',0,1,-1],['Mech. Admittance',0,-1,1],['Momentum',1,1,-1],['Impulse',1,1,-1],['Angular Momentum',2,1,-1],['Action (ℏ)',2,1,-1],['Angular Impulse',2,1,-1],['Force',1,1,-2],['Weight',1,1,-2],['Drag',1,1,-2],['Thrust',1,1,-2],['Tension',1,1,-2],['Lift',1,1,-2],['Energy',2,1,-2],['Work',2,1,-2],['Heat (Q)',2,1,-2],['Torque',2,1,-2],['Enthalpy',2,1,-2],['Helmholtz Energy',2,1,-2],['Power',2,1,-3],['Radiant Flux',2,1,-3],['Luminosity',2,1,-3],['Pressure',-1,1,-2],['Stress',-1,1,-2],["Young's Modulus",-1,1,-2],['Shear Modulus',-1,1,-2],['Bulk Modulus',-1,1,-2],['Energy Density',-1,1,-2],['Pressure Gradient',-2,1,-2],['Force Density',-2,1,-2],['Mass Flux (ρv)',-2,1,-1],['Yield Strength',-1,1,-2],['Surface Tension',0,1,-2],['Spring Constant',0,1,-2],['Stiffness',0,1,-2],['Dynamic Viscosity',-1,1,-1],['Intensity (W/m²)',0,1,-3],['Power Density',-1,1,-3],['Spec. Power (W/kg)',2,0,-3],['Dissipation Rate ε',2,0,-3],['Fracture Toughness',-0.5,1,-2],['Charge (CGS-Gaussian)',1.5,0.5,-1],['Irradiance',0,1,-3],['Grav. Constant G',3,-1,-2]];
+// Exponents can be fractional (√m in fracture toughness, √Hz in noise densities). Points are
+// keyed by exponent × 60 rounded, so halves, thirds, quarters, fifths and sixths computed in
+// floating point always find the same point.
+const keyOf=(L,M,T)=>[L,M,T].map(v=>Math.round(v*60)+0).join(',');
+function fracStr(v){
+  for(let d=1;d<=6;d++){const n=Math.round(v*d);if(Math.abs(v*d-n)<1e-9)return d===1?String(n):`${n}/${d}`;}
+  return String(+v.toFixed(3));
+}
 const GROUPS=new Map();
 RAW.forEach(([name,L,M,T])=>{
-  const k=`${L},${M},${T}`;
+  const k=keyOf(L,M,T);
   if(!GROUPS.has(k)) GROUPS.set(k,{L,M,T,entries:[]});
   GROUPS.get(k).entries.push(name);
 });
@@ -401,6 +409,7 @@ const FORMULA_DEFS=[
   // Gravity
   {label:'g=GM/r²',   from:[3,0,-2], to:[1,0,-2],  desc:'grav. param ÷ r² = accel'},
   // Fluids & continuum
+  {label:'K = σ√(πa)', from:[-1,1,-2],to:[-0.5,1,-2],desc:'stress × √length = fracture toughness'},
   {label:'P = F/A',   from:[1,1,-2], to:[-1,1,-2], desc:'force ÷ area = pressure'},
   {label:'Q = Av',    from:[1,0,-1], to:[3,0,-1],  desc:'vel × area = vol. flow rate'},
   {label:'ν = μ/ρ',  from:[-1,1,-1],to:[2,0,-1],  desc:'dyn. visc ÷ density = kin. visc'},
@@ -416,9 +425,10 @@ const FORMULA_DEFS=[
 // Builds a gradient arrow from one exponent coordinate to another, oriented along +Y of its group.
 // Caller adds the group to the scene (after applying any bundle offset).
 function makeArrow(from,to,{SR,CR,opacity,emissive=0}){
-  const MARGIN=0.22, HEAD=0.25;
   const s=new THREE.Vector3(...from), e=new THREE.Vector3(...to);
   const dir=e.clone().sub(s), total=dir.length();
+  // Half-steps (fractional exponents) are short, so shrink the end gaps and head to fit
+  const MARGIN=Math.min(0.22,total*0.2), HEAD=Math.min(0.25,total*0.3);
   dir.normalize();
   const shaftLen=total-MARGIN*2-HEAD;
   if(shaftLen<=0.05) return null;
@@ -450,13 +460,13 @@ function makeArrow(from,to,{SR,CR,opacity,emissive=0}){
 let showFormulas=true;
 const formulaObjs=[], formulaPickMeshes=[];
 // Pre-cache point keys for fast lookup
-PTS.forEach(pt=>{pt.key=`${pt.L},${pt.M},${pt.T}`;});
+PTS.forEach(pt=>{pt.key=keyOf(pt.L,pt.M,pt.T);});
 (()=>{
   const TAU=Math.PI*2;
   // Group by unordered endpoint pair — arrows between the same two points (in either direction) bundle together
   const segMap=new Map();
   FORMULA_DEFS.forEach((def,idx)=>{
-    const a=def.from.join(','), b=def.to.join(',');
+    const a=keyOf(...def.from), b=keyOf(...def.to);
     const k=a<b?`${a}|${b}`:`${b}|${a}`;
     if(!segMap.has(k)) segMap.set(k,[]);
     segMap.get(k).push(idx);
@@ -465,7 +475,7 @@ PTS.forEach(pt=>{pt.key=`${pt.L},${pt.M},${pt.T}`;});
   const segFrames=new Map();
   segMap.forEach((indices,k)=>{
     const d=FORMULA_DEFS[indices[0]];
-    const a=d.from.join(','), b=d.to.join(',');
+    const a=keyOf(...d.from), b=keyOf(...d.to);
     const cf=a<b?d.from:d.to, ct=a<b?d.to:d.from;
     const cd=new THREE.Vector3(...ct).sub(new THREE.Vector3(...cf)).normalize();
     const up=new THREE.Vector3(0,1,0);
@@ -475,7 +485,7 @@ PTS.forEach(pt=>{pt.key=`${pt.L},${pt.M},${pt.T}`;});
     segFrames.set(k,{lx:new THREE.Vector3(1,0,0).applyQuaternion(q),lz:new THREE.Vector3(0,0,1).applyQuaternion(q)});
   });
   FORMULA_DEFS.forEach((def,defIdx)=>{
-    const a=def.from.join(','), b=def.to.join(',');
+    const a=keyOf(...def.from), b=keyOf(...def.to);
     const segKey=a<b?`${a}|${b}`:`${b}|${a}`;
     const bundle=segMap.get(segKey);
     const n=bundle.length, bi=bundle.indexOf(defIdx);
@@ -495,7 +505,7 @@ PTS.forEach(pt=>{pt.key=`${pt.L},${pt.M},${pt.T}`;});
     // World-space midpoint of shaft (including bundle offset) — used for label positioning
     const mid=new THREE.Vector3(0,shaftLen/2,0).applyQuaternion(g.quaternion).add(g.position);
     const midCol={r:Math.round((sc.r+ec.r)/2),g:Math.round((sc.g+ec.g)/2),b:Math.round((sc.b+ec.b)/2)};
-    const fromKey=def.from.join(','), toKey=def.to.join(',');
+    const fromKey=keyOf(...def.from), toKey=keyOf(...def.to);
     const fo={g,def,mid,midCol,shaftMat,coneMat,fromKey,toKey};
     formulaObjs.push(fo);
     pm.userData={__fo:fo}; formulaPickMeshes.push(pm);
@@ -507,11 +517,11 @@ PTS.forEach(pt=>{pt.key=`${pt.L},${pt.M},${pt.T}`;});
 // dimension you must multiply A by to get B, so [B] = [A] · L^ΔL M^ΔM T^ΔT. We then look for
 // named quantities with dimension Δ (multiply) or −Δ (divide) to phrase it as a physical equation.
 const PT_BY_KEY=new Map(PTS.map(p=>[p.key,p]));
-const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','/':'ᐟ','.':'·'};
 const supStr=n=>String(n).split('').map(c=>SUP[c]).join('');
 function dimStr(L,M,T){
   const parts=[];
-  [['L',L],['M',M],['T',T]].forEach(([s,e])=>{if(e)parts.push(e===1?s:s+supStr(e));});
+  [['L',L],['M',M],['T',T]].forEach(([s,e])=>{const f=fracStr(e);if(f!=='0')parts.push(f==='1'?s:s+supStr(f));});
   return parts.join('·')||'1';
 }
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -521,7 +531,7 @@ function vectorEquations(a,b){
   const delta=dimStr(dL,dM,dT);
   const A=nm(a), B=nm(b);
   const named=[];   // [{eq, short}]
-  const mul=PT_BY_KEY.get(`${dL},${dM},${dT}`), div=PT_BY_KEY.get(`${-dL},${-dM},${-dT}`);
+  const mul=PT_BY_KEY.get(keyOf(dL,dM,dT)), div=PT_BY_KEY.get(keyOf(-dL,-dM,-dT));
   if(mul) named.push({eq:`${B} = ${A} × ${nm(mul)}`,short:`× ${nm(mul)}`});
   if(div) named.push({eq:`${B} = ${A} ÷ ${nm(div)}`,short:`÷ ${nm(div)}`});
   // Prefer the factor with fewer negative exponents: "÷ Time" reads better than "× Frequency"
@@ -532,10 +542,10 @@ function vectorEquations(a,b){
     const seen=new Set(), isZero=p=>!p.L&&!p.M&&!p.T;
     for(const P of PTS){
       if(isZero(P)) continue;
-      const Q=PT_BY_KEY.get(`${dL-P.L},${dM-P.M},${dT-P.T}`);
+      const Q=PT_BY_KEY.get(keyOf(dL-P.L,dM-P.M,dT-P.T));
       if(Q&&!isZero(Q)){const k=[P.key,Q.key].sort().join('|');
         if(!seen.has(k)){seen.add(k);named.push({eq:`${B} = ${A} × ${nm(P)} × ${nm(Q)}`,short:`× ${nm(P)} × ${nm(Q)}`});}}
-      const R=PT_BY_KEY.get(`${P.L-dL},${P.M-dM},${P.T-dT}`);
+      const R=PT_BY_KEY.get(keyOf(P.L-dL,P.M-dM,P.T-dT));
       if(R&&!isZero(R)&&R!==P) named.push({eq:`${B} = ${A} × ${nm(P)} ÷ ${nm(R)}`,short:`× ${nm(P)} ÷ ${nm(R)}`});
       if(named.length>=4) break;
     }
@@ -543,7 +553,7 @@ function vectorEquations(a,b){
   const generic=`[${B}] = [${A}] · ${delta}`;
   const known=[];
   FORMULA_DEFS.forEach(d=>{
-    const f=d.from.join(','), t=d.to.join(',');
+    const f=keyOf(...d.from), t=keyOf(...d.to);
     if(f===a.key&&t===b.key) known.push(`${d.label}  (${d.desc})`);
     else if(f===b.key&&t===a.key) known.push(`${d.label}  (inverse: ${d.desc})`);
   });
@@ -582,7 +592,8 @@ function removeUserVector(uv){
 // A derivative d/dx divides by [x]; an integral ∫…dx multiplies by it. Either way it is the same
 // fixed translation (∓[x]) applied to every point, so an operator shows as a field of parallel
 // arrows. Gradient, divergence and curl all share ∂/∂x's shift — they differ only in tensor rank,
-// which L·M·T exponents can't see.
+// which L·M·T exponents can't see. Powers are different: √ and x² scale the vector about the origin
+// (halving or doubling every exponent), so their arrows fan out radially instead of running parallel.
 const OPERATORS=[
   {id:'ddt',   label:'d/dt',   shift:[0,0,-1], desc:'time derivative · rate of change',          eq:(a,b)=>`${b} = d(${a})/dt`},
   {id:'d2dt2', label:'d²/dt²', shift:[0,0,-2], desc:'second time derivative',                    eq:(a,b)=>`${b} = d²(${a})/dt²`},
@@ -592,19 +603,26 @@ const OPERATORS=[
   {id:'intdx', label:'∫dx',    shift:[1,0,0],  desc:'line integral',                             eq:(a,b)=>`${b} = ∫ ${a} dx`},
   {id:'intdA', label:'∫dA',    shift:[2,0,0],  desc:'surface integral · flux',                   eq:(a,b)=>`${b} = ∫ ${a} dA`},
   {id:'intdV', label:'∫dV',    shift:[3,0,0],  desc:'volume integral',                           eq:(a,b)=>`${b} = ∫ ${a} dV`},
+  {id:'sqrt',  label:'√',      scale:1/2,      desc:'square root · halves every exponent, toward the origin', eq:(a,b)=>`${b} = √(${a})`},
+  {id:'sq',    label:'x²',     scale:2,        desc:'square · doubles every exponent, away from the origin', eq:(a,b)=>`${b} = (${a})²`},
 ];
+// Where op sends point p (or, with inv, where p came from)
+const opApply=(op,p,inv=false)=>op.scale
+  ?[p.L,p.M,p.T].map(v=>inv?v/op.scale:v*op.scale)
+  :[p.L,p.M,p.T].map((v,i)=>v+(inv?-op.shift[i]:op.shift[i]));
+const opMove=op=>op.scale?`scale ×${fracStr(op.scale)}`:`shift ${dimStr(...op.shift)}`;
 const opObjs=[], opPickMeshes=[];
 let activeOp=null, hoveredOp=null;
 const opHint=document.getElementById('opHint');
 const opBtns=[];
-const shiftKey=(p,[sL,sM,sT],k=1)=>`${p.L+k*sL},${p.M+k*sM},${p.T+k*sT}`;
 // Longest run P → op(P) → op(op(P)) … where every step lands on a named quantity
 function opChain(op){
   let best=[];
   PTS.forEach(p=>{
-    if(PT_BY_KEY.has(shiftKey(p,op.shift,-1))) return; // only start chains at their first link
+    if(keyOf(...opApply(op,p))===p.key) return;           // the origin is fixed under scaling
+    if(PT_BY_KEY.has(keyOf(...opApply(op,p,true)))) return; // only start chains at their first link
     const chain=[p];
-    for(let q=PT_BY_KEY.get(shiftKey(p,op.shift));q;q=PT_BY_KEY.get(shiftKey(q,op.shift))) chain.push(q);
+    for(let q=PT_BY_KEY.get(keyOf(...opApply(op,p)));q;q=PT_BY_KEY.get(keyOf(...opApply(op,q)))) chain.push(q);
     if(chain.length>best.length) best=chain;
   });
   return best.length>=3?best:null;
@@ -619,12 +637,11 @@ function setOperator(op){
   formulaObjs.forEach(({g})=>g.visible=showFormulas&&!activeOp);
   opBtns.forEach(b=>b.classList.toggle('on',!!activeOp&&b.dataset.v===activeOp.id));
   if(!activeOp){opHint.style.display='none';return;}
-  const[sL,sM,sT]=op.shift;
   let hits=0;
   PTS.forEach(a=>{
-    const t=[a.L+sL,a.M+sM,a.T+sT];
+    const t=opApply(op,a);
     if(t.some(v=>Math.abs(v)>5)) return;
-    const b=PT_BY_KEY.get(t.join(','))||null;
+    const b=PT_BY_KEY.get(keyOf(...t))||null;
     const arrow=makeArrow([a.L,a.M,a.T],t,b?{SR:0.03,CR:0.075,opacity:0.9,emissive:0.1}:{SR:0.014,CR:0.04,opacity:0.2});
     if(!arrow) return;
     scene.add(arrow.g);
@@ -634,7 +651,7 @@ function setOperator(op){
     arrow.pm.userData={__op:o}; opPickMeshes.push(arrow.pm); opObjs.push(o);
   });
   const chain=opChain(op), chainTxt=chain&&chain.map(nm).join(` —${op.label}→ `);
-  opHint.innerHTML=`<span class="oph">${esc(op.label)}</span> · shift ${esc(dimStr(sL,sM,sT))} · ${esc(op.desc)}<br>`+
+  opHint.innerHTML=`<span class="oph">${esc(op.label)}</span> · ${esc(opMove(op))} · ${esc(op.desc)}<br>`+
     `<span style="color:#99a">${hits} of ${opObjs.length} points land on a named quantity (bright arrows)</span>`+
     (chain?`<div class="opc" data-copy="${esc(chainTxt)}" title="Click to copy">longest chain: ${esc(chainTxt)}</div>`:'');
   opHint.style.display='block';
@@ -672,7 +689,7 @@ const vcard=document.getElementById('vcard');
 function showCard(uv){
   selectedUV=uv;
   const{from:a,to:b,eq,sc,ec}=uv;
-  const sgn=n=>n>0?`+${n}`:String(n);
+  const sgn=n=>n>0?`+${fracStr(n)}`:fracStr(n);
   const row=(t,cls='veq')=>`<div class="${cls}" data-copy="${esc(t)}" title="Click to copy">${esc(t)}</div>`;
   vcard.innerHTML=
     `<div class="vhead"><span><span style="color:${sc.css}">${esc(nm(a))}</span> <span style="color:#556">→</span> <span style="color:${ec.css}">${esc(nm(b))}</span></span><button class="vx" id="vcardX" title="Close">✕</button></div>`+
@@ -784,7 +801,7 @@ function pick(e,force=false){
       const c=newPt.col;
       const preview=(drawMode&&drawStart&&drawStart!==newPt)
         ?`<div style="color:#cce0ff;font-weight:bold;margin-bottom:5px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:4px">${esc(vectorEquations(drawStart,newPt).primary)}</div>`:'';
-      tip.innerHTML=preview+`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="display:inline-block;width:13px;height:13px;border-radius:3px;background:${c.css};flex-shrink:0"></span><span style="color:${c.css};font-weight:bold">L<sup>${newPt.L}</sup>·M<sup>${newPt.M}</sup>·T<sup>${newPt.T}</sup> <span style="font-weight:normal;color:#667;font-size:10px">(${newPt.entries.length})</span></span></div><div style="color:#334;font-size:8.5px;margin-bottom:4px">OKLAB L=${c.oL.toFixed(2)} a=${c.oa.toFixed(3)} b=${c.ob.toFixed(3)}</div><div style="color:#99aacc;font-size:10px;line-height:1.8">${newPt.entries.map(n=>`• ${n}`).join('<br>')}</div>`;
+      tip.innerHTML=preview+`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="display:inline-block;width:13px;height:13px;border-radius:3px;background:${c.css};flex-shrink:0"></span><span style="color:${c.css};font-weight:bold">L<sup>${fracStr(newPt.L)}</sup>·M<sup>${fracStr(newPt.M)}</sup>·T<sup>${fracStr(newPt.T)}</sup> <span style="font-weight:normal;color:#667;font-size:10px">(${newPt.entries.length})</span></span></div><div style="color:#334;font-size:8.5px;margin-bottom:4px">OKLAB L=${c.oL.toFixed(2)} a=${c.oa.toFixed(3)} b=${c.ob.toFixed(3)}</div><div style="color:#99aacc;font-size:10px;line-height:1.8">${newPt.entries.map(n=>`• ${n}`).join('<br>')}</div>`;
     } else if(newFo){
       const d=newFo.def,sc=coordToColor(...d.from),ec=coordToColor(...d.to);
       const fp=PTS.find(p=>p.key===newFo.fromKey),tp=PTS.find(p=>p.key===newFo.toKey);
@@ -803,7 +820,7 @@ function pick(e,force=false){
     } else if(newOp){
       const{from:a,to:b,target:t,sc,ec}=newOp;
       tip.innerHTML=`<div style="font:bold 11px 'Courier New',monospace;color:#eef;margin-bottom:4px">${esc(newOp.eq)}</div>`+
-        `<div style="font-size:9px;color:#667;margin-bottom:4px">${esc(activeOp.label)} · shift ${esc(dimStr(...activeOp.shift))}</div>`+
+        `<div style="font-size:9px;color:#667;margin-bottom:4px">${esc(activeOp.label)} · ${esc(opMove(activeOp))}</div>`+
         `<div style="font-size:9px"><span style="color:${sc.css}">${esc(nm(a))}</span><span style="color:#334"> → </span><span style="color:${ec.css}">${b?esc(nm(b)):'unnamed'}</span></div>`+
         (b?'':`<div style="font-size:8.5px;color:#667;margin-top:3px">No quantity in the list sits at ${esc(dimStr(...t))}</div>`)+
         `<div style="font-size:8px;color:#445;margin-top:4px">click to copy</div>`;
@@ -985,7 +1002,7 @@ function updFov(s){
   });
   const note=document.createElement('div');
   note.style.cssText='margin-top:7px;font-size:8px;color:#2a3a55;line-height:1.6;';
-  note.textContent='A derivative or integral shifts every quantity by the same vector, so it draws as parallel arrows. ∇, ∇· and ∇× all shift by L⁻¹ — they differ in tensor rank, not dimension. O cycles operators.';
+  note.textContent='A derivative or integral shifts every quantity by the same vector, so it draws as parallel arrows. ∇, ∇· and ∇× all shift by L⁻¹ — they differ in tensor rank, not dimension. √ and x² scale the vector instead, so their arrows point toward or away from the origin. O cycles operators.';
   div.append(segs,note);
   panel.appendChild(acc('OPERATORS',div,true));
 })();
