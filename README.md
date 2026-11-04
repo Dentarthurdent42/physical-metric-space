@@ -34,6 +34,9 @@ The visualization helps show that dimensional analysis is not just a bookkeeping
 - **Keyboard and mouse controls** for orbiting, zooming, and resetting the view
 - **Draw vectors** between any two points to see the equation that connects them — the exponent difference is the factor that turns one quantity into the other (e.g. Force → Energy gives `Energy = Force × Length`)
 - **Calculus operators** — pick d/dt, ∫dt, ∂/∂x (∇), ∇², ∫dx, ∫dA, ∫dV and more to see the operator as a field of parallel arrows. A derivative or integral is a fixed shift in exponent space, so chains like Length → Velocity → Acceleration → Jerk show up as straight lines. Gradient, divergence and curl share the same L⁻¹ shift; they differ in tensor rank, which L·M·T exponents can't see. √ and x² scale the vector about the origin instead of shifting it
+- **General powers** — the xⁿ operator raises every quantity to any exponent you type (2/3, −5/3, 1.5)
+- **Power laws** — formulas like Kolmogorov's E(k) = C·ε²ᐟ³·k⁻⁵ᐟ³, η = (ν³/ε)¹ᐟ⁴, ω = √(g/L) and Kepler's third law drawn as a path from the origin: each factor Xᵖ steps p times along X's ray, passing through unnamed fractional points before landing on the result
+- **Commensurable quantities** — quantities with identical dimensions (addable, comparable) share a point; each gets its own bead on a ring around it. Hover to fan out every member's name; click a bead to copy that one name
 - **Fractional exponents** — quantities like fracture toughness (M·L⁻¹ᐟ²·T⁻²), sorptivity (L·T⁻¹ᐟ²) and Gaussian charge (L³ᐟ²·M¹ᐟ²·T⁻¹) sit between lattice points; exponents display as fractions
 - **Click to copy** any point's names, formula label, or vector equation to the clipboard
 

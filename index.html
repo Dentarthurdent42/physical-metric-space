@@ -98,6 +98,15 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
 #opHint .opc{margin-top:4px;padding:3px 6px;border-radius:5px;cursor:copy;color:#ffe6bf;
   background:rgba(255,200,120,.08);border:1px solid rgba(255,200,120,.18)}
 #opHint .opc:hover{background:rgba(255,200,120,.2)}
+input.nin{width:70px;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,.14);border-radius:5px;
+  color:#ffe6bf;font:11px 'Courier New',monospace;padding:5px 6px;outline:none}
+input.nin.bad{border-color:rgba(255,90,90,.7)}
+.lawrow{padding:5px 6px;margin:3px 0;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.03);display:flex;flex-direction:column;gap:1px}
+.lawrow:hover{background:rgba(255,200,120,.1)}
+.lawrow.on{background:rgba(255,200,120,.16);border-color:rgba(255,200,120,.4)}
+.lawl{color:#ffe6bf;font-size:10px;font-weight:bold}
+.lawd{color:#556;font-size:8.5px}
 #vcard{position:absolute;left:12px;bottom:40px;z-index:20;display:none;width:330px;
   max-width:calc(100% - 32px);max-height:50%;overflow-y:auto;padding:10px 12px;
   background:rgba(4,4,18,.97);border:1px solid rgba(255,255,255,.14);border-radius:9px;
@@ -146,7 +155,7 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
         The origin — the single point at (0, 0, 0) — is the home of all dimensionless quantities: strain, Mach number, Reynolds number, angles.
       </p>
       <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:20px">
-        Hover over any sphere for a tooltip; click it to copy its name. Arrows show familiar formulas — and with <strong style="color:#aaccff">✎ Draw vector</strong> you can connect any two points to see the equation that links them. The Operators panel shows derivatives and integrals as uniform shifts of the whole space. Use the controls panel (⚙) to adjust projection, labels, and rotation. Keyboard: arrow keys orbit, space pauses, R resets, V draws, O cycles operators.
+        Hover over any sphere for a tooltip; click it to copy its name. Arrows show familiar formulas — and with <strong style="color:#aaccff">✎ Draw vector</strong> you can connect any two points to see the equation that links them. The Operators panel shows derivatives and integrals as uniform shifts of the whole space, and Power laws traces formulas like E(k) = C·ε²ᐟ³·k⁻⁵ᐟ³ as paths. Beads ringing a sphere are commensurable quantities sharing one dimension — hover to see them all. Use the controls panel (⚙) to adjust projection, labels, and rotation. Keyboard: arrow keys orbit, space pauses, R resets, V draws, O cycles operators.
       </p>
       <button onclick="document.getElementById('preface').style.display='none'" style="background:rgba(80,110,220,.22);border:1px solid rgba(100,140,255,.4);border-radius:7px;color:#aaccff;font:12px 'Courier New',monospace;padding:10px 14px;cursor:pointer">Enter visualization</button>
     </div>
@@ -367,12 +376,38 @@ PTS.forEach(pt=>{
   pick.position.set(pt.L,pt.M,pt.T); pick.userData=pt; scene.add(pick); pickMeshes.push(pick);
 });
 
+// ── Commensurable members ─────────────────────────────────────────────────────
+// Quantities with identical dimensions are commensurable: they can be added and compared, and
+// they share one point. Each member gets its own bead on a ring around that point, turned to
+// face the camera every frame, so a shared point visibly holds several distinct quantities.
+const BEAD_GEO=new THREE.SphereGeometry(0.034,10,8), BEAD_PICK_GEO=new THREE.SphereGeometry(0.06,6,6);
+const BEAD_PICK_MAT=new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false});
+const beadPickMeshes=[];
+PTS.forEach(pt=>{
+  const n=pt.entries.length; if(n<2) return;
+  const R=pt.vis.geometry.parameters.radius+0.13;
+  const holder=new THREE.Group(); holder.position.copy(pt.vis.position); scene.add(holder);
+  pt.holder=holder; pt.beads=[];
+  pt.entries.forEach((name,i)=>{
+    const th=Math.PI/2-i*2*Math.PI/n;
+    const pos=new THREE.Vector3(R*Math.cos(th),R*Math.sin(th),0);
+    // Step lightness across members so neighbours on the ring are told apart
+    const col=new THREE.Color(pt.col.hex).offsetHSL(0,0,(i/(n-1)-0.5)*0.3);
+    const mat=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.9,depthWrite:false});
+    const bead=new THREE.Mesh(BEAD_GEO,mat); bead.position.copy(pos); bead.renderOrder=3; holder.add(bead);
+    const pk=new THREE.Mesh(BEAD_PICK_GEO,BEAD_PICK_MAT); pk.position.copy(pos); holder.add(pk);
+    const m={pt,name,i,bead,mat,css:`#${col.getHexString()}`};
+    pk.userData={__cm:m}; beadPickMeshes.push(pk); pt.beads.push(m);
+  });
+});
+
 let metricsVis='full', labelsVis='full';
 function applyMetricsVis(){
   PTS.forEach(pt=>{
     const h=metricsVis==='hidden',l=metricsVis==='low';
     pt.vis.visible=!h; pt.vis.material.opacity=l?0.18:1; pt.vis.material.transparent=l; pt.vis.material.needsUpdate=true;
     if(pt.projLine){pt.projLine.visible=!h;pt.projLine.material.opacity=l?0.06:0.2;pt.projLine.material.needsUpdate=true;}
+    if(pt.holder) pt.holder.visible=!h;
   });
 }
 
@@ -605,7 +640,16 @@ const OPERATORS=[
   {id:'intdV', label:'∫dV',    shift:[3,0,0],  desc:'volume integral',                           eq:(a,b)=>`${b} = ∫ ${a} dV`},
   {id:'sqrt',  label:'√',      scale:1/2,      desc:'square root · halves every exponent, toward the origin', eq:(a,b)=>`${b} = √(${a})`},
   {id:'sq',    label:'x²',     scale:2,        desc:'square · doubles every exponent, away from the origin', eq:(a,b)=>`${b} = (${a})²`},
+  {id:'pow',   label:'xⁿ',     scale:2/3,      desc:'power · multiplies every exponent by n', eq:(a,b)=>`${b} = (${a})${supStr(fracStr(POW_OP.scale))}`},
 ];
+const POW_OP=OPERATORS.find(o=>o.id==='pow');
+// Parses "2/3", "-5/3", "1.5" → number; null when unusable
+function parseExp(str){
+  const m=String(str).trim().match(/^(-?\d+(?:\.\d+)?)(?:\s*\/\s*(\d+(?:\.\d+)?))?$/);
+  if(!m) return null;
+  const v=m[2]?parseFloat(m[1])/parseFloat(m[2]):parseFloat(m[1]);
+  return Number.isFinite(v)&&v!==0&&Math.abs(v)<=6?v:null;
+}
 // Where op sends point p (or, with inv, where p came from)
 const opApply=(op,p,inv=false)=>op.scale
   ?[p.L,p.M,p.T].map(v=>inv?v/op.scale:v*op.scale)
@@ -622,21 +666,33 @@ function opChain(op){
     if(keyOf(...opApply(op,p))===p.key) return;           // the origin is fixed under scaling
     if(PT_BY_KEY.has(keyOf(...opApply(op,p,true)))) return; // only start chains at their first link
     const chain=[p];
-    for(let q=PT_BY_KEY.get(keyOf(...opApply(op,p)));q;q=PT_BY_KEY.get(keyOf(...opApply(op,q)))) chain.push(q);
+    for(let q=PT_BY_KEY.get(keyOf(...opApply(op,p)));q&&!chain.includes(q);q=PT_BY_KEY.get(keyOf(...opApply(op,q)))) chain.push(q);
     if(chain.length>best.length) best=chain;
   });
   return best.length>=3?best:null;
 }
+// Operators and power laws share one overlay: arrows in opObjs, waypoint labels in overlayLabels.
+let activeLaw=null, lawLanding=null;
+const lawRows=[], overlayLabels=[];
+const overlayOn=()=>!!(activeOp||activeLaw);
 function clearOpArrows(){
   opObjs.forEach(o=>{scene.remove(o.g);o.g.traverse(x=>{if(x.geometry)x.geometry.dispose();if(x.material)x.material.dispose();});});
-  opObjs.length=0; opPickMeshes.length=0; hoveredOp=null;
+  opObjs.length=0; opPickMeshes.length=0; overlayLabels.length=0; hoveredOp=null;
 }
+function syncOverlayUI(){
+  formulaObjs.forEach(({g})=>g.visible=showFormulas&&!overlayOn());
+  opBtns.forEach(b=>b.classList.toggle('on',!!activeOp&&b.dataset.v===activeOp.id));
+  lawRows.forEach(r=>r.classList.toggle('on',r.__law===activeLaw));
+  if(!overlayOn()) opHint.style.display='none';
+}
+const tipHead=t=>`<div style="font:bold 11px 'Courier New',monospace;color:#eef;margin-bottom:4px">${esc(t)}</div>`;
+const tipSub=t=>`<div style="font-size:9px;color:#667;margin-bottom:4px">${t}</div>`;
+const tipFoot='<div style="font-size:8px;color:#445;margin-top:4px">click to copy</div>';
 function setOperator(op){
   clearOpArrows();
-  activeOp=op;
-  formulaObjs.forEach(({g})=>g.visible=showFormulas&&!activeOp);
-  opBtns.forEach(b=>b.classList.toggle('on',!!activeOp&&b.dataset.v===activeOp.id));
-  if(!activeOp){opHint.style.display='none';return;}
+  activeOp=op; activeLaw=null; lawLanding=null;
+  syncOverlayUI();
+  if(!activeOp) return;
   let hits=0;
   PTS.forEach(a=>{
     const t=opApply(op,a);
@@ -648,14 +704,75 @@ function setOperator(op){
     if(b) hits++;
     const o={...arrow,from:a,to:b,target:t,baseOp:b?0.9:0.2,
       eq:op.eq(nm(a),b?nm(b):`[${dimStr(...t)}]`)};
+    o.tipHtml=tipHead(o.eq)+tipSub(`${esc(op.label)} · ${esc(opMove(op))}`)+
+      `<div style="font-size:9px"><span style="color:${arrow.sc.css}">${esc(nm(a))}</span><span style="color:#334"> → </span><span style="color:${arrow.ec.css}">${b?esc(nm(b)):'unnamed'}</span></div>`+
+      (b?'':`<div style="font-size:8.5px;color:#667;margin-top:3px">No quantity in the list sits at ${esc(dimStr(...t))}</div>`)+tipFoot;
     arrow.pm.userData={__op:o}; opPickMeshes.push(arrow.pm); opObjs.push(o);
   });
-  const chain=opChain(op), chainTxt=chain&&chain.map(nm).join(` —${op.label}→ `);
-  opHint.innerHTML=`<span class="oph">${esc(op.label)}</span> · ${esc(opMove(op))} · ${esc(op.desc)}<br>`+
+  const lbl=op===POW_OP?`x${supStr(fracStr(op.scale))}`:op.label;
+  const chain=opChain(op), chainTxt=chain&&chain.map(nm).join(` —${lbl}→ `);
+  opHint.innerHTML=`<span class="oph">${esc(lbl)}</span> · ${esc(opMove(op))} · ${esc(op.desc)}<br>`+
     `<span style="color:#99a">${hits} of ${opObjs.length} points land on a named quantity (bright arrows)</span>`+
     (chain?`<div class="opc" data-copy="${esc(chainTxt)}" title="Click to copy">longest chain: ${esc(chainTxt)}</div>`:'');
   opHint.style.display='block';
 }
+
+// ── Power laws ────────────────────────────────────────────────────────────────
+// A power law multiplies powers of quantities: E(k) = C·ε²ᐟ³·k⁻⁵ᐟ³. Each factor Xᵖ adds p times X's
+// vector, so the law is a path from the origin that steps along each factor's ray in turn. The
+// steps can wander through fractional points even when the law lands on a whole-number one.
+const POWER_LAWS=[
+  {label:'E(k) = C·ε²ᐟ³·k⁻⁵ᐟ³', desc:'Kolmogorov turbulence spectrum', lands:'Energy Spectrum E(k)', terms:[['ε',[2,0,-3],2/3],['k',[-1,0,0],-5/3]]},
+  {label:'η = (ν³/ε)¹ᐟ⁴',       desc:'Kolmogorov length scale',        terms:[['ν',[2,0,-1],3/4],['ε',[2,0,-3],-1/4]]},
+  {label:'τη = (ν/ε)¹ᐟ²',       desc:'Kolmogorov time scale',          terms:[['ν',[2,0,-1],1/2],['ε',[2,0,-3],-1/2]]},
+  {label:'ω = √(g/L)',          desc:'pendulum angular frequency',     terms:[['g',[1,0,-2],1/2],['L',[1,0,0],-1/2]]},
+  {label:'v = √(T/μ)',          desc:'wave speed on a string',         terms:[['T',[1,1,-2],1/2],['μ',[-1,1,0],-1/2]]},
+  {label:'v = √(2GM/r)',        desc:'escape velocity',                terms:[['GM',[3,0,-2],1/2],['r',[1,0,0],-1/2]]},
+  {label:'T = 2π√(a³/GM)',      desc:"Kepler's third law",             terms:[['a',[1,0,0],3/2],['GM',[3,0,-2],-1/2]]},
+  {label:'ℓ = √(D·t)',          desc:'diffusion length',               terms:[['D',[2,0,-1],1/2],['t',[0,0,1],1/2]]},
+];
+const termStr=([sym,,p])=>p===1?sym:sym+supStr(fracStr(p));
+function setLaw(law){
+  clearOpArrows();
+  activeLaw=law; activeOp=null; lawLanding=null;
+  syncOverlayUI();
+  if(!law) return;
+  let pos=[0,0,0], sofar='';
+  const end=law.terms.reduce((acc,[,d,p])=>acc.map((v,i)=>v+p*d[i]),[0,0,0]);
+  const landing=PT_BY_KEY.get(keyOf(...end));
+  // Name the result after the quantity the law is about, not whichever member is listed first
+  const landName=landing&&(landing.entries.includes(law.lands)?law.lands:nm(landing));
+  if(landing) lawLanding={pt:landing,name:landName};
+  law.terms.forEach((term,i)=>{
+    const[sym,d,p]=term, next=pos.map((v,j)=>v+p*d[j]);
+    const step=termStr(term); sofar=sofar?`${sofar}·${step}`:step;
+    const last=i===law.terms.length-1;
+    const arrow=makeArrow(pos,next,{SR:0.034,CR:0.085,opacity:0.95,emissive:0.2});
+    if(arrow){
+      scene.add(arrow.g);
+      const o={...arrow,from:PT_BY_KEY.get(keyOf(...pos))||null,to:last?landing:null,law,baseOp:0.95,eq:law.label};
+      o.tipHtml=tipHead(law.label)+tipSub(esc(law.desc))+
+        `<div style="font-size:9px;color:#ccd">step ${i+1}: × ${esc(step)} — adds ${esc(fracStr(p))} × [${esc(sym)}] = ${esc(dimStr(...d.map(v=>v*p)))}</div>`+
+        `<div style="font-size:9px;color:#99a;margin-top:2px">now at ${esc(dimStr(...next))}${last&&landing?` = ${esc(landName)}`:''}</div>`+tipFoot;
+      arrow.pm.userData={__op:o}; opPickMeshes.push(arrow.pm); opObjs.push(o);
+    }
+    if(!last){
+      // Ghost marker for the intermediate product, which usually has no name of its own
+      const col=coordToColor(...next);
+      const ghost=new THREE.Mesh(new THREE.SphereGeometry(0.07,10,8),new THREE.MeshBasicMaterial({color:col.hex,wireframe:true,transparent:true,opacity:0.8}));
+      ghost.position.set(...next); scene.add(ghost);
+      opObjs.push({g:ghost,ghost:true});
+      overlayLabels.push({pos:next,text:sofar,col});
+    }
+    pos=next;
+  });
+  const path=['1',...law.terms.map((t,i)=>law.terms.slice(0,i+1).map(termStr).join('·'))].join(' → ');
+  opHint.innerHTML=`<span class="oph">${esc(law.label)}</span> · ${esc(law.desc)}<br>`+
+    `<span style="color:#99a">path: ${esc(path)} = ${esc(dimStr(...end))}${landing?` (${esc(landName)})`:''}</span>`+
+    `<div class="opc" data-copy="${esc(law.label)}" title="Click to copy">${esc(law.label)}</div>`;
+  opHint.style.display='block';
+}
+
 function cycleOperator(){
   const i=activeOp?OPERATORS.indexOf(activeOp):-1;
   setOperator(i+1<OPERATORS.length?OPERATORS[i+1]:null);
@@ -780,28 +897,34 @@ function drawLbl(sx,sy,text,r,g,b,isH,isBadge=false,sizeBoost=0){
 
 // ── Picking ───────────────────────────────────────────────────────────────────
 const ray=new THREE.Raycaster(), mouse=new THREE.Vector2();
-let hovered=null, hoveredFormula=null, hoveredUV=null, lastMouse=null;
+let hovered=null, hoveredFormula=null, hoveredUV=null, hoveredCm=null, lastMouse=null;
 // Returns {pt, fo, uv, op} for whatever is under the given client coordinates (at most one is set).
 // While drawing, only points are pickable so arrows never block endpoint selection.
 function hitAt(cx,cy){
   mouse.x=(cx/W)*2-1; mouse.y=-(cy/H)*2+1;
   ray.setFromCamera(mouse,activeCamera);
-  const targets=drawMode?pickMeshes:[...(showFormulas&&!activeOp?formulaPickMeshes:[]),...opPickMeshes,...uvPickMeshes,...pickMeshes];
+  const targets=drawMode?pickMeshes:[...(showFormulas&&!overlayOn()?formulaPickMeshes:[]),...opPickMeshes,...uvPickMeshes,...beadPickMeshes,...pickMeshes];
   const hits=ray.intersectObjects(targets).sort((a,b)=>a.distance-b.distance);
   const hit=hits.length?hits[0].object.userData:null;
-  return{fo:hit&&hit.__fo||null,uv:hit&&hit.__uv||null,op:hit&&hit.__op||null,pt:hit&&!hit.__fo&&!hit.__uv&&!hit.__op?hit:null};
+  return{fo:hit&&hit.__fo||null,uv:hit&&hit.__uv||null,op:hit&&hit.__op||null,cm:hit&&hit.__cm||null,pt:hit&&!hit.__fo&&!hit.__uv&&!hit.__op&&!hit.__cm?hit:null};
 }
 function pick(e,force=false){
   const src=e.touches?e.touches[0]:e;
   lastMouse={x:src.clientX,y:src.clientY};
-  const{pt:newPt,fo:newFo,uv:newUV,op:newOp}=hitAt(src.clientX,src.clientY);
-  if(force||newPt!==hovered||newFo!==hoveredFormula||newUV!==hoveredUV||newOp!==hoveredOp){
-    hovered=newPt; hoveredFormula=newFo; hoveredUV=newUV; hoveredOp=newOp;
-    if(newPt){
+  const{pt:newPt,fo:newFo,uv:newUV,op:newOp,cm:newCm}=hitAt(src.clientX,src.clientY);
+  if(force||newPt!==hovered||newFo!==hoveredFormula||newUV!==hoveredUV||newOp!==hoveredOp||newCm!==hoveredCm){
+    hovered=newPt; hoveredFormula=newFo; hoveredUV=newUV; hoveredOp=newOp; hoveredCm=newCm;
+    if(newCm){
+      const{pt,name,css}=newCm, others=pt.entries.filter(e=>e!==name);
+      tip.innerHTML=`<div style="font:bold 11px 'Courier New',monospace;color:${css};margin-bottom:4px">${esc(name)}</div>`+
+        `<div style="font-size:9px;color:#667;margin-bottom:5px">${esc(dimStr(pt.L,pt.M,pt.T))}</div>`+
+        `<div style="font-size:9px;color:#99aacc;line-height:1.7">Commensurable with ${others.length}:<br>${others.map(e=>`• ${esc(e)}`).join('<br>')}</div>`+
+        `<div style="font-size:8px;color:#445;margin-top:4px">click to copy</div>`;
+    } else if(newPt){
       const c=newPt.col;
       const preview=(drawMode&&drawStart&&drawStart!==newPt)
         ?`<div style="color:#cce0ff;font-weight:bold;margin-bottom:5px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:4px">${esc(vectorEquations(drawStart,newPt).primary)}</div>`:'';
-      tip.innerHTML=preview+`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="display:inline-block;width:13px;height:13px;border-radius:3px;background:${c.css};flex-shrink:0"></span><span style="color:${c.css};font-weight:bold">L<sup>${fracStr(newPt.L)}</sup>·M<sup>${fracStr(newPt.M)}</sup>·T<sup>${fracStr(newPt.T)}</sup> <span style="font-weight:normal;color:#667;font-size:10px">(${newPt.entries.length})</span></span></div><div style="color:#334;font-size:8.5px;margin-bottom:4px">OKLAB L=${c.oL.toFixed(2)} a=${c.oa.toFixed(3)} b=${c.ob.toFixed(3)}</div><div style="color:#99aacc;font-size:10px;line-height:1.8">${newPt.entries.map(n=>`• ${n}`).join('<br>')}</div>`;
+      tip.innerHTML=preview+`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="display:inline-block;width:13px;height:13px;border-radius:3px;background:${c.css};flex-shrink:0"></span><span style="color:${c.css};font-weight:bold">L<sup>${fracStr(newPt.L)}</sup>·M<sup>${fracStr(newPt.M)}</sup>·T<sup>${fracStr(newPt.T)}</sup> <span style="font-weight:normal;color:#667;font-size:10px">(${newPt.entries.length})</span></span></div>${newPt.entries.length>1?'<div style="color:#556;font-size:8.5px;margin-bottom:3px">commensurable · same dimension, addable</div>':''}<div style="color:#334;font-size:8.5px;margin-bottom:4px">OKLAB L=${c.oL.toFixed(2)} a=${c.oa.toFixed(3)} b=${c.ob.toFixed(3)}</div><div style="color:#99aacc;font-size:10px;line-height:1.8">${newPt.entries.map(n=>`• ${n}`).join('<br>')}</div>`;
     } else if(newFo){
       const d=newFo.def,sc=coordToColor(...d.from),ec=coordToColor(...d.to);
       const fp=PTS.find(p=>p.key===newFo.fromKey),tp=PTS.find(p=>p.key===newFo.toKey);
@@ -818,22 +941,17 @@ function pick(e,force=false){
         `<div style="font-size:9px"><span style="color:${sc.css}">${esc(nm(newUV.from))}</span><span style="color:#334"> → </span><span style="color:${ec.css}">${esc(nm(newUV.to))}</span></div>`+
         `<div style="font-size:8px;color:#445;margin-top:4px">click to copy · open details</div>`;
     } else if(newOp){
-      const{from:a,to:b,target:t,sc,ec}=newOp;
-      tip.innerHTML=`<div style="font:bold 11px 'Courier New',monospace;color:#eef;margin-bottom:4px">${esc(newOp.eq)}</div>`+
-        `<div style="font-size:9px;color:#667;margin-bottom:4px">${esc(activeOp.label)} · ${esc(opMove(activeOp))}</div>`+
-        `<div style="font-size:9px"><span style="color:${sc.css}">${esc(nm(a))}</span><span style="color:#334"> → </span><span style="color:${ec.css}">${b?esc(nm(b)):'unnamed'}</span></div>`+
-        (b?'':`<div style="font-size:8.5px;color:#667;margin-top:3px">No quantity in the list sits at ${esc(dimStr(...t))}</div>`)+
-        `<div style="font-size:8px;color:#445;margin-top:4px">click to copy</div>`;
+      tip.innerHTML=newOp.tipHtml;
     }
   }
-  if(newPt||newFo||newUV||newOp){tip.style.display='block';tip.style.left=Math.min(src.clientX+14,W-244)+'px';tip.style.top=Math.max(4,src.clientY-60)+'px';}
+  if(newPt||newFo||newUV||newOp||newCm){tip.style.display='block';tip.style.left=Math.min(src.clientX+14,W-244)+'px';tip.style.top=Math.max(4,src.clientY-60)+'px';}
   else tip.style.display='none';
 }
 c3d.addEventListener('mousemove',pick);
 c3d.addEventListener('mouseenter',()=>{controls.autoRotate=false;});
-c3d.addEventListener('mouseleave',()=>{controls.autoRotate=autoRotOn;hovered=null;hoveredFormula=null;hoveredUV=null;hoveredOp=null;lastMouse=null;tip.style.display='none';});
+c3d.addEventListener('mouseleave',()=>{controls.autoRotate=autoRotOn;hovered=null;hoveredFormula=null;hoveredUV=null;hoveredOp=null;hoveredCm=null;lastMouse=null;tip.style.display='none';});
 c3d.addEventListener('touchmove',e=>{if(e.touches.length===1)pick(e);},{passive:true});
-c3d.addEventListener('touchend',()=>{hovered=null;hoveredFormula=null;hoveredUV=null;hoveredOp=null;tip.style.display='none';});
+c3d.addEventListener('touchend',()=>{hovered=null;hoveredFormula=null;hoveredUV=null;hoveredOp=null;hoveredCm=null;tip.style.display='none';});
 
 // ── Click (tap) handling — distinguished from orbit drags by pointer travel ──
 let downAt=null;
@@ -842,7 +960,7 @@ c3d.addEventListener('pointerup',e=>{
   if(!e.isPrimary||!downAt) return;
   const moved=Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y); downAt=null;
   if(moved>6) return;
-  const{pt,fo,uv,op}=hitAt(e.clientX,e.clientY);
+  const{pt,fo,uv,op,cm}=hitAt(e.clientX,e.clientY);
   if(drawMode){
     if(!pt){drawStart=null;updateDrawUI();return;}
     if(!drawStart||drawStart===pt){drawStart=drawStart===pt?null:pt;}
@@ -852,6 +970,7 @@ c3d.addEventListener('pointerup',e=>{
   }
   if(uv){showCard(uv);copyText(uv.eq.primary);}
   else if(op) copyText(op.eq);
+  else if(cm) copyText(cm.name);
   else if(fo) copyText(fo.def.label);
   else if(pt) copyText(pt.entries.join(', '));
 });
@@ -1003,8 +1122,37 @@ function updFov(s){
   const note=document.createElement('div');
   note.style.cssText='margin-top:7px;font-size:8px;color:#2a3a55;line-height:1.6;';
   note.textContent='A derivative or integral shifts every quantity by the same vector, so it draws as parallel arrows. ∇, ∇· and ∇× all shift by L⁻¹ — they differ in tensor rank, not dimension. √ and x² scale the vector instead, so their arrows point toward or away from the origin. O cycles operators.';
-  div.append(segs,note);
+  const nrow=document.createElement('div'); nrow.className='prow'; nrow.style.marginTop='6px';
+  const nl=document.createElement('span'); nl.className='pl'; nl.textContent='xⁿ   n =';
+  const nin=document.createElement('input'); nin.type='text'; nin.value='2/3'; nin.className='nin';
+  nin.title='Exponent for xⁿ: a fraction like 2/3 or -5/3, or a decimal';
+  nin.addEventListener('input',()=>{
+    const v=parseExp(nin.value); nin.classList.toggle('bad',v===null);
+    if(v===null) return;
+    POW_OP.scale=v;
+    if(activeOp===POW_OP) setOperator(POW_OP);
+  });
+  nin.addEventListener('keydown',e=>{if(e.key==='Enter')setOperator(POW_OP);});
+  nrow.append(nl,nin);
+  div.append(segs,nrow,note);
   panel.appendChild(acc('OPERATORS',div,true));
+})();
+
+// Power laws
+(()=>{
+  const div=document.createElement('div');
+  POWER_LAWS.forEach(law=>{
+    const row=document.createElement('div'); row.className='lawrow'; row.__law=law;
+    row.innerHTML=`<span class="lawl">${esc(law.label)}</span><span class="lawd">${esc(law.desc)}</span>`;
+    row.title='Show this law as a path through exponent space';
+    row.addEventListener('click',()=>setLaw(activeLaw===law?null:law));
+    div.appendChild(row); lawRows.push(row);
+  });
+  const note=document.createElement('div');
+  note.style.cssText='margin-top:7px;font-size:8px;color:#2a3a55;line-height:1.6;';
+  note.textContent='Each factor Xᵖ steps p times along X\'s ray. The path can pass through fractional points and still land on a whole-number one.';
+  div.appendChild(note);
+  panel.appendChild(acc('POWER LAWS',div,true));
 })();
 
 // Formulas
@@ -1015,7 +1163,7 @@ function updFov(s){
   tb.style.color='#aaccff';
   tb.addEventListener('click',()=>{
     showFormulas=!showFormulas;
-    formulaObjs.forEach(({g})=>g.visible=showFormulas&&!activeOp);
+    formulaObjs.forEach(({g})=>g.visible=showFormulas&&!overlayOn());
     tb.textContent=showFormulas?'◉ Visible':'○ Hidden';
     tb.classList.toggle('on',showFormulas);
     tb.style.color=showFormulas?'#aaccff':'#aaaacc';
@@ -1097,7 +1245,7 @@ window.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     if(drawStart){drawStart=null;updateDrawUI();}
     else if(drawMode) setDrawMode(false);
-    else if(activeOp) setOperator(null);
+    else if(overlayOn()) setOperator(null);
     else hideCard();
   }
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
@@ -1114,6 +1262,7 @@ window.addEventListener('resize',()=>{
 });
 
 // ── Render loop ───────────────────────────────────────────────────────────────
+const _bw=new THREE.Vector3();
 const ROT=0.027;
 function animate(){
   requestAnimationFrame(animate);
@@ -1129,6 +1278,7 @@ function animate(){
   activeCamera = usingOrtho ? orthoCam : perspCam;
 
   if(lblEffect==='pill') PTS.forEach(pt=>{if(pt.ring.visible)pt.ring.quaternion.copy(activeCamera.quaternion);});
+  PTS.forEach(pt=>{if(pt.holder)pt.holder.quaternion.copy(activeCamera.quaternion);});
 
   const dpr=window.devicePixelRatio||1;
   lc.setTransform(dpr,0,0,dpr,0,0); lc.clearRect(0,0,W,H); lc.textAlign='center';
@@ -1146,7 +1296,7 @@ function animate(){
     const cT=coordToColor(0,0,Math.max(-4,Math.min(1,n)));let[tx,ty]=toSc(0,0,n);drawLbl(tx,ty+24,String(n),cT.r,cT.g,cT.b,false,true);
   });
   // Pre-compute hover sets once — shared by label pass and 3D highlight pass
-  const anyHov=!!(hovered||hoveredFormula||hoveredUV||hoveredOp);
+  const anyHov=!!(hovered||hoveredFormula||hoveredUV||hoveredOp||hoveredCm);
   const activeFos=new Set(), activePts=new Set(), activeOps=new Set();
   if(anyHov){
     if(hoveredFormula){
@@ -1154,7 +1304,8 @@ function animate(){
       PTS.forEach(pt=>{if(pt.key===hoveredFormula.fromKey||pt.key===hoveredFormula.toKey)activePts.add(pt);});
     }
     if(hoveredUV){activePts.add(hoveredUV.from);activePts.add(hoveredUV.to);}
-    if(hoveredOp){activeOps.add(hoveredOp);activePts.add(hoveredOp.from);if(hoveredOp.to)activePts.add(hoveredOp.to);}
+    if(hoveredCm) activePts.add(hoveredCm.pt);
+    if(hoveredOp){(hoveredOp.law?opObjs:[hoveredOp]).forEach(o=>{activeOps.add(o);if(o.from)activePts.add(o.from);if(o.to)activePts.add(o.to);});}
     if(hovered) opObjs.forEach(o=>{if(o.from===hovered||o.to===hovered){activeOps.add(o);activePts.add(o.from);if(o.to)activePts.add(o.to);}});
     if(hovered){
       activePts.add(hovered);
@@ -1167,27 +1318,51 @@ function animate(){
     }
   }
 
+  // A shown power law takes focus like a hover: its path and endpoints stay bright, the rest fades
+  if(activeLaw&&!anyHov) opObjs.forEach(o=>{if(o.ghost)return;activeOps.add(o);if(o.from)activePts.add(o.from);if(o.to)activePts.add(o.to);});
+  const dim=anyHov||!!activeLaw;
   if(labelsVis!=='hidden'){
     const baseAlpha=labelsVis==='low'?0.3:1;
     PTS.map(pt=>{const[sx,sy,z]=toSc(pt.L,pt.M,pt.T);return{pt,sx,sy,z};})
       .sort((a,b)=>b.z-a.z)
       .forEach(({pt,sx,sy})=>{
         const isActive=activePts.has(pt), isDirect=hovered===pt;
-        lc.globalAlpha=anyHov?(isActive?1:0.12):baseAlpha;
+        lc.globalAlpha=dim?(isActive?1:0.12):baseAlpha;
         const{r,g,b}=pt.col,isH=isDirect,n=pt.entries.length;
-        const boost=anyHov?(isDirect?4:isActive?2:0):0;
-        drawLbl(sx,sy,n>1?`${pt.entries[0]} +${n-1}`:pt.entries[0],r,g,b,isH,false,boost);
+        const boost=dim?(isDirect?4:isActive?2:0):0;
+        if(pt.beads&&(hovered===pt||hoveredCm&&hoveredCm.pt===pt)){
+          // Expanded: one label per commensurable member, pushed out radially from its bead
+          pt.beads.forEach(m=>{
+            const[bx,by]=toSc(...m.bead.getWorldPosition(_bw).toArray());
+            const dx=bx-sx, dy=by-sy, d=Math.hypot(dx,dy)||1, ux=dx/d, uy=dy/d;
+            const hot=hoveredCm===m, sz=lblSize+(hot?2.5:1);
+            lc.font=`${hot?'bold ':''}${sz}px ${lblFont}`;
+            lc.textAlign=ux>0.25?'left':ux<-0.25?'right':'center';
+            const tx=bx+ux*9, ty=by+uy*9+(uy>0.25?sz*.8:uy<-0.25?-2:sz*.35);
+            lc.strokeStyle='rgba(4,4,20,.97)';lc.lineWidth=Math.max(2,sz*.25);lc.lineJoin='round';
+            lc.strokeText(m.name,tx,ty); lc.fillStyle=m.css; lc.fillText(m.name,tx,ty);
+          });
+          lc.textAlign='center';
+          return;
+        }
+        const main=activeLaw&&lawLanding&&lawLanding.pt===pt?lawLanding.name:pt.entries[0];
+        drawLbl(sx,sy,n>1?`${main} +${n-1}`:main,r,g,b,isH,false,boost);
         if(n>1&&!isH){lc.font=`8px ${lblFont}`;lc.fillStyle=`rgba(${r},${g},${b},.55)`;lc.fillText(`×${n}`,sx,sy+(lblSize*.8));}
       });
     lc.globalAlpha=1;
   }
+  overlayLabels.forEach(({pos,text,col})=>{
+    const[sx,sy]=toSc(...pos);
+    lc.globalAlpha=1;
+    drawLbl(sx,sy,text,col.r,col.g,col.b,true,false,1.5);
+  });
   if(showFormulas){
     formulaObjs.forEach(fo=>{
       if(!fo.g.visible) return;
       const[sx,sy]=toSc(fo.mid.x,fo.mid.y,fo.mid.z);
       const foActive=activeFos.has(fo), foDirect=hoveredFormula===fo;
-      lc.globalAlpha=anyHov?(foActive?1:0.10):1;
-      const foBoost=anyHov?(foDirect?3:foActive?2:0):0;
+      lc.globalAlpha=dim?(foActive?1:0.10):1;
+      const foBoost=dim?(foDirect?3:foActive?2:0):0;
       lc.font=`bold ${Math.max(7,lblSize-1+foBoost)}px ${lblFont}`;
       lc.textAlign='center';
       lc.strokeStyle='rgba(4,4,20,.97)';
@@ -1202,7 +1377,7 @@ function animate(){
   userVecs.forEach(uv=>{
     const[sx,sy]=toSc(uv.mid.x,uv.mid.y,uv.mid.z);
     const isH=hoveredUV===uv||selectedUV===uv;
-    lc.globalAlpha=anyHov&&hoveredUV!==uv&&!activePts.has(uv.from)?0.25:1;
+    lc.globalAlpha=dim&&hoveredUV!==uv&&!activePts.has(uv.from)?0.25:1;
     const sz=lblSize+(isH?2:0.5);
     lc.font=`bold ${sz}px ${lblFont}`; lc.textAlign='center';
     const m=lc.measureText(uv.eq.short),p=5,y0=sy+sz+8;
@@ -1228,17 +1403,27 @@ function animate(){
 
   // ── 3D hover highlights ───────────────────────────────────────────────────────
   opObjs.forEach(o=>{
-    const op=anyHov?(activeOps.has(o)?1:0.08):o.baseOp;
+    if(o.ghost) return;
+    const op=dim?(activeOps.has(o)?1:0.08):o.baseOp;
     if(o.shaftMat.opacity!==op){o.shaftMat.opacity=op;o.coneMat.opacity=op;}
   });
+  PTS.forEach(pt=>{
+    if(!pt.beads) return;
+    const lowV=metricsVis==='low';
+    pt.beads.forEach(m=>{
+      const op=dim?(activePts.has(pt)?(hoveredCm===m?1:0.9):0.1):(lowV?0.25:0.9);
+      if(m.mat.opacity!==op) m.mat.opacity=op;
+      const sc=hoveredCm===m?1.6:1; m.bead.scale.setScalar(sc);
+    });
+  });
   userVecs.forEach(uv=>{
-    const op=anyHov?(hoveredUV===uv||activePts.has(uv.from)&&activePts.has(uv.to)?1:0.25):0.95;
+    const op=dim?(hoveredUV===uv||activePts.has(uv.from)&&activePts.has(uv.to)?1:0.25):0.95;
     if(uv.shaftMat.opacity!==op){uv.shaftMat.opacity=op;uv.coneMat.opacity=op;}
   });
   if(showFormulas){
     formulaObjs.forEach(fo=>{
       if(!fo.g.visible) return;
-      const op=anyHov?(activeFos.has(fo)?1.0:0.10):0.72;
+      const op=dim?(activeFos.has(fo)?1.0:0.10):0.72;
       if(fo.shaftMat.opacity!==op){fo.shaftMat.opacity=op;fo.shaftMat.needsUpdate=true;}
       if(fo.coneMat.opacity!==op){fo.coneMat.opacity=op;fo.coneMat.needsUpdate=true;}
     });
@@ -1246,7 +1431,7 @@ function animate(){
       const baseOp=metricsVis==='low'?0.18:1;
       PTS.forEach(pt=>{
         if(!pt.vis.visible) return;
-        const op=anyHov?(activePts.has(pt)?1.0:Math.min(baseOp,0.15)):baseOp;
+        const op=dim?(activePts.has(pt)?1.0:Math.min(baseOp,0.15)):baseOp;
         const tr=op<1;
         if(pt.vis.material.opacity!==op||pt.vis.material.transparent!==tr){pt.vis.material.opacity=op;pt.vis.material.transparent=tr;pt.vis.material.needsUpdate=true;}
       });
