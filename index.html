@@ -101,7 +101,7 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
 input.nin{width:70px;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,.14);border-radius:5px;
   color:#ffe6bf;font:11px 'Courier New',monospace;padding:5px 6px;outline:none}
 input.nin.bad{border-color:rgba(255,90,90,.7)}
-.lawrow{padding:5px 6px;margin:3px 0;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.06);
+.lawrow{width:100%;text-align:left;font-family:'Courier New',monospace;color:inherit;padding:5px 6px;margin:3px 0;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.06);
   background:rgba(255,255,255,.03);display:flex;flex-direction:column;gap:1px}
 .lawrow:hover{background:rgba(255,200,120,.1)}
 .lawrow.on{background:rgba(255,200,120,.16);border-color:rgba(255,200,120,.4)}
@@ -552,6 +552,12 @@ PTS.forEach(pt=>{pt.key=keyOf(pt.L,pt.M,pt.T);});
 // dimension you must multiply A by to get B, so [B] = [A] · L^ΔL M^ΔM T^ΔT. We then look for
 // named quantities with dimension Δ (multiply) or −Δ (divide) to phrase it as a physical equation.
 const PT_BY_KEY=new Map(PTS.map(p=>[p.key,p]));
+// The key only narrows the search; a hit must really sit at those exponents, so an arbitrary power
+// like 0.499 doesn't snap Area's image (0.998) onto Length.
+function ptAt(L,M,T){
+  const p=PT_BY_KEY.get(keyOf(L,M,T));
+  return p&&Math.abs(p.L-L)<1e-6&&Math.abs(p.M-M)<1e-6&&Math.abs(p.T-T)<1e-6?p:undefined;
+}
 const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','/':'ᐟ','.':'·'};
 const supStr=n=>String(n).split('').map(c=>SUP[c]).join('');
 function dimStr(L,M,T){
@@ -566,7 +572,7 @@ function vectorEquations(a,b){
   const delta=dimStr(dL,dM,dT);
   const A=nm(a), B=nm(b);
   const named=[];   // [{eq, short}]
-  const mul=PT_BY_KEY.get(keyOf(dL,dM,dT)), div=PT_BY_KEY.get(keyOf(-dL,-dM,-dT));
+  const mul=ptAt(dL,dM,dT), div=ptAt(-dL,-dM,-dT);
   if(mul) named.push({eq:`${B} = ${A} × ${nm(mul)}`,short:`× ${nm(mul)}`});
   if(div) named.push({eq:`${B} = ${A} ÷ ${nm(div)}`,short:`÷ ${nm(div)}`});
   // Prefer the factor with fewer negative exponents: "÷ Time" reads better than "× Frequency"
@@ -577,10 +583,10 @@ function vectorEquations(a,b){
     const seen=new Set(), isZero=p=>!p.L&&!p.M&&!p.T;
     for(const P of PTS){
       if(isZero(P)) continue;
-      const Q=PT_BY_KEY.get(keyOf(dL-P.L,dM-P.M,dT-P.T));
+      const Q=ptAt(dL-P.L,dM-P.M,dT-P.T);
       if(Q&&!isZero(Q)){const k=[P.key,Q.key].sort().join('|');
         if(!seen.has(k)){seen.add(k);named.push({eq:`${B} = ${A} × ${nm(P)} × ${nm(Q)}`,short:`× ${nm(P)} × ${nm(Q)}`});}}
-      const R=PT_BY_KEY.get(keyOf(P.L-dL,P.M-dM,P.T-dT));
+      const R=ptAt(P.L-dL,P.M-dM,P.T-dT);
       if(R&&!isZero(R)&&R!==P) named.push({eq:`${B} = ${A} × ${nm(P)} ÷ ${nm(R)}`,short:`× ${nm(P)} ÷ ${nm(R)}`});
       if(named.length>=4) break;
     }
@@ -648,13 +654,13 @@ function parseExp(str){
   const m=String(str).trim().match(/^(-?\d+(?:\.\d+)?)(?:\s*\/\s*(\d+(?:\.\d+)?))?$/);
   if(!m) return null;
   const v=m[2]?parseFloat(m[1])/parseFloat(m[2]):parseFloat(m[1]);
-  return Number.isFinite(v)&&v!==0&&Math.abs(v)<=6?v:null;
+  return Number.isFinite(v)&&Math.abs(v)<=6?v:null;
 }
 // Where op sends point p (or, with inv, where p came from)
-const opApply=(op,p,inv=false)=>op.scale
+const opApply=(op,p,inv=false)=>op.scale!==undefined
   ?[p.L,p.M,p.T].map(v=>inv?v/op.scale:v*op.scale)
   :[p.L,p.M,p.T].map((v,i)=>v+(inv?-op.shift[i]:op.shift[i]));
-const opMove=op=>op.scale?`scale ×${fracStr(op.scale)}`:`shift ${dimStr(...op.shift)}`;
+const opMove=op=>op.scale!==undefined?`scale ×${fracStr(op.scale)}`:`shift ${dimStr(...op.shift)}`;
 const opObjs=[], opPickMeshes=[];
 let activeOp=null, hoveredOp=null;
 const opHint=document.getElementById('opHint');
@@ -664,9 +670,9 @@ function opChain(op){
   let best=[];
   PTS.forEach(p=>{
     if(keyOf(...opApply(op,p))===p.key) return;           // the origin is fixed under scaling
-    if(PT_BY_KEY.has(keyOf(...opApply(op,p,true)))) return; // only start chains at their first link
+    if(op.scale!==0&&ptAt(...opApply(op,p,true))) return; // only start chains at their first link
     const chain=[p];
-    for(let q=PT_BY_KEY.get(keyOf(...opApply(op,p)));q&&!chain.includes(q);q=PT_BY_KEY.get(keyOf(...opApply(op,q)))) chain.push(q);
+    for(let q=ptAt(...opApply(op,p));q&&!chain.includes(q);q=ptAt(...opApply(op,q))) chain.push(q);
     if(chain.length>best.length) best=chain;
   });
   return best.length>=3?best:null;
@@ -680,6 +686,8 @@ function clearOpArrows(){
   opObjs.length=0; opPickMeshes.length=0; overlayLabels.length=0; hoveredOp=null;
 }
 function syncOverlayUI(){
+  // Whatever was under the pointer may just have been hidden or removed
+  hoveredFormula=null; hoveredOp=null; tip.style.display='none';
   formulaObjs.forEach(({g})=>g.visible=showFormulas&&!overlayOn());
   opBtns.forEach(b=>b.classList.toggle('on',!!activeOp&&b.dataset.v===activeOp.id));
   lawRows.forEach(r=>r.classList.toggle('on',r.__law===activeLaw));
@@ -697,7 +705,7 @@ function setOperator(op){
   PTS.forEach(a=>{
     const t=opApply(op,a);
     if(t.some(v=>Math.abs(v)>5)) return;
-    const b=PT_BY_KEY.get(keyOf(...t))||null;
+    const b=ptAt(...t)||null;
     const arrow=makeArrow([a.L,a.M,a.T],t,b?{SR:0.03,CR:0.075,opacity:0.9,emissive:0.1}:{SR:0.014,CR:0.04,opacity:0.2});
     if(!arrow) return;
     scene.add(arrow.g);
@@ -739,7 +747,7 @@ function setLaw(law){
   if(!law) return;
   let pos=[0,0,0], sofar='';
   const end=law.terms.reduce((acc,[,d,p])=>acc.map((v,i)=>v+p*d[i]),[0,0,0]);
-  const landing=PT_BY_KEY.get(keyOf(...end));
+  const landing=ptAt(...end);
   // Name the result after the quantity the law is about, not whichever member is listed first
   const landName=landing&&(landing.entries.includes(law.lands)?law.lands:nm(landing));
   if(landing) lawLanding={pt:landing,name:landName};
@@ -750,7 +758,7 @@ function setLaw(law){
     const arrow=makeArrow(pos,next,{SR:0.034,CR:0.085,opacity:0.95,emissive:0.2});
     if(arrow){
       scene.add(arrow.g);
-      const o={...arrow,from:PT_BY_KEY.get(keyOf(...pos))||null,to:last?landing:null,law,baseOp:0.95,eq:law.label};
+      const o={...arrow,from:ptAt(...pos)||null,to:last?landing:null,law,baseOp:0.95,eq:law.label};
       o.tipHtml=tipHead(law.label)+tipSub(esc(law.desc))+
         `<div style="font-size:9px;color:#ccd">step ${i+1}: × ${esc(step)} — adds ${esc(fracStr(p))} × [${esc(sym)}] = ${esc(dimStr(...d.map(v=>v*p)))}</div>`+
         `<div style="font-size:9px;color:#99a;margin-top:2px">now at ${esc(dimStr(...next))}${last&&landing?` = ${esc(landName)}`:''}</div>`+tipFoot;
@@ -1142,7 +1150,7 @@ function updFov(s){
 (()=>{
   const div=document.createElement('div');
   POWER_LAWS.forEach(law=>{
-    const row=document.createElement('div'); row.className='lawrow'; row.__law=law;
+    const row=document.createElement('button'); row.type='button'; row.className='lawrow'; row.__law=law;
     row.innerHTML=`<span class="lawl">${esc(law.label)}</span><span class="lawd">${esc(law.desc)}</span>`;
     row.title='Show this law as a path through exponent space';
     row.addEventListener('click',()=>setLaw(activeLaw===law?null:law));
@@ -1231,6 +1239,7 @@ if(window.innerWidth>600) openPanel();
 const KEYS={};
 window.addEventListener('keydown',e=>{
   if(e.target.closest&&e.target.closest('input,select,textarea')) return;
+  if(e.target.closest&&e.target.closest('button')&&(e.key===' '||e.key==='Enter')) return;
   KEYS[e.key]=true;
   if(e.key===' '){autoRotOn=!autoRotOn;controls.autoRotate=autoRotOn;rotBtn.textContent=autoRotOn?'⏸ Pause':'▶ Rotate';rotBtn.style.color=autoRotOn?'#88aaff':'#aaaacc';e.preventDefault();}
   if(e.key==='r'||e.key==='R'){
@@ -1427,15 +1436,15 @@ function animate(){
       if(fo.shaftMat.opacity!==op){fo.shaftMat.opacity=op;fo.shaftMat.needsUpdate=true;}
       if(fo.coneMat.opacity!==op){fo.coneMat.opacity=op;fo.coneMat.needsUpdate=true;}
     });
-    if(metricsVis!=='hidden'){
-      const baseOp=metricsVis==='low'?0.18:1;
-      PTS.forEach(pt=>{
-        if(!pt.vis.visible) return;
-        const op=dim?(activePts.has(pt)?1.0:Math.min(baseOp,0.15)):baseOp;
-        const tr=op<1;
-        if(pt.vis.material.opacity!==op||pt.vis.material.transparent!==tr){pt.vis.material.opacity=op;pt.vis.material.transparent=tr;pt.vis.material.needsUpdate=true;}
-      });
-    }
+  }
+  if(metricsVis!=='hidden'){
+    const baseOp=metricsVis==='low'?0.18:1;
+    PTS.forEach(pt=>{
+      if(!pt.vis.visible) return;
+      const op=dim?(activePts.has(pt)?1.0:Math.min(baseOp,0.15)):baseOp;
+      const tr=op<1;
+      if(pt.vis.material.opacity!==op||pt.vis.material.transparent!==tr){pt.vis.material.opacity=op;pt.vis.material.transparent=tr;pt.vis.material.needsUpdate=true;}
+    });
   }
 
   renderer.render(scene,activeCamera);
