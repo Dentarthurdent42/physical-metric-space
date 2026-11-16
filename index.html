@@ -28,28 +28,29 @@ html,body{width:100%;height:100%;overflow:hidden;background:#06061a}
 #info{position:relative;max-width:100%;padding:6px 11px;
   background:rgba(4,4,18,.88);border:1px solid rgba(255,255,255,.07);
   border-radius:7px;pointer-events:none}
-#badge{position:absolute;bottom:14px;left:12px;z-index:5;padding:3px 8px;
-  background:rgba(4,4,18,.82);border:1px solid rgba(255,255,255,.06);
-  border-radius:5px;font:10px 'Courier New',monospace;color:#6380aa;pointer-events:none}
-#panel{position:absolute;top:0;right:0;bottom:0;width:220px;
-  background:rgba(5,5,22,.97);border-left:1px solid rgba(255,255,255,.09);
-  font:11px 'Courier New',monospace;color:#aab;overflow-y:auto;z-index:30;
-  transition:transform .24s cubic-bezier(.4,0,.2,1)}
-#panel.closed{transform:translateX(220px)}
-#tab{position:absolute;right:0;top:50%;transform:translateY(-50%);
-  width:34px;height:80px;background:rgba(5,5,22,.96);
-  border:1px solid rgba(255,255,255,.1);border-right:none;border-radius:8px 0 0 8px;
-  cursor:pointer;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:4px;z-index:40;box-shadow:-3px 0 14px rgba(0,0,0,.45);
-  user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
-  transition:background .15s}
-#tab.open{right:220px}
-#tab:hover{background:rgba(16,16,48,.99)}
+#badge{flex-shrink:0;padding:0 6px;font:10px 'Courier New',monospace;color:#6380aa;pointer-events:none;white-space:nowrap}
+/* Bottom dock: every control lives in one glass bar; the panel rises above it */
+#dock{position:absolute;left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:45;
+  display:flex;align-items:center;gap:6px;padding:6px;width:max-content;max-width:calc(100% - 24px);
+  background:rgba(10,12,36,.72);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
+  border:1px solid rgba(150,170,255,.2);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.55)}
+#tools{display:contents}
+#panel{position:absolute;left:12px;right:12px;bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 60px);
+  height:min(46vh,440px);z-index:44;overflow-y:auto;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));align-content:start;
+  background:rgba(8,10,30,.86);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);
+  border:1px solid rgba(150,170,255,.18);border-radius:16px;box-shadow:0 14px 50px rgba(0,0,0,.6);
+  font:11px 'Courier New',monospace;color:#aab;
+  transition:transform .26s cubic-bezier(.4,0,.2,1),opacity .2s}
+#panel.closed{transform:translateY(24px);opacity:0;pointer-events:none;visibility:hidden}
+#tab{flex-shrink:0;height:36px;padding:0 12px;display:flex;align-items:center;gap:6px;cursor:pointer;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#aabbee;
+  user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:background .15s}
+#tab:hover{background:rgba(255,255,255,.1)}
+#tab.open{background:rgba(80,110,220,.3);border-color:rgba(100,140,255,.5)}
 .ti{font-size:16px;color:#8899ff;pointer-events:none;line-height:1}
-.tl{font:7px/1 'Courier New',monospace;color:#667fb3;letter-spacing:.12em;
-  writing-mode:vertical-rl;transform:rotate(180deg);text-transform:uppercase;pointer-events:none}
-.psec{padding:8px 11px;border-bottom:1px solid rgba(255,255,255,.06)}
-.psec:last-child{border-bottom:none}
+.tl{font:11px/1 'Courier New',monospace;color:#aabbee;pointer-events:none}
+.psec{padding:8px 13px;border-bottom:1px solid rgba(255,255,255,.06);border-right:1px solid rgba(255,255,255,.04);min-width:0}
 .ph{color:#667fb6;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
   display:flex;align-items:center;justify-content:space-between;
   cursor:pointer;user-select:none;touch-action:manipulation;
@@ -84,13 +85,11 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
   -webkit-tap-highlight-color:transparent;transition:background .12s}
 .pbtn:hover,.pbtn:active{background:rgba(255,255,255,.1)}
 .pbtn.on{background:rgba(80,110,220,.25);border-color:rgba(100,140,255,.45);color:#aaccff}
-#tools{position:relative;z-index:25;display:flex;gap:6px;align-items:flex-start;
-  max-width:100%}
-#drawBtn{flex-shrink:0;padding:8px 12px;border-radius:7px;white-space:nowrap;
-  border:1px solid rgba(255,255,255,.1);background:rgba(4,4,18,.88);cursor:pointer;
+#drawBtn{flex-shrink:0;height:36px;padding:0 12px;border-radius:10px;white-space:nowrap;display:flex;align-items:center;gap:6px;
+  border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);cursor:pointer;
   font:11px 'Courier New',monospace;color:#aabbee;touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;transition:background .12s}
-#drawBtn:hover{background:rgba(16,16,48,.95)}
+#drawBtn:hover{background:rgba(255,255,255,.1)}
 #drawBtn.on{background:rgba(80,110,220,.3);border-color:rgba(100,140,255,.5);color:#cce0ff}
 #drawHint{position:relative;z-index:6;display:none;
   max-width:calc(100% - 32px);padding:6px 12px;border-radius:7px;background:rgba(40,50,120,.85);
@@ -112,7 +111,7 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
 .lawrow.on{background:rgba(255,200,120,.16);border-color:rgba(255,200,120,.4)}
 .lawl{color:#ffe6bf;font-size:10px;font-weight:bold}
 .lawd{color:#7d7d92;font-size:8.5px}
-#vcard{position:absolute;left:12px;bottom:40px;z-index:20;display:none;width:330px;
+#vcard{position:absolute;left:12px;bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 62px);z-index:20;display:none;width:330px;
   max-width:calc(100% - 32px);max-height:50%;overflow-y:auto;padding:10px 12px;
   background:rgba(4,4,18,.97);border:1px solid rgba(255,255,255,.14);border-radius:9px;
   font:11px/1.5 'Courier New',monospace;color:#dde;box-shadow:0 6px 28px rgba(0,0,0,.8)}
@@ -130,20 +129,20 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
 .vfoot{color:#7b7b9c;font-size:8.5px;margin-top:6px}
 .vrow{display:flex;align-items:center;gap:6px;margin:4px 0}
 .vrow .veq{flex:1;font-size:9px;font-weight:normal;padding:3px 5px}
-#search{position:static;width:230px;min-width:0;flex:0 1 230px}
-#sq{width:100%;padding:8px 26px 8px 28px;border-radius:7px;border:1px solid rgba(255,255,255,.1);
-  background:rgba(4,4,18,.88);color:#dde6ff;font:12px 'Courier New',monospace;outline:none;
+#search{position:static;width:260px;min-width:0;flex:1 1 260px}
+#sq{width:100%;height:36px;padding:0 26px 0 28px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,10,.35);color:#dde6ff;font:12px 'Courier New',monospace;outline:none;
   -webkit-appearance:none;appearance:none}
 #sq::-webkit-search-cancel-button{display:none}
-@media (pointer:coarse){#sq{font-size:16px;padding-top:6px;padding-bottom:6px}}
+@media (pointer:coarse){#sq{font-size:16px}}
 #sq:focus{border-color:rgba(120,150,255,.5);background:rgba(8,10,34,.96)}
 #sq::placeholder{color:#7d7d92}
-.sqi{position:relative;float:left;width:0;left:9px;top:8px;font-size:11px;color:#7d7d92;pointer-events:none}
-#sqx{position:relative;float:right;margin-top:-30px;margin-right:2px;display:none;background:none;border:none;color:#7d7d90;
+.sqi{position:relative;float:left;width:0;left:10px;top:10px;font-size:11px;color:#7d7d92;pointer-events:none}
+#sqx{position:relative;float:right;margin-top:-32px;margin-right:2px;display:none;background:none;border:none;color:#7d7d90;
   cursor:pointer;font-size:12px;padding:4px 6px}
-#sres{display:none;position:absolute;left:0;top:calc(100% + 4px);max-height:min(55vh,420px);overflow-y:auto;border-radius:8px;
+#sres{display:none;position:absolute;left:0;bottom:calc(100% + 10px);max-height:min(55vh,420px);overflow-y:auto;border-radius:12px;
   background:rgba(4,4,18,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 28px rgba(0,0,0,.8);
-  font:11px/1.4 'Courier New',monospace;color:#dde;width:min(340px,calc(100vw - 24px))}
+  font:11px/1.4 'Courier New',monospace;color:#dde;width:min(380px,calc(100vw - 24px))}
 .sr{display:flex;align-items:flex-start;gap:7px;padding:7px 9px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05)}
 .sr:last-child{border-bottom:none}
 .sr.act,.sr:hover{background:rgba(80,110,220,.2)}
@@ -155,13 +154,13 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
 .snone{padding:9px;color:#7d7d90;font-size:10px}
 .flash{animation:flash 1.4s ease-out 2}
 @keyframes flash{0%{box-shadow:0 0 0 0 rgba(140,170,255,.9)}100%{box-shadow:0 0 0 12px rgba(140,170,255,0)}}
-#helpBtn{flex-shrink:0;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.14);
-  background:rgba(4,4,18,.88);color:#cce0ff;font:bold 15px 'Courier New',monospace;cursor:pointer;
+#helpBtn{flex-shrink:0;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.04);color:#cce0ff;font:bold 15px 'Courier New',monospace;cursor:pointer;
   touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-#helpBtn:hover{background:rgba(16,16,48,.95)}
+#helpBtn:hover{background:rgba(255,255,255,.1)}
 #helpBtn.glow{border-color:rgba(160,190,255,.9);animation:helpGlow 1.6s ease-in-out infinite}
 @keyframes helpGlow{0%,100%{box-shadow:0 0 4px 1px rgba(120,160,255,.5)}50%{box-shadow:0 0 18px 6px rgba(140,180,255,.9);color:#fff}}
-#tmenu{display:none;position:absolute;left:0;top:calc(100% + 4px);z-index:30;width:min(300px,calc(100vw - 24px));
+#tmenu{display:none;position:absolute;left:0;bottom:calc(100% + 10px);z-index:30;width:min(300px,calc(100vw - 24px));
   background:rgba(4,4,18,.98);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:6px;
   box-shadow:0 6px 28px rgba(0,0,0,.8);font:11px/1.4 'Courier New',monospace;color:#dde}
 .tmh{display:flex;justify-content:space-between;padding:4px 6px 8px;color:#8899ff;font-weight:bold;letter-spacing:.05em;text-transform:uppercase;font-size:10px}
@@ -200,19 +199,16 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
 .mout{min-height:50px;margin:4px 0 2px;font-family:'Courier New',monospace}
 .mout svg{max-width:100%;height:auto;font-family:'Courier New',monospace}
 .tt .prow .pl,.tt .prow .pv{font:10px 'Courier New',monospace;min-width:14px}
+body.panel-open #vcard{bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 70px + min(46vh,440px));max-height:24vh}
+body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:auto}
 @media (max-width:600px){
-  #panel{top:auto;left:0;right:0;bottom:0;width:auto;height:52%;border-left:none;
-    border-top:1px solid rgba(255,255,255,.14);border-radius:12px 12px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.6)}
-  #panel.closed{transform:translateY(100%)}
-  #tab{top:auto;bottom:14px;right:12px;transform:none;width:auto;height:40px;padding:0 12px;
-    flex-direction:row;gap:6px;border:1px solid rgba(255,255,255,.14);border-radius:8px}
-  #tab.open{right:12px;bottom:calc(52% + 8px)}
-  .tl{writing-mode:horizontal-tb;transform:none;font-size:9px}
-  body.panel-open #vcard{bottom:calc(52% + 8px);max-height:30%}
-  body.panel-open #badge{display:none}
-  body.panel-open #tl{max-height:calc(48% - 70px);overflow-y:auto}
+  #dock{left:8px;right:8px;transform:none;width:auto;max-width:none}
+  #drawBtn .lb,#tab .tl,#badge{display:none}
+  #panel{left:8px;right:8px;height:min(50vh,460px);grid-template-columns:1fr}
+  body.panel-open #vcard{bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 70px + min(50vh,460px))}
+  body.panel-open #tl{max-height:calc(100% - min(50vh,460px) - 110px)}
 }
-#toast{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:60;
+#toast{position:absolute;bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 62px);left:50%;transform:translateX(-50%);z-index:60;
   max-width:calc(100% - 32px);padding:5px 12px;border-radius:6px;background:rgba(30,40,90,.95);
   border:1px solid rgba(120,150,255,.35);font:11px 'Courier New',monospace;color:#dde6ff;
   pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -227,18 +223,7 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
   <div id="info">
     <div style="font:bold 10px 'Courier New',monospace;color:#8899ff;letter-spacing:.04em">DIMENSIONAL ANALYSIS</div>
     <div style="font:10px 'Courier New',monospace;color:#6b80a8;margin-top:2px">Each sphere is a physical quantity, placed by its powers of length, mass &amp; time</div>
-    <div id="newHint" style="font:10px 'Courier New',monospace;color:#8fa4d8;margin-top:2px">New here? Press <b style="color:#cce0ff">?</b> for a short tour</div>
-  </div>
-  <div id="tools">
-    <button id="helpBtn" class="glow" title="Tutorials" aria-label="Tutorials">?</button>
-    <div id="tmenu" role="menu"></div>
-    <button id="drawBtn" title="Draw a vector between two points (V)">✎ Draw vector</button>
-    <div id="search">
-      <span class="sqi">⌕</span>
-      <input id="sq" type="search" placeholder="force, F, ÷, help…" autocomplete="off" spellcheck="false" aria-label="Search quantities, symbols, formulas and controls">
-      <button id="sqx" title="Clear search" aria-label="Clear search">✕</button>
-      <div id="sres" role="listbox"></div>
-    </div>
+    <div id="newHint" style="font:10px 'Courier New',monospace;color:#8fa4d8;margin-top:2px">New here? Press <b style="color:#cce0ff">?</b> (bottom bar) for a short tour</div>
   </div>
   <div id="drawHint"></div>
   <div id="opHint"></div>
@@ -246,9 +231,22 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
   </div>
   <div id="vcard"></div>
   <div id="toast"></div>
-  <div id="badge"></div>
-  <div id="panel" class="closed"></div>
-  <div id="tab"><span class="ti">⚙</span><span class="tl">Controls</span></div>
+  <div id="panel" class="closed" aria-label="Controls"></div>
+  <div id="dock">
+  <div id="tools">
+      <button id="helpBtn" class="glow" title="Tutorials" aria-label="Tutorials">?</button>
+      <div id="tmenu" role="menu"></div>
+      <button id="drawBtn" title="Draw a vector between two points (V)"><span class="ic">✎</span><span class="lb">Draw vector</span></button>
+      <div id="search">
+        <span class="sqi">⌕</span>
+        <input id="sq" type="search" placeholder="force, F, ÷, help…" autocomplete="off" spellcheck="false" aria-label="Search quantities, symbols, formulas and controls">
+        <button id="sqx" title="Clear search" aria-label="Clear search">✕</button>
+        <div id="sres" role="listbox"></div>
+      </div>
+    </div>
+    <button id="tab" title="Controls" aria-label="Controls"><span class="ti">⚙</span><span class="tl">Controls</span></button>
+    <div id="badge"></div>
+  </div>
 </div>
 <script type="module">
 import * as THREE from 'three';
@@ -1063,7 +1061,8 @@ const drawBtn=document.getElementById('drawBtn'), drawHint=document.getElementBy
 let panelDrawBtn=null;
 function updateDrawUI(){
   const txt=drawMode?'✕ Stop drawing':'✎ Draw vector';
-  drawBtn.textContent=txt; drawBtn.classList.toggle('on',drawMode);
+  drawBtn.innerHTML=drawMode?'<span class="ic">✕</span><span class="lb">Stop drawing</span>':'<span class="ic">✎</span><span class="lb">Draw vector</span>';
+  drawBtn.classList.toggle('on',drawMode);
   if(panelDrawBtn){panelDrawBtn.textContent=txt;panelDrawBtn.classList.toggle('on',drawMode);}
   c3d.style.cursor=drawMode?'crosshair':'';
   drawHint.style.display=drawMode?'block':'none';
@@ -1890,7 +1889,6 @@ let panelOpen=false;
 function openPanel(){panelOpen=true;document.body.classList.add('panel-open');panel.classList.remove('closed');tab.classList.add('open');tab.querySelector('.ti').textContent='✕';tab.querySelector('.tl').textContent='Close';}
 function closePanel(){panelOpen=false;document.body.classList.remove('panel-open');panel.classList.add('closed');tab.classList.remove('open');tab.querySelector('.ti').textContent='⚙';tab.querySelector('.tl').textContent='Controls';}
 tab.addEventListener('click',()=>panelOpen?closePanel():openPanel());
-if(window.innerWidth>600) openPanel();
 
 // ── Keyboard ──────────────────────────────────────────────────────────────────
 const KEYS={};
@@ -1956,7 +1954,7 @@ function animate(){
   if(sliceMode()){
     const c=dimColor('A',VIEW.slice);
     lc.font=`bold ${lblSize+3}px ${lblFont}`; lc.textAlign='right'; lc.fillStyle=c.css;
-    lc.fillText(`slice A = ${VIEW.slice}`,W-(panelOpen&&W>600?232:48),panelOpen&&W<=600?H*0.48-14:H-18); lc.textAlign='center';
+    lc.fillText(`slice A = ${VIEW.slice}`,W-16,28); lc.textAlign='center';
   }
   // Pre-compute hover sets once — shared by label pass and 3D highlight pass
   const anyHov=!!(hovered||hoveredFormula||hoveredUV||hoveredOp||hoveredCm||focusPt||focusFo);
