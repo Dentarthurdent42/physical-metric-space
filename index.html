@@ -16,8 +16,8 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#06061a}
 #app{position:relative;width:100%;height:100%}
-#c3d{display:block;position:absolute;inset:0;touch-action:none}
-#clbl{position:absolute;inset:0;pointer-events:none}
+#c3d{display:block;position:absolute;top:0;left:0;touch-action:none}
+#clbl{position:absolute;top:0;left:0;pointer-events:none}
 #tip{position:absolute;z-index:50;display:none;padding:9px 13px;max-width:230px;
   background:rgba(4,4,18,.97);border:1px solid rgba(255,255,255,.13);border-radius:9px;
   font:12px/1.7 'Courier New',monospace;color:#dde;pointer-events:none;
@@ -204,9 +204,10 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
 @media (max-width:600px){
   #dock{left:8px;right:8px;transform:none;width:auto;max-width:none}
   #drawBtn .lb,#tab .tl,#badge{display:none}
-  #panel{left:8px;right:8px;height:min(50vh,460px);grid-template-columns:1fr}
-  body.panel-open #vcard{bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 70px + min(50vh,460px))}
-  body.panel-open #tl{max-height:calc(100% - min(50vh,460px) - 110px)}
+  #panel{left:8px;right:8px;height:min(42vh,400px);grid-template-columns:1fr}
+  body.panel-open #vcard{bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 70px + min(42vh,400px))}
+  body.panel-open #tl{max-height:calc(100% - min(42vh,400px) - 110px)}
+  body.panel-open #info{display:none}
 }
 #toast{position:absolute;bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 62px);left:50%;transform:translateX(-50%);z-index:60;
   max-width:calc(100% - 32px);padding:5px 12px;border-radius:6px;background:rgba(30,40,90,.95);
@@ -1896,8 +1897,8 @@ Object.entries(GLOSS).forEach(([k,g])=>SEARCH_INDEX.push({kind:'term',title:g.t,
 
 // ── Toggle ────────────────────────────────────────────────────────────────────
 let panelOpen=false;
-function openPanel(){panelOpen=true;document.body.classList.add('panel-open');panel.classList.remove('closed');tab.classList.add('open');tab.querySelector('.ti').textContent='✕';tab.querySelector('.tl').textContent='Close';}
-function closePanel(){panelOpen=false;document.body.classList.remove('panel-open');panel.classList.add('closed');tab.classList.remove('open');tab.querySelector('.ti').textContent='⚙';tab.querySelector('.tl').textContent='Controls';}
+function openPanel(){panelOpen=true;document.body.classList.add('panel-open');requestAnimationFrame(()=>typeof layoutView==='function'&&layoutView());panel.classList.remove('closed');tab.classList.add('open');tab.querySelector('.ti').textContent='✕';tab.querySelector('.tl').textContent='Close';}
+function closePanel(){panelOpen=false;document.body.classList.remove('panel-open');requestAnimationFrame(()=>typeof layoutView==='function'&&layoutView());panel.classList.add('closed');tab.classList.remove('open');tab.querySelector('.ti').textContent='⚙';tab.querySelector('.tl').textContent='Controls';}
 tab.addEventListener('click',()=>panelOpen?closePanel():openPanel());
 
 // ── Keyboard ──────────────────────────────────────────────────────────────────
@@ -1928,14 +1929,19 @@ window.addEventListener('keydown',e=>{
 });
 window.addEventListener('keyup',e=>{KEYS[e.key]=false;});
 
-window.addEventListener('resize',()=>{
-  W=window.innerWidth; H=window.innerHeight;
+// The 3D view never sits under the controls: it ends just above the dock, or above the
+// panel while that is open, so whatever a control changes stays in sight.
+function layoutView(){
+  const dockEl=document.getElementById('dock');
+  const edge=panelOpen?panel.offsetTop:dockEl.offsetTop;
+  W=window.innerWidth; H=Math.max(140,Math.round(edge-8));
   renderer.setSize(W,H); perspCam.aspect=W/H; perspCam.updateProjectionMatrix();
-  // Update ortho aspect too
   const h=ORTHO_H, asp=W/H;
   orthoCam.left=-h*asp; orthoCam.right=h*asp; orthoCam.updateProjectionMatrix();
   syncLC();
-});
+}
+window.addEventListener('resize',layoutView);
+layoutView();
 
 // ── Render loop ───────────────────────────────────────────────────────────────
 const _bw=new THREE.Vector3();
@@ -1964,7 +1970,7 @@ function animate(){
   if(sliceMode()){
     const c=dimColor('A',VIEW.slice);
     lc.font=`bold ${lblSize+3}px ${lblFont}`; lc.textAlign='right'; lc.fillStyle=c.css;
-    lc.fillText(`slice A = ${VIEW.slice}`,W-16,28); lc.textAlign='center';
+    lc.fillText(`slice A = ${VIEW.slice}`,W-16,H-12); lc.textAlign='center';
   }
   // Pre-compute hover sets once — shared by label pass and 3D highlight pass
   const anyHov=!!(hovered||hoveredFormula||hoveredUV||hoveredOp||hoveredCm||focusPt||focusFo);
