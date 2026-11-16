@@ -22,7 +22,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#06061a}
   background:rgba(4,4,18,.97);border:1px solid rgba(255,255,255,.13);border-radius:9px;
   font:12px/1.7 'Courier New',monospace;color:#dde;pointer-events:none;
   box-shadow:0 6px 28px rgba(0,0,0,.8)}
-#info{position:absolute;top:12px;left:12px;z-index:5;padding:6px 11px;
+#tl{position:absolute;top:12px;left:12px;z-index:25;display:flex;flex-direction:column;align-items:flex-start;gap:8px;
+  max-width:calc(100% - 58px);pointer-events:none}
+#tl>*{pointer-events:auto}
+#info{position:relative;max-width:100%;padding:6px 11px;
   background:rgba(4,4,18,.88);border:1px solid rgba(255,255,255,.07);
   border-radius:7px;pointer-events:none}
 #badge{position:absolute;bottom:14px;left:12px;z-index:5;padding:3px 8px;
@@ -81,8 +84,8 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
   -webkit-tap-highlight-color:transparent;transition:background .12s}
 .pbtn:hover,.pbtn:active{background:rgba(255,255,255,.1)}
 .pbtn.on{background:rgba(80,110,220,.25);border-color:rgba(100,140,255,.45);color:#aaccff}
-#tools{position:absolute;top:58px;left:12px;z-index:25;display:flex;gap:6px;align-items:flex-start;
-  max-width:calc(100% - 58px)}
+#tools{position:relative;z-index:25;display:flex;gap:6px;align-items:flex-start;
+  max-width:100%}
 #drawBtn{flex-shrink:0;padding:8px 12px;border-radius:7px;white-space:nowrap;
   border:1px solid rgba(255,255,255,.1);background:rgba(4,4,18,.88);cursor:pointer;
   font:11px 'Courier New',monospace;color:#aabbee;touch-action:manipulation;
@@ -173,7 +176,7 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
 .tbl{color:#667;font-size:9.5px}
 .tnew{color:#ff9;font-size:9px}
 .treset{margin:4px 6px;background:none;border:none;color:#556;font:9px 'Courier New',monospace;cursor:pointer;text-decoration:underline}
-#coach{display:none;position:absolute;top:104px;left:12px;z-index:22;width:min(360px,calc(100vw - 58px));
+#coach{display:none;position:relative;z-index:22;width:min(360px,calc(100vw - 58px));
   background:rgba(6,8,30,.97);border:1px solid rgba(140,170,255,.35);border-radius:10px;padding:10px 12px;
   box-shadow:0 6px 28px rgba(0,0,0,.8);font:12px/1.6 Georgia,serif;color:#c8cce0}
 .ch{display:flex;align-items:center;gap:8px;font:bold 11px 'Courier New',monospace;color:#8899ff;margin-bottom:6px}
@@ -208,33 +211,11 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
   <canvas id="c3d"></canvas>
   <canvas id="clbl"></canvas>
   <div id="tip"></div>
-  <div id="preface" style="position:absolute;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(6,6,26,.97);padding:24px;overflow-y:auto">
-    <div style="max-width:600px;font:'Courier New',monospace;color:#aab;line-height:1.75">
-      <div style="font:bold 13px 'Courier New',monospace;color:#8899ff;letter-spacing:.08em;margin-bottom:18px;text-transform:uppercase">Dimensional Analysis · L M T Exponent Space</div>
-      <p style="font:13px/1.8 Georgia,serif;color:#c8cce0;margin-bottom:14px">
-        What you are about to explore is, in a precise sense, a <em>semantic embedding</em> — except the embedding space predates machine learning by two centuries, and the geometry is not learned but exact.
-      </p>
-      <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:14px">
-        Every physical quantity — force, energy, pressure, viscosity — can be expressed as a product of powers of three base dimensions: <strong style="color:#aaccff">Length (L)</strong>, <strong style="color:#aaccff">Mass (M)</strong>, and <strong style="color:#aaccff">Time (T)</strong>.
-      </p>
-      <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:14px">
-        The structure that emerges is not decorative. Quantities sharing a point are <em>dimensionally identical</em>. Nearby regions often encode meaningful structural relationships.
-      </p>
-      <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:14px">
-        For someone working at the intersection of formula search and mathematical information retrieval, dimensional exponents are a compact, language-independent coordinate system.
-      </p>
-      <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:14px">
-        The origin — the single point at (0, 0, 0) — is the home of all dimensionless quantities: strain, Mach number, Reynolds number, angles.
-      </p>
-      <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:20px">
-        Hover over any sphere for a tooltip; click it to copy its name. Turn on formula arrows in the controls panel to see familiar formulas, and with <strong style="color:#aaccff">✎ Draw vector</strong> you can connect any two points to see the equation that links them. The Operators panel shows derivatives and integrals as uniform shifts of the whole space, and Power laws traces formulas like E(k) = C·ε²ᐟ³·k⁻⁵ᐟ³ as paths. Beads ringing a sphere are commensurable quantities sharing one dimension — hover to see them all. Use the controls panel (⚙) to adjust projection, labels, and rotation. New here? Press the glowing <strong style="color:#aaccff">?</strong> for short tutorials. Search (/) finds any quantity, symbol, formula, operator or control. Keyboard: arrow keys orbit, space pauses, R resets, V draws, O cycles operators.
-      </p>
-      <button onclick="document.getElementById('preface').style.display='none'" style="background:rgba(80,110,220,.22);border:1px solid rgba(100,140,255,.4);border-radius:7px;color:#aaccff;font:12px 'Courier New',monospace;padding:10px 14px;cursor:pointer">Enter visualization</button>
-    </div>
-  </div>
+  <div id="tl">
   <div id="info">
     <div style="font:bold 10px 'Courier New',monospace;color:#8899ff;letter-spacing:.04em">DIMENSIONAL ANALYSIS</div>
-    <div style="font:8.5px 'Courier New',monospace;color:#2c3f60;margin-top:2px">Physical metrics · L M T exponent space · OKLAB color</div>
+    <div style="font:9px 'Courier New',monospace;color:#5a6f98;margin-top:2px">Each sphere is a physical quantity, placed by its powers of length, mass &amp; time</div>
+    <div id="newHint" style="font:9px 'Courier New',monospace;color:#8fa4d8;margin-top:2px">New here? Press <b style="color:#cce0ff">?</b> for a short tour</div>
   </div>
   <div id="tools">
     <button id="helpBtn" class="glow" title="Tutorials" aria-label="Tutorials">?</button>
@@ -250,6 +231,7 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
   <div id="drawHint"></div>
   <div id="opHint"></div>
   <div id="coach" role="dialog" aria-label="Tutorial"></div>
+  </div>
   <div id="vcard"></div>
   <div id="toast"></div>
   <div id="badge"></div>
@@ -1021,7 +1003,7 @@ function pick(e,force=false){
       const c=newPt.col;
       const preview=(drawMode&&drawStart&&drawStart!==newPt)
         ?`<div style="color:#cce0ff;font-weight:bold;margin-bottom:5px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:4px">${esc(vectorEquations(drawStart,newPt).primary)}</div>`:'';
-      tip.innerHTML=preview+`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="display:inline-block;width:13px;height:13px;border-radius:3px;background:${c.css};flex-shrink:0"></span><span style="color:${c.css};font-weight:bold">L<sup>${fracStr(newPt.L)}</sup>·M<sup>${fracStr(newPt.M)}</sup>·T<sup>${fracStr(newPt.T)}</sup> <span style="font-weight:normal;color:#667;font-size:10px">(${newPt.entries.length})</span></span></div>${newPt.entries.length>1?'<div style="color:#556;font-size:8.5px;margin-bottom:3px">commensurable · same dimension, addable</div>':''}<div style="color:#334;font-size:8.5px;margin-bottom:4px">OKLAB L=${c.oL.toFixed(2)} a=${c.oa.toFixed(3)} b=${c.ob.toFixed(3)}</div><div style="color:#99aacc;font-size:10px;line-height:1.8">${newPt.entries.map(n=>`• ${n}`).join('<br>')}</div>`;
+      tip.innerHTML=preview+`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="display:inline-block;width:13px;height:13px;border-radius:3px;background:${c.css};flex-shrink:0"></span><span style="color:${c.css};font-weight:bold">L<sup>${fracStr(newPt.L)}</sup>·M<sup>${fracStr(newPt.M)}</sup>·T<sup>${fracStr(newPt.T)}</sup> <span style="font-weight:normal;color:#667;font-size:10px">(${newPt.entries.length})</span></span></div>${newPt.entries.length>1?'<div style="color:#556;font-size:8.5px;margin-bottom:3px">commensurable · same dimension, addable</div>':''}<div style="color:#99aacc;font-size:10px;line-height:1.8">${newPt.entries.map(n=>`• ${n}`).join('<br>')}</div>${tipFoot}`;
     } else if(newFo){
       const d=newFo.def,sc=coordToColor(...d.from),ec=coordToColor(...d.to);
       const fp=PTS.find(p=>p.key===newFo.fromKey),tp=PTS.find(p=>p.key===newFo.toKey);
@@ -1454,9 +1436,8 @@ const GLOSS={
     v:SVG(120,36,`<g stroke="#fc8">${[0,1,2,3].map(i=>`<line x1="${10+i*33}" y1="34" x2="${50+i*7}" y2="2"/>`).join('')}</g>`)},
   fov:{t:'Field of view',h:'The angle the camera sees. Small = telephoto (flat), large = wide-angle (deep).',
     v:SVG(150,44,`<path d="M6 22 L70 10 L70 34Z" fill="#9bf" opacity=".35"/><text x="20" y="44" fill="#9bf" font-size="8">narrow</text><path d="M86 22 L146 0 L146 44Z" fill="#fc8" opacity=".35"/><text x="104" y="44" fill="#fc8" font-size="8">wide</text>`)},
-  colour:{t:'Colour = position',h:'Each point is coloured from its [[coord|coordinate]] in [[oklab|OKLAB]]: the L exponent sets green↔pink, T sets blue↔yellow, M sets darker↔lighter. Nearby points look alike.',
+  colour:{t:'Colour = position',h:'Each point is coloured from its [[coord|coordinate]]: the L exponent sets green↔pink, T sets blue↔yellow, M sets darker↔lighter. The colours are [[perceptual|perceptually uniform]], so nearby points look alike.',
     v:SVG(170,52,[['L',-3,3,c=>coordToColor(c,0,0)],['T',-4,1,c=>coordToColor(0,0,c)],['M',-1,1,c=>coordToColor(0,c,0)]].map(([s,a,b,f],i)=>`<defs><linearGradient id="g${s}"><stop offset="0" stop-color="${f(a).css}"/><stop offset="1" stop-color="${f(b).css}"/></linearGradient></defs><text x="0" y="${12+i*17}" fill="#aab" font-size="9">${s}</text><rect x="14" y="${4+i*17}" width="150" height="10" rx="3" fill="url(#g${s})"/>`).join(''))},
-  oklab:{t:'OKLAB',h:'A colour space designed so equal numeric steps look like equal colour changes — it is [[perceptual|perceptually uniform]].'},
   perceptual:{t:'Perceptually uniform',h:'A step of the same size looks equally big anywhere in the space — unlike RGB, where some steps are barely visible and others jump.',
     v:SVG(170,30,[0,1,2,3,4,5,6].map(i=>{const c=oklabToSRGB(.7,.12*Math.cos(i),.12*Math.sin(i)).map(x=>Math.round(Math.max(0,Math.min(1,x))*255));return`<rect x="${i*24}" y="4" width="22" height="22" rx="3" fill="rgb(${c})"/>`;}).join(''))},
 };
@@ -1504,7 +1485,9 @@ function openTT(key,anchor,src){
   let x=Math.min(Math.max(8,r.left+r.width/2-w/2+lv*10),vw-w-8);
   let y=r.bottom+6; if(y+h>vh-8) y=Math.max(8,r.top-h-6);
   // A nested card goes below (or above) its whole parent card so the parent stays readable
-  if(parent){const pr=parent.getBoundingClientRect();
+  // Terms in the tutorial card open below (or above) the whole card, never over its buttons
+  const box=parent||(src&&src.closest('#coach'));
+  if(box){const pr=box.getBoundingClientRect();
     if(pr.bottom+6+h<=vh-8) y=pr.bottom+6; else if(pr.top-h-6>=8) y=pr.top-h-6;}
   el.style.left=x+'px'; el.style.top=y+'px';
   if(src) src.classList.add('open');
@@ -1579,7 +1562,8 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON
 const tutDone=new Set(store.get('pms.tutDone',[]));
 
 const helpBtn=document.getElementById('helpBtn'), tmenu=document.getElementById('tmenu'), coach=document.getElementById('coach');
-if(!store.get('pms.helpSeen',false)) helpBtn.classList.add('glow');
+const newHint=document.getElementById('newHint');
+if(store.get('pms.helpSeen',false)){helpBtn.classList.remove('glow');newHint.style.display='none';}
 function renderMenu(){
   tmenu.innerHTML=`<div class="tmh">Tutorials <span>${tutDone.size}/${TUTS.length} done</span></div>`+
     TUTS.map((t,i)=>`<button class="ti2${tutDone.has(t.id)?' done':''}" data-i="${i}"><span class="tck">${tutDone.has(t.id)?'✓':i+1}</span><span><b>${esc(t.title)}</b>${i===0&&!tutDone.has(t.id)?' <span class="tnew">start here</span>':''}<br><span class="tbl">${esc(t.blurb)}</span></span></button>`).join('')+
@@ -1590,7 +1574,7 @@ function toggleMenu(show){
   if(show){renderMenu();tmenu.style.display='block';}else tmenu.style.display='none';
 }
 helpBtn.addEventListener('click',()=>{
-  helpBtn.classList.remove('glow'); store.set('pms.helpSeen',true); toggleMenu();
+  helpBtn.classList.remove('glow'); newHint.style.display='none'; store.set('pms.helpSeen',true); toggleMenu();
 });
 tmenu.addEventListener('click',e=>{
   const b=e.target.closest('.ti2'); if(b){toggleMenu(false);startTut(+b.dataset.i);return;}
@@ -1716,9 +1700,9 @@ function animate(){
   const dpr=window.devicePixelRatio||1;
   lc.setTransform(dpr,0,0,dpr,0,0); lc.clearRect(0,0,W,H); lc.textAlign='center';
 
-  [[AX+.5,0,0,'L →',3,0,0],[-(AX+.5),0,0,'← −L',-3,0,0],
-   [0,AX+.5,0,'M ↑',0,1,0],[0,-(AX+.5),0,'↓ −M',0,-1,0],
-   [0,0,AX+.5,'T →',0,0,1],[0,0,-(AX+.5),'← −T',0,0,-4]
+  [[AX+.5,0,0,'L length →',3,0,0],[-(AX+.5),0,0,'← −L',-3,0,0],
+   [0,AX+.5,0,'M mass ↑',0,1,0],[0,-(AX+.5),0,'↓ −M',0,-1,0],
+   [0,0,AX+.5,'T time →',0,0,1],[0,0,-(AX+.5),'← −T',0,0,-4]
   ].forEach(([x,y,z,lbl,...cd])=>{
     const col=coordToColor(...cd),[sx,sy]=toSc(x,y,z);
     drawLbl(sx,sy+16,lbl,col.r,col.g,col.b,false,false);
