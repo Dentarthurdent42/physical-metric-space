@@ -25,9 +25,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#06061a}
 #tl{position:absolute;top:12px;left:12px;z-index:25;display:flex;flex-direction:column;align-items:flex-start;gap:8px;
   max-width:calc(100% - 58px);pointer-events:none}
 #tl>*{pointer-events:auto}
-#info{position:relative;max-width:100%;padding:6px 11px;
-  background:rgba(4,4,18,.88);border:1px solid rgba(255,255,255,.07);
-  border-radius:7px;pointer-events:none}
 #badge{flex-shrink:0;padding:0 6px;font:10px 'Courier New',monospace;color:#6380aa;pointer-events:none;white-space:nowrap}
 /* Bottom dock: every control lives in one glass bar; the panel rises above it */
 #dock{position:absolute;left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:45;
@@ -207,7 +204,6 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
   #panel{left:8px;right:8px;height:min(42vh,400px);grid-template-columns:1fr}
   body.panel-open #vcard{bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 70px + min(42vh,400px))}
   body.panel-open #tl{max-height:calc(100% - min(42vh,400px) - 110px)}
-  body.panel-open #info{display:none}
 }
 #toast{position:absolute;bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 62px);left:50%;transform:translateX(-50%);z-index:60;
   max-width:calc(100% - 32px);padding:5px 12px;border-radius:6px;background:rgba(30,40,90,.95);
@@ -221,11 +217,6 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
   <canvas id="clbl"></canvas>
   <div id="tip"></div>
   <div id="tl">
-  <div id="info">
-    <div style="font:bold 10px 'Courier New',monospace;color:#8899ff;letter-spacing:.04em">DIMENSIONAL ANALYSIS</div>
-    <div style="font:10px 'Courier New',monospace;color:#6b80a8;margin-top:2px">Each sphere is a physical quantity, placed by its powers of length, mass &amp; time</div>
-    <div id="newHint" style="font:10px 'Courier New',monospace;color:#8fa4d8;margin-top:2px">New here? Press <b style="color:#cce0ff">?</b> (bottom bar) for a short tour</div>
-  </div>
   <div id="drawHint"></div>
   <div id="opHint"></div>
   <div id="coach" role="dialog" aria-label="Tutorial"></div>
@@ -1823,8 +1814,7 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON
 const tutDone=new Set(store.get('pms.tutDone',[]));
 
 const helpBtn=document.getElementById('helpBtn'), tmenu=document.getElementById('tmenu'), coach=document.getElementById('coach');
-const newHint=document.getElementById('newHint');
-if(store.get('pms.helpSeen',false)){helpBtn.classList.remove('glow');newHint.style.display='none';}
+if(store.get('pms.helpSeen',false)) helpBtn.classList.remove('glow');
 function renderMenu(){
   tmenu.innerHTML=`<div class="tmh">Tutorials <span>${tutDone.size}/${TUTS.length} done</span></div>`+
     TUTS.map((t,i)=>`<button class="ti2${tutDone.has(t.id)?' done':''}" data-i="${i}"><span class="tck">${tutDone.has(t.id)?'✓':i+1}</span><span><b>${esc(t.title)}</b>${i===0&&!tutDone.has(t.id)?' <span class="tnew">start here</span>':''}<br><span class="tbl">${esc(t.blurb)}</span></span></button>`).join('')+
@@ -1835,7 +1825,7 @@ function toggleMenu(show){
   if(show){renderMenu();tmenu.style.display='block';}else tmenu.style.display='none';
 }
 helpBtn.addEventListener('click',()=>{
-  helpBtn.classList.remove('glow'); newHint.style.display='none'; store.set('pms.helpSeen',true); toggleMenu();
+  helpBtn.classList.remove('glow'); store.set('pms.helpSeen',true); toggleMenu();
 });
 tmenu.addEventListener('click',e=>{
   const b=e.target.closest('.ti2'); if(b){toggleMenu(false);startTut(+b.dataset.i);return;}
