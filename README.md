@@ -29,7 +29,7 @@ The visualization helps show that dimensional analysis is not just a bookkeeping
 - **Perspective and orthographic projection** modes
 - **Hover tooltips** for inspecting quantities
 - **Label styling controls** for readability
-- **Color encoding in OKLAB space** tied to dimensional coordinates
+- **Color encoding in OKLAB space** tied to dimensional coordinates (explained in the tutorials' glossary)
 - **Grouped metrics** when multiple physical quantities share the same dimensional signature
 - **Keyboard and mouse controls** for orbiting, zooming, and resetting the view
 - **Draw vectors** between any two points to see the equation that connects them — the exponent difference is the factor that turns one quantity into the other (e.g. Force → Energy gives `Energy = Force × Length`)
@@ -39,6 +39,9 @@ The visualization helps show that dimensional analysis is not just a bookkeeping
 - **Commensurable quantities** — quantities with identical dimensions (addable, comparable) share a point; each gets its own bead on a ring around it. Hover to fan out every member's name; click a bead to copy that one name
 - **Fractional exponents** — quantities like fracture toughness (M·L⁻¹ᐟ²·T⁻²), sorptivity (L·T⁻¹ᐟ²) and Gaussian charge (L³ᐟ²·M¹ᐟ²·T⁻¹) sit between lattice points; exponents display as fractions
 - **Click to copy** any point's names, formula label, or vector equation to the clipboard
+- **Search** (press `/`) for quantity names (“force”), symbols (“F” — case-sensitive), formulas, operations (×, ÷), controls and glossary terms
+- **Tutorials** behind the glowing **?** button: short guided walkthroughs (what the points are, drawing vectors, formula arrows, search, projection, labels) with nested glossary tooltips and progress marks
+- **Formula arrows** for well-known laws (F = ma, E = mc², …), hidden by default and toggled from the controls panel
 
 ## Why this exists
 

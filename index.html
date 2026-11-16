@@ -81,7 +81,9 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
   -webkit-tap-highlight-color:transparent;transition:background .12s}
 .pbtn:hover,.pbtn:active{background:rgba(255,255,255,.1)}
 .pbtn.on{background:rgba(80,110,220,.25);border-color:rgba(100,140,255,.45);color:#aaccff}
-#drawBtn{position:absolute;top:58px;left:12px;z-index:6;padding:8px 12px;border-radius:7px;
+#tools{position:absolute;top:58px;left:12px;z-index:25;display:flex;gap:6px;align-items:flex-start;
+  max-width:calc(100% - 58px)}
+#drawBtn{flex-shrink:0;padding:8px 12px;border-radius:7px;white-space:nowrap;
   border:1px solid rgba(255,255,255,.1);background:rgba(4,4,18,.88);cursor:pointer;
   font:11px 'Courier New',monospace;color:#aabbee;touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;transition:background .12s}
@@ -125,6 +127,76 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
 .vfoot{color:#334;font-size:8.5px;margin-top:6px}
 .vrow{display:flex;align-items:center;gap:6px;margin:4px 0}
 .vrow .veq{flex:1;font-size:9px;font-weight:normal;padding:3px 5px}
+#search{position:static;width:230px;min-width:0;flex:0 1 230px}
+#sq{width:100%;padding:8px 26px 8px 28px;border-radius:7px;border:1px solid rgba(255,255,255,.1);
+  background:rgba(4,4,18,.88);color:#dde6ff;font:12px 'Courier New',monospace;outline:none;
+  -webkit-appearance:none;appearance:none}
+#sq::-webkit-search-cancel-button{display:none}
+@media (pointer:coarse){#sq{font-size:16px;padding-top:6px;padding-bottom:6px}}
+#sq:focus{border-color:rgba(120,150,255,.5);background:rgba(8,10,34,.96)}
+#sq::placeholder{color:#556}
+.sqi{position:relative;float:left;width:0;left:9px;top:8px;font-size:11px;color:#556;pointer-events:none}
+#sqx{position:relative;float:right;margin-top:-30px;margin-right:2px;display:none;background:none;border:none;color:#667;
+  cursor:pointer;font-size:12px;padding:4px 6px}
+#sres{display:none;position:absolute;left:0;top:calc(100% + 4px);max-height:min(55vh,420px);overflow-y:auto;border-radius:8px;
+  background:rgba(4,4,18,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 28px rgba(0,0,0,.8);
+  font:11px/1.4 'Courier New',monospace;color:#dde;width:min(340px,calc(100vw - 24px))}
+.sr{display:flex;align-items:flex-start;gap:7px;padding:7px 9px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05)}
+.sr:last-child{border-bottom:none}
+.sr.act,.sr:hover{background:rgba(80,110,220,.2)}
+.srk{flex-shrink:0;font-size:8px;letter-spacing:.06em;text-transform:uppercase;padding:2px 4px;border-radius:3px;
+  margin-top:1px;min-width:52px;text-align:center;border:1px solid currentColor;opacity:.85}
+.srt{font-weight:bold;color:#eef}
+.srs{color:#778;font-size:9.5px;margin-top:1px}
+.sr mark{background:rgba(120,150,255,.35);color:inherit;border-radius:2px}
+.snone{padding:9px;color:#667;font-size:10px}
+.flash{animation:flash 1.4s ease-out 2}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(140,170,255,.9)}100%{box-shadow:0 0 0 12px rgba(140,170,255,0)}}
+#helpBtn{flex-shrink:0;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.14);
+  background:rgba(4,4,18,.88);color:#cce0ff;font:bold 15px 'Courier New',monospace;cursor:pointer;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#helpBtn:hover{background:rgba(16,16,48,.95)}
+#helpBtn.glow{border-color:rgba(160,190,255,.9);animation:helpGlow 1.6s ease-in-out infinite}
+@keyframes helpGlow{0%,100%{box-shadow:0 0 4px 1px rgba(120,160,255,.5)}50%{box-shadow:0 0 18px 6px rgba(140,180,255,.9);color:#fff}}
+#tmenu{display:none;position:absolute;left:0;top:calc(100% + 4px);z-index:30;width:min(300px,calc(100vw - 24px));
+  background:rgba(4,4,18,.98);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:6px;
+  box-shadow:0 6px 28px rgba(0,0,0,.8);font:11px/1.4 'Courier New',monospace;color:#dde}
+.tmh{display:flex;justify-content:space-between;padding:4px 6px 8px;color:#8899ff;font-weight:bold;letter-spacing:.05em;text-transform:uppercase;font-size:10px}
+.tmh span{color:#556;font-weight:normal}
+.ti2{display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;padding:7px 6px;border:none;border-radius:6px;
+  background:none;color:#dde;font:inherit;cursor:pointer}
+.ti2:hover{background:rgba(80,110,220,.2)}
+.tck{flex-shrink:0;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(140,160,255,.4);color:#99a;font-size:10px}
+.ti2.done .tck{background:rgba(80,200,140,.25);border-color:#6d9;color:#8fb;font-weight:bold}
+.ti2.done b{color:#8fb}
+.tbl{color:#667;font-size:9.5px}
+.tnew{color:#ff9;font-size:9px}
+.treset{margin:4px 6px;background:none;border:none;color:#556;font:9px 'Courier New',monospace;cursor:pointer;text-decoration:underline}
+#coach{display:none;position:absolute;top:104px;left:12px;z-index:22;width:min(360px,calc(100vw - 58px));
+  background:rgba(6,8,30,.97);border:1px solid rgba(140,170,255,.35);border-radius:10px;padding:10px 12px;
+  box-shadow:0 6px 28px rgba(0,0,0,.8);font:12px/1.6 Georgia,serif;color:#c8cce0}
+.ch{display:flex;align-items:center;gap:8px;font:bold 11px 'Courier New',monospace;color:#8899ff;margin-bottom:6px}
+.ch>span:first-child{flex:1}
+.cdots{display:flex;gap:4px}.cdots i{width:6px;height:6px;border-radius:50%;background:#334}
+.cdots i.d{background:#6d9}.cdots i.c{background:#9bf}
+.cact{margin-top:8px;padding:5px 8px;border-radius:6px;background:rgba(255,230,120,.08);border:1px dashed rgba(255,230,120,.35);
+  color:#ffe9a0;font:11px 'Courier New',monospace}
+.cact.ok{background:rgba(80,200,140,.1);border:1px solid rgba(80,200,140,.4);color:#8fb}
+.cbtns{display:flex;gap:6px;margin-top:9px}
+.cbtns .pbtn{padding:7px 0;font-size:10.5px}
+.term{color:#9cf;border-bottom:1px dotted #9cf;cursor:help;white-space:nowrap}
+.term.open{background:rgba(120,160,255,.2);border-radius:3px}
+.tt{position:fixed;z-index:70;max-width:min(270px,calc(100vw - 16px));padding:9px 11px;border-radius:9px;
+  background:rgba(10,12,40,.99);border:1px solid rgba(140,170,255,.45);box-shadow:0 8px 30px rgba(0,0,0,.85);
+  font:11.5px/1.55 Georgia,serif;color:#c8cce0}
+.tt[data-lv="1"]{border-color:rgba(200,160,255,.5)}.tt[data-lv="2"],.tt[data-lv="3"]{border-color:rgba(140,230,190,.5)}
+.tth{display:flex;justify-content:space-between;gap:8px;font:bold 11px 'Courier New',monospace;color:#eef;margin-bottom:5px}
+.ttd{font-weight:normal;font-size:8.5px;color:#667;text-transform:uppercase;letter-spacing:.06em}
+.ttv{display:block;margin:2px 0 6px;max-width:100%;height:auto;font-family:'Courier New',monospace}
+.mout{min-height:50px;margin:4px 0 2px;font-family:'Courier New',monospace}
+.mout svg{max-width:100%;height:auto;font-family:'Courier New',monospace}
+.tt .prow .pl,.tt .prow .pv{font:10px 'Courier New',monospace;min-width:14px}
 #toast{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:60;
   max-width:calc(100% - 32px);padding:5px 12px;border-radius:6px;background:rgba(30,40,90,.95);
   border:1px solid rgba(120,150,255,.35);font:11px 'Courier New',monospace;color:#dde6ff;
@@ -155,7 +227,7 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
         The origin — the single point at (0, 0, 0) — is the home of all dimensionless quantities: strain, Mach number, Reynolds number, angles.
       </p>
       <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:20px">
-        Hover over any sphere for a tooltip; click it to copy its name. Arrows show familiar formulas — and with <strong style="color:#aaccff">✎ Draw vector</strong> you can connect any two points to see the equation that links them. The Operators panel shows derivatives and integrals as uniform shifts of the whole space, and Power laws traces formulas like E(k) = C·ε²ᐟ³·k⁻⁵ᐟ³ as paths. Beads ringing a sphere are commensurable quantities sharing one dimension — hover to see them all. Use the controls panel (⚙) to adjust projection, labels, and rotation. Keyboard: arrow keys orbit, space pauses, R resets, V draws, O cycles operators.
+        Hover over any sphere for a tooltip; click it to copy its name. Turn on formula arrows in the controls panel to see familiar formulas, and with <strong style="color:#aaccff">✎ Draw vector</strong> you can connect any two points to see the equation that links them. The Operators panel shows derivatives and integrals as uniform shifts of the whole space, and Power laws traces formulas like E(k) = C·ε²ᐟ³·k⁻⁵ᐟ³ as paths. Beads ringing a sphere are commensurable quantities sharing one dimension — hover to see them all. Use the controls panel (⚙) to adjust projection, labels, and rotation. New here? Press the glowing <strong style="color:#aaccff">?</strong> for short tutorials. Search (/) finds any quantity, symbol, formula, operator or control. Keyboard: arrow keys orbit, space pauses, R resets, V draws, O cycles operators.
       </p>
       <button onclick="document.getElementById('preface').style.display='none'" style="background:rgba(80,110,220,.22);border:1px solid rgba(100,140,255,.4);border-radius:7px;color:#aaccff;font:12px 'Courier New',monospace;padding:10px 14px;cursor:pointer">Enter visualization</button>
     </div>
@@ -164,9 +236,20 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
     <div style="font:bold 10px 'Courier New',monospace;color:#8899ff;letter-spacing:.04em">DIMENSIONAL ANALYSIS</div>
     <div style="font:8.5px 'Courier New',monospace;color:#2c3f60;margin-top:2px">Physical metrics · L M T exponent space · OKLAB color</div>
   </div>
-  <button id="drawBtn" title="Draw a vector between two points (V)">✎ Draw vector</button>
+  <div id="tools">
+    <button id="helpBtn" class="glow" title="Tutorials" aria-label="Tutorials">?</button>
+    <div id="tmenu" role="menu"></div>
+    <button id="drawBtn" title="Draw a vector between two points (V)">✎ Draw vector</button>
+    <div id="search">
+      <span class="sqi">⌕</span>
+      <input id="sq" type="search" placeholder="force, F, ÷, help…" autocomplete="off" spellcheck="false" aria-label="Search quantities, symbols, formulas and controls">
+      <button id="sqx" title="Clear search" aria-label="Clear search">✕</button>
+      <div id="sres" role="listbox"></div>
+    </div>
+  </div>
   <div id="drawHint"></div>
   <div id="opHint"></div>
+  <div id="coach" role="dialog" aria-label="Tutorial"></div>
   <div id="vcard"></div>
   <div id="toast"></div>
   <div id="badge"></div>
@@ -346,6 +429,10 @@ RAW.forEach(([name,L,M,T])=>{
   GROUPS.get(k).entries.push(name);
 });
 const PTS=[...GROUPS.values()];
+// Conventional variable symbols for each named quantity (used by search and the info card)
+const SYMBOLS={'Length':['l','L','x'],'Displacement':['x','Δx','s','d'],'Wavelength':['λ'],'Arm / Lever':['r'],'Area':['A'],'Cross-section':['A','σ'],'Volume':['V'],'Wavenumber':['k','ν̃'],'Curvature':['κ'],'Velocity':['v','u'],'Speed of Light':['c'],'Acceleration':['a'],'Free-fall g':['g'],'Jerk':['j'],'Snap / Jounce':['s'],'Vol. Flow Rate':['Q'],'Kinematic Viscosity':['ν'],'Diffusivity':['D'],'Thermal Diffusivity':['α'],'Spec. Ang. Mom.':['h'],'Grav. Potential':['Φ','V'],'Specific Energy':['ε','e'],'Absorbed Dose (Gy)':['D'],'Dose Equivalent':['H'],'Std. Grav. Param GM':['μ','GM'],'Strain':['ε'],'Angle (rad)':['θ','φ'],'Mach Number':['Ma','M'],'Reynolds Number':['Re'],'Coeff. of Restitution':['e'],'Time':['t'],'Period':['T'],'Half-life':['t½'],'Frequency':['f','ν'],'Angular Velocity':['ω'],'Angular Frequency ω':['ω'],'Radioactivity (Bq)':['A'],'Angular Acceleration':['α'],'Mass':['m','M'],'Linear Density':['λ','μ'],'Surface Density':['σ'],'Volume Density':['ρ'],'Moment of Inertia':['I'],'Specific Volume':['v'],'Mass Flow Rate':['ṁ'],'Mech. Impedance':['Z'],'Mech. Admittance':['Y'],'Momentum':['p'],'Impulse':['J'],'Angular Momentum':['L'],'Action (ℏ)':['ℏ','S'],'Angular Impulse':['ΔL'],'Force':['F'],'Weight':['W'],'Drag':['F_D','D'],'Thrust':['T'],'Tension':['T'],'Lift':['L','F_L'],'Energy':['E'],'Work':['W'],'Heat (Q)':['Q'],'Torque':['τ'],'Enthalpy':['H'],'Helmholtz Energy':['F','A'],'Power':['P'],'Radiant Flux':['Φₑ'],'Luminosity':['L'],'Pressure':['P','p'],'Stress':['σ'],"Young's Modulus":['E'],'Shear Modulus':['G'],'Bulk Modulus':['K'],'Yield Strength':['σᵧ'],'Surface Tension':['γ'],'Spring Constant':['k'],'Stiffness':['k'],'Dynamic Viscosity':['μ','η'],'Intensity (W/m²)':['I'],'Power Density':['p'],'Spec. Power (W/kg)':['P/m'],'Irradiance':['Eₑ'],'Grav. Constant G':['G']};
+const PT_OF_NAME=new Map();
+PTS.forEach(pt=>pt.entries.forEach(n=>PT_OF_NAME.set(n,pt)));
 document.getElementById('badge').textContent=`${RAW.length} metrics · ${PTS.length} unique coordinates`;
 
 const pickMeshes=[];
@@ -492,7 +579,7 @@ function makeArrow(from,to,{SR,CR,opacity,emissive=0}){
   else g.quaternion.setFromUnitVectors(up,dir);
   return{g,shaftMat,coneMat,pm,shaftLen,sc,ec};
 }
-let showFormulas=true;
+let showFormulas=false;
 const formulaObjs=[], formulaPickMeshes=[];
 // Pre-cache point keys for fast lookup
 PTS.forEach(pt=>{pt.key=keyOf(pt.L,pt.M,pt.T);});
@@ -616,7 +703,7 @@ function addUserVector(a,b){
   const midCol={r:Math.round((sc.r+ec.r)/2),g:Math.round((sc.g+ec.g)/2),b:Math.round((sc.b+ec.b)/2)};
   const uv={from:a,to:b,g,shaftMat,coneMat,pm,mid,midCol,sc,ec,eq:vectorEquations(a,b)};
   pm.userData={__uv:uv}; uvPickMeshes.push(pm); userVecs.push(uv);
-  showCard(uv); renderVecList();
+  showCard(uv); renderVecList(); tutEmit('vector');
   return uv;
 }
 function removeUserVector(uv){
@@ -826,7 +913,8 @@ function showCard(uv){
   vcard.style.display='block';
   document.getElementById('vcardX').addEventListener('click',hideCard);
 }
-function hideCard(){selectedUV=null;vcard.style.display='none';}
+function hideCard(){selectedUV=null;focusPt=null;focusFo=null;vcard.style.display='none';}
+let focusPt=null, focusFo=null;
 
 // ── Draw mode ─────────────────────────────────────────────────────────────────
 const drawBtn=document.getElementById('drawBtn'), drawHint=document.getElementById('drawHint');
@@ -922,6 +1010,7 @@ function pick(e,force=false){
   const{pt:newPt,fo:newFo,uv:newUV,op:newOp,cm:newCm}=hitAt(src.clientX,src.clientY);
   if(force||newPt!==hovered||newFo!==hoveredFormula||newUV!==hoveredUV||newOp!==hoveredOp||newCm!==hoveredCm){
     hovered=newPt; hoveredFormula=newFo; hoveredUV=newUV; hoveredOp=newOp; hoveredCm=newCm;
+    if(newPt||newCm) tutEmit('point'); else if(newFo) tutEmit('formula');
     if(newCm){
       const{pt,name,css}=newCm, others=pt.entries.filter(e=>e!==name);
       tip.innerHTML=`<div style="font:bold 11px 'Courier New',monospace;color:${css};margin-bottom:4px">${esc(name)}</div>`+
@@ -978,13 +1067,14 @@ c3d.addEventListener('pointerup',e=>{
   }
   if(uv){showCard(uv);copyText(uv.eq.primary);}
   else if(op) copyText(op.eq);
-  else if(cm) copyText(cm.name);
-  else if(fo) copyText(fo.def.label);
-  else if(pt) copyText(pt.entries.join(', '));
+  else if(cm){copyText(cm.name);tutEmit('point');}
+  else if(fo){copyText(fo.def.label);tutEmit('formula');}
+  else if(pt){copyText(pt.entries.join(', '));tutEmit('point');}
 });
 
 // ── Panel ─────────────────────────────────────────────────────────────────────
 let rotBtn, fovSlider, fovValLbl;
+const SECTIONS={};
 function acc(title,content,open=true){
   const sec=document.createElement('div'); sec.className='psec';
   const head=document.createElement('div'); head.className='ph';
@@ -992,34 +1082,11 @@ function acc(title,content,open=true){
   const body=document.createElement('div'); body.className='pb'; body.style.maxHeight=open?'600px':'0px';
   body.appendChild(content);
   head.addEventListener('click',()=>{const arr=head.querySelector('.ph-arr'),op=arr.classList.contains('open');arr.classList.toggle('open',!op);body.style.maxHeight=op?'0px':'600px';});
-  sec.append(head,body); return sec;
+  sec.append(head,body);
+  SECTIONS[title]={sec,open(){head.querySelector('.ph-arr').classList.add('open');body.style.maxHeight='600px';}};
+  return sec;
 }
 
-// OKLAB swatch
-(()=>{
-  const div=document.createElement('div');
-  const sw=document.createElement('canvas'); sw.width=114; sw.height=48;
-  const sx=sw.getContext('2d'), sid=sx.createImageData(114,48);
-  for(let py=0;py<48;py++) for(let px=0;px<114;px++){
-    const dL=-3+(px/113)*6,dT=1-(py/47)*5,[r,g,b]=oklabToSRGB(.65,(dL/3)*.22,(dT/4)*.24);
-    const i=(py*114+px)*4;sid.data[i]=Math.round(Math.max(0,Math.min(1,r))*255);sid.data[i+1]=Math.round(Math.max(0,Math.min(1,g))*255);sid.data[i+2]=Math.round(Math.max(0,Math.min(1,b))*255);sid.data[i+3]=255;
-  }
-  sx.putImageData(sid,0,0);sx.font='bold 7px monospace';sx.fillStyle='rgba(0,0,0,.5)';sx.textAlign='center';sx.fillText('L →',102,45);sx.fillText('T ↑',7,9);
-  sw.style.cssText='border-radius:4px;border:1px solid rgba(255,255,255,.08);flex-shrink:0;';
-  const sv=document.createElement('canvas'); sv.width=13; sv.height=48;
-  const svx=sv.getContext('2d'), svd=svx.createImageData(13,48);
-  for(let py=0;py<48;py++){const dM=1-(py/47)*2,oL=.65+(dM/1.5)*.12,[r,g,b]=oklabToSRGB(oL,0,0);for(let px=0;px<13;px++){const i=(py*13+px)*4;svd.data[i]=Math.round(Math.max(0,Math.min(1,r))*255);svd.data[i+1]=Math.round(Math.max(0,Math.min(1,g))*255);svd.data[i+2]=Math.round(Math.max(0,Math.min(1,b))*255);svd.data[i+3]=255;}}
-  svx.putImageData(svd,0,0);svx.font='bold 7px monospace';svx.fillStyle='rgba(0,0,0,.45)';svx.textAlign='center';svx.fillText('M',6,7);svx.fillText('↕',6,44);
-  sv.style.cssText='border-radius:4px;border:1px solid rgba(255,255,255,.08);flex-shrink:0;';
-  const row=document.createElement('div');row.style.cssText='display:flex;gap:5px;align-items:center;margin-bottom:7px;';row.append(sw,sv);div.appendChild(row);
-  [['L-exp','a (green↔red)',-3,0,0,3,0,0],['T-exp','b (blue↔yel)',0,0,-4,0,0,1],['M-exp','lightness',0,-1,0,0,1,0]].forEach(([d,desc,...c])=>{
-    const cn=coordToColor(c[0],c[1],c[2]),cp=coordToColor(c[3],c[4],c[5]);
-    const r2=document.createElement('div');r2.style.cssText='display:flex;align-items:center;gap:5px;margin:2px 0;font-size:9px;';
-    r2.innerHTML=`<span style="display:inline-block;width:20px;height:5px;border-radius:2px;background:linear-gradient(to right,${cn.css},${cp.css});flex-shrink:0"></span><span style="color:#4a5f88">${d} → ${desc}</span>`;
-    div.appendChild(r2);
-  });
-  panel.appendChild(acc('OKLAB COLOR SPACE',div,false));
-})();
 
 function updFov(s){
   if(!fovValLbl) return;
@@ -1063,7 +1130,7 @@ function updFov(s){
   const xs=document.createElement('div'); xs.className='segs';
   [['None','none'],['Shadow','shadow'],['Halo','halo'],['Outline','outline'],['Pill','pill'],['Glow','glow']].forEach(([l,v])=>{
     const btn=document.createElement('button'); btn.className='seg'+(v===lblEffect?' on':''); btn.textContent=l; btn.dataset.v=v;
-    btn.addEventListener('click',()=>{lblEffect=v;xs.querySelectorAll('.seg').forEach(b=>b.classList.toggle('on',b.dataset.v===v));applyNodeEffect();});
+    btn.addEventListener('click',()=>{lblEffect=v;tutEmit('labelfx');xs.querySelectorAll('.seg').forEach(b=>b.classList.toggle('on',b.dataset.v===v));applyNodeEffect();});
     btn.addEventListener('mousedown',e=>e.stopPropagation());
     xs.appendChild(btn);
   });
@@ -1112,7 +1179,7 @@ function updFov(s){
   rb.addEventListener('mousedown',e=>e.stopPropagation());
   row.append(rotBtn,rb);
   const hint=document.createElement('div'); hint.style.cssText='font-size:8px;color:#1e2a40;margin-top:6px;line-height:1.8;';
-  hint.textContent='←→↑↓ orbit · scroll/pinch zoom · Space pause · R reset · V draw vector · O cycle operators · click a label to copy';
+  hint.textContent='←→↑↓ orbit · scroll/pinch zoom · Space pause · R reset · V draw vector · O cycle operators · / search · click a label to copy';
   div.append(row,hint);
   panel.appendChild(acc('VIEW',div,true));
 })();
@@ -1163,38 +1230,26 @@ function updFov(s){
   panel.appendChild(acc('POWER LAWS',div,true));
 })();
 
-// Formulas
+// Formulas — a single show/hide toggle (hidden by default)
+let formulaBtn;
+function setFormulas(on){
+  showFormulas=on;
+  formulaObjs.forEach(({g})=>g.visible=on&&!overlayOn());
+  if(formulaBtn){
+    formulaBtn.textContent=on?'◉ Formula arrows':'○ Formula arrows';
+    formulaBtn.classList.toggle('on',on);
+  }
+}
 (()=>{
   const div=document.createElement('div');
   const tr=document.createElement('div'); tr.className='prow';
-  const tb=document.createElement('button'); tb.className='pbtn on'; tb.textContent='◉ Visible';
-  tb.style.color='#aaccff';
-  tb.addEventListener('click',()=>{
-    showFormulas=!showFormulas;
-    formulaObjs.forEach(({g})=>g.visible=showFormulas&&!overlayOn());
-    tb.textContent=showFormulas?'◉ Visible':'○ Hidden';
-    tb.classList.toggle('on',showFormulas);
-    tb.style.color=showFormulas?'#aaccff':'#aaaacc';
-  });
-  tb.addEventListener('mousedown',e=>e.stopPropagation());
-  tr.appendChild(tb); div.appendChild(tr);
-  const list=document.createElement('div'); list.style.cssText='margin-top:6px;';
-  FORMULA_DEFS.forEach(def=>{
-    const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:6px;margin:4px 0;';
-    const sc=coordToColor(...def.from),ec=coordToColor(...def.to);
-    const midCss=`rgb(${Math.round((sc.r+ec.r)/2)},${Math.round((sc.g+ec.g)/2)},${Math.round((sc.b+ec.b)/2)})`;
-    row.innerHTML=`<span style="display:inline-block;width:18px;height:3px;background:linear-gradient(to right,${sc.css},${ec.css});border-radius:2px;flex-shrink:0"></span>`+
-      `<span style="color:${midCss};font:bold 9px 'Courier New',monospace;flex-shrink:0">${def.label}</span>`+
-      `<span style="color:#2a3a55;font-size:8px">${def.desc}</span>`;
-    list.appendChild(row);
-  });
-  div.appendChild(list);
-  const note=document.createElement('div');
-  note.style.cssText='margin-top:8px;font-size:8px;color:#2a3a55;line-height:1.6;border-top:1px solid rgba(255,255,255,.05);padding-top:6px;';
-  note.textContent='V=IR, F=qE etc. involve electric current (A) — a 4th dimension outside this L·M·T space.';
-  div.appendChild(note);
+  formulaBtn=document.createElement('button'); formulaBtn.className='pbtn';
+  formulaBtn.title='Show arrows for well-known formulas (F = ma, E = mc², …)';
+  formulaBtn.addEventListener('click',()=>setFormulas(!showFormulas));
+  formulaBtn.addEventListener('mousedown',e=>e.stopPropagation());
+  tr.appendChild(formulaBtn); div.appendChild(tr);
   panel.appendChild(acc('FORMULAS',div,true));
+  setFormulas(showFormulas);
 })();
 
 // Vectors
@@ -1228,6 +1283,373 @@ function renderVecList(){
   updateDrawUI(); renderVecList();
 })();
 
+// ── Search ────────────────────────────────────────────────────────────────────
+// One flat index of everything worth finding. Each entry: {kind, title, sub, keys[], sym[], go()}.
+// Tutorials (and anything else) can push more entries later via SEARCH_INDEX.push(...).
+let camTween=null;
+function centreOn(x,y,z){camTween={t0:performance.now(),from:controls.target.clone(),to:new THREE.Vector3(x,y,z)};}
+function focusPoint(pt,name){
+  hideCard(); focusPt=pt; centreOn(pt.L,pt.M,pt.T);
+  const c=pt.col, syms=n=>(SYMBOLS[n]||[]).join(', ');
+  const rel=FORMULA_DEFS.filter(d=>keyOf(...d.from)===pt.key||keyOf(...d.to)===pt.key);
+  vcard.innerHTML=`<div class="vhead"><span style="color:${c.css}">${esc(name||nm(pt))}</span><button class="vx" id="vcardX" title="Close">✕</button></div>`+
+    `<div class="vsub">${esc(dimStr(pt.L,pt.M,pt.T))} · coordinate (${pt.L}, ${pt.M}, ${pt.T})</div>`+
+    `<div class="vlbl">Quantities at this point</div>`+
+    pt.entries.map(n=>`<div class="veq alt" data-copy="${esc(n)}" title="Click to copy">${esc(n)}${syms(n)?` <span style="color:#778">· ${esc(syms(n))}</span>`:''}</div>`).join('')+
+    (rel.length?`<div class="vlbl">Formulas touching it</div>`+rel.map(d=>`<div class="veq known" data-copy="${esc(d.label)}">${esc(d.label)}  (${esc(d.desc)})</div>`).join(''):'');
+  vcard.style.display='block';
+  document.getElementById('vcardX').addEventListener('click',hideCard);
+}
+function focusFormula(fo){
+  hideCard(); setFormulas(true); focusFo=fo; centreOn(fo.mid.x,fo.mid.y,fo.mid.z);
+  const d=fo.def, fp=PT_BY_KEY.get(fo.fromKey), tp=PT_BY_KEY.get(fo.toKey);
+  vcard.innerHTML=`<div class="vhead"><span>${esc(d.label)}</span><button class="vx" id="vcardX" title="Close">✕</button></div>`+
+    `<div class="vsub">${esc(d.desc)}</div>`+
+    `<div class="veq alt"><span style="color:${fp.col.css}">${esc(nm(fp))}</span> → <span style="color:${tp.col.css}">${esc(nm(tp))}</span></div>`+
+    `<div class="vfoot">Formula arrows are now on — toggle them in ⚙ Controls › Formulas</div>`;
+  vcard.style.display='block';
+  document.getElementById('vcardX').addEventListener('click',hideCard);
+}
+function flashEl(el){if(!el)return;el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');}
+function showControl(section){
+  openPanel(); const S=SECTIONS[section]; if(!S) return;
+  S.open(); S.sec.scrollIntoView({block:'nearest',behavior:'smooth'}); flashEl(S.sec);
+}
+const SEARCH_INDEX=[];
+// Quantities: one entry per name
+RAW.forEach(([name])=>{
+  const pt=PT_OF_NAME.get(name);
+  SEARCH_INDEX.push({kind:'quantity',title:name,sub:`${dimStr(pt.L,pt.M,pt.T)}${(SYMBOLS[name]||[]).length?' · '+SYMBOLS[name].join(', '):''}`,
+    keys:[name],sym:SYMBOLS[name]||[],go:()=>focusPoint(pt,name)});
+});
+// Formulas / operations
+formulaObjs.forEach(fo=>{
+  const d=fo.def;
+  SEARCH_INDEX.push({kind:'formula',title:d.label,sub:d.desc,keys:[d.label,d.desc,d.desc.includes('×')?'multiply times product':'',d.desc.includes('÷')?'divide divided quotient per':''],sym:[],go:()=>focusFormula(fo)});
+});
+// Operations and controls (features + their tooltips)
+[
+  ['operation','Multiply quantities (×)','Adds exponents: move along a vector',['multiply','times','product','×','*','add exponents'],()=>{setDrawMode(true);flashEl(drawBtn);}],
+  ['operation','Divide quantities (÷)','Subtracts exponents: the reverse vector',['divide','quotient','per','÷','/','subtract exponents'],()=>{setDrawMode(true);flashEl(drawBtn);}],
+  ['operation','Power of a quantity (x²)','Scales the exponent vector',['power','square','squared','cube','exponent','^'],()=>focusPoint(PT_BY_KEY.get(keyOf(2,0,0)),'Area')],
+  ['control','Draw vector','Connect two points to get the equation linking them (V)',['draw','vector','arrow','connect','equation','line'],()=>{setDrawMode(true);flashEl(drawBtn);}],
+  ['control','Clear all vectors','Remove every drawn vector',['clear','delete','remove','vectors'],()=>showControl('VECTORS')],
+  ['control','Formula arrows','Show/hide arrows for known formulas',['formula','formulas','arrows','show','hide','known'],()=>showControl('FORMULAS')],
+  ['control','Projection / field of view','Orthographic ↔ wide-angle perspective',['projection','orthographic','ortho','perspective','fov','field of view','zoom','lens'],()=>showControl('PROJECTION')],
+  ['control','Label size & typeface','Font size, typeface and legibility effect',['label','labels','size','font','typeface','halo','outline','shadow','pill','glow','legibility'],()=>showControl('LABELS')],
+  ['control','Visibility','Dim or hide spheres and labels',['visibility','hide','dim','spheres','opacity','low','off'],()=>showControl('VISIBILITY')],
+  ['control','Pause / rotate','Toggle auto-rotation (Space)',['pause','rotate','rotation','spin','auto','space'],()=>showControl('VIEW')],
+  ['control','Reset view','Return the camera to its start (R)',['reset','home','camera','view','recenter'],()=>{showControl('VIEW');window.dispatchEvent(new KeyboardEvent('keydown',{key:'r'}));}],
+  ['control','Hover tooltip','Hover a sphere to see every quantity at that point; click to copy',['tooltip','hover','copy','clipboard','info'],()=>focusPoint(PT_BY_KEY.get(keyOf(1,1,-2)),'Force')],
+  ['control','Dimensionless origin','(0,0,0): strain, angle, Mach & Reynolds numbers',['origin','dimensionless','zero','unitless','ratio'],()=>focusPoint(PT_BY_KEY.get(keyOf(0,0,0)),'Strain')],
+].forEach(([kind,title,sub,keys,go])=>SEARCH_INDEX.push({kind,title,sub,keys,sym:[],go}));
+OPERATORS.forEach(op=>SEARCH_INDEX.push({kind:'operator',title:op.label,sub:op.desc,
+  keys:[op.label,op.desc,op.id,op.shift?(op.label.includes('∫')?'integral integrate':'derivative differentiate rate gradient'):'power root exponent'],sym:[op.label],
+  go:()=>{hideCard();showControl('OPERATORS');setOperator(op);}}));
+POWER_LAWS.forEach(law=>SEARCH_INDEX.push({kind:'formula',title:law.label,sub:'power law · '+law.desc,
+  keys:[law.label,law.desc,'power law',law.lands||''],sym:[],go:()=>{hideCard();showControl('POWER LAWS');setLaw(law);}}));
+
+const KIND_COL={operator:'#7ee',quantity:'#8fb',formula:'#fc8',operation:'#f9c',control:'#9bf',tutorial:'#ff9',term:'#c9f'};
+const norm=t=>String(t).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'');
+function scoreEntry(en,q,qn){
+  let best=0;
+  // Symbols are case-sensitive: "F" is force, "f" is frequency
+  for(const s of en.sym){ if(s===q) best=Math.max(best,100); else if(norm(s)===qn) best=Math.max(best,70); }
+  const t=norm(en.title);
+  if(t===qn) best=Math.max(best,95);
+  else if(t.startsWith(qn)) best=Math.max(best,85);
+  else if(new RegExp('\\b'+qn.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).test(t)) best=Math.max(best,75);
+  else if(qn.length>1&&t.includes(qn)) best=Math.max(best,60);
+  for(const k of en.keys){ const kn=norm(k); if(!kn) continue;
+    if(kn===qn) best=Math.max(best,65); else if(qn.length>1&&kn.includes(qn)) best=Math.max(best,45); }
+  if(norm(en.sub).includes(qn)&&qn.length>1) best=Math.max(best,30);
+  return best;
+}
+function hl(text,qn){
+  const t=String(text), i=qn.length>0?norm(t).indexOf(qn):-1;
+  if(i<0) return esc(t);
+  return esc(t.slice(0,i))+'<mark>'+esc(t.slice(i,i+qn.length))+'</mark>'+esc(t.slice(i+qn.length));
+}
+const sq=document.getElementById('sq'), sres=document.getElementById('sres'), sqx=document.getElementById('sqx');
+let sHits=[], sAct=0;
+function runSearch(){
+  const q=sq.value.trim(), qn=norm(q);
+  sqx.style.display=q?'block':'none';
+  if(!q){sres.style.display='none';sHits=[];return;}
+  sHits=SEARCH_INDEX.map(en=>({en,sc:scoreEntry(en,q,qn)})).filter(h=>h.sc>0)
+    .sort((a,b)=>b.sc-a.sc||a.en.title.length-b.en.title.length).slice(0,14);
+  sAct=0;
+  sres.innerHTML=sHits.length?sHits.map((h,i)=>{
+    const en=h.en,col=KIND_COL[en.kind]||'#aab', symHit=en.sym.find(s=>s===q||norm(s)===qn);
+    return `<div class="sr${i===sAct?' act':''}" data-i="${i}" role="option"><span class="srk" style="color:${col}">${en.kind}</span>`+
+      `<div><div class="srt">${hl(en.title,qn)}${symHit?` <span style="color:${col}">(${esc(symHit)})</span>`:''}</div><div class="srs">${qn.length>1?hl(en.sub,qn):esc(en.sub)}</div></div></div>`;
+  }).join(''):`<div class="snone">No matches for “${esc(q)}”</div>`;
+  sres.style.display='block';
+}
+function pickHit(i){
+  const h=sHits[i]; if(!h) return;
+  sres.style.display='none'; sq.blur(); h.en.go(); tutEmit('search');
+}
+function markAct(){sres.querySelectorAll('.sr').forEach((el,i)=>el.classList.toggle('act',i===sAct));
+  const a=sres.querySelector('.sr.act'); if(a) a.scrollIntoView({block:'nearest'});}
+sq.addEventListener('input',runSearch);
+sq.addEventListener('focus',()=>{if(sq.value.trim())runSearch();});
+sq.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'){sAct=Math.min(sHits.length-1,sAct+1);markAct();e.preventDefault();}
+  else if(e.key==='ArrowUp'){sAct=Math.max(0,sAct-1);markAct();e.preventDefault();}
+  else if(e.key==='Enter'){pickHit(sAct);e.preventDefault();}
+  else if(e.key==='Escape'){sq.value='';runSearch();sq.blur();}
+  e.stopPropagation();
+});
+sres.addEventListener('pointerdown',e=>e.preventDefault()); // keep focus so the click lands
+sres.addEventListener('click',e=>{const r=e.target.closest('.sr');if(r)pickHit(+r.dataset.i);});
+sqx.addEventListener('click',()=>{sq.value='';runSearch();hideCard();sq.focus();});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#search'))sres.style.display='none';});
+
+// ── Tutorials & glossary ──────────────────────────────────────────────────────
+// Glossary text uses [[key|shown text]] to link to another entry, so tooltips nest:
+// a high-level term opens a card whose own terms open simpler cards, and so on.
+const tutBus=new Map();
+function tutEmit(ev){(tutBus.get(ev)||[]).slice().forEach(f=>f());}
+function tutOn(ev,f){if(!tutBus.has(ev))tutBus.set(ev,[]);tutBus.get(ev).push(f);return()=>{const a=tutBus.get(ev);a.splice(a.indexOf(f),1);};}
+
+const SVG=(w,h,body)=>`<svg class="ttv" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true">${body}</svg>`;
+const LC='#ff6fae', MC='#e8e8ff', TC='#f5b400';
+const GLOSS={
+  point:{t:'Lattice point',h:'A spot where every [[coord|coordinate]] is an [[integer|integer]]. Each sphere sits on one and stands for one [[dimension|dimension]].',
+    v:SVG(150,60,[...Array(5)].map((_,i)=>[...Array(3)].map((_,j)=>`<circle cx="${15+i*30}" cy="${12+j*18}" r="${i===3&&j===1?6:2.5}" fill="${i===3&&j===1?'#9bf':'#556'}"/>`).join('')).join('')+'<text x="110" y="52" fill="#9bf" font-size="9">(3, 1)</text>')},
+  dimension:{t:'Dimension',h:'<i>What kind</i> of thing a quantity is, written as [[base|base dimensions]] raised to [[exponent|exponents]]. Force is L¹·M¹·T⁻² — i.e. kg·m/s².',
+    v:SVG(170,68,`<text x="0" y="12" fill="#889" font-size="9">Force</text>`+[['L',1,LC],['M',1,MC],['T',-2,TC]].map(([s,e,c],i)=>`<text x="${8+i*55}" y="52" fill="${c}" font-size="11" font-weight="bold">${s}</text><rect x="${22+i*55}" y="${e>0?34-e*10:34}" width="14" height="${Math.abs(e)*10}" fill="${c}" opacity=".8"/><text x="${22+i*55}" y="${e>0?30-e*10:34+Math.abs(e)*10+9}" fill="${c}" font-size="9">${e>0?'+'+e:e}</text>`).join('')+'<line x1="0" x2="170" y1="34" y2="34" stroke="#445"/>')},
+  base:{t:'Base dimensions',h:'Three building blocks, each with an [[unit|SI unit]]: <b style="color:'+LC+'">L</b> length (metre), <b style="color:'+MC+'">M</b> mass (kilogram), <b style="color:'+TC+'">T</b> time (second). Every mechanical quantity is built from them.',
+    v:SVG(180,44,`<g stroke="${LC}" fill="none" stroke-width="2"><line x1="6" y1="28" x2="50" y2="28"/>${[0,1,2,3,4].map(i=>`<line x1="${6+i*11}" y1="28" x2="${6+i*11}" y2="${i%2?23:20}"/>`).join('')}</g><text x="22" y="42" fill="${LC}" font-size="9">L</text>`+
+      `<path d="M74 30 L80 14 L96 14 L102 30 Z" fill="${MC}" opacity=".85"/><circle cx="88" cy="11" r="3" fill="none" stroke="${MC}"/><text x="85" y="42" fill="${MC}" font-size="9">M</text>`+
+      `<circle cx="150" cy="22" r="13" fill="none" stroke="${TC}" stroke-width="2"/><line x1="150" y1="22" x2="150" y2="13" stroke="${TC}" stroke-width="2"/><line x1="150" y1="22" x2="157" y2="25" stroke="${TC}" stroke-width="2"/><text x="147" y="42" fill="${TC}" font-size="9">T</text>`)},
+  exponent:{t:'Exponent',h:'How many times a base dimension is multiplied in. Negative means divided by: T⁻¹ is “per second”. It must be an [[integer|integer]] here. Try it:',
+    m:'exp'},
+  integer:{t:'Integer',h:'A whole number — no fractions or decimals.',
+    v:SVG(180,30,[-3,-2,-1,0,1,2,3].map((n,i)=>`<line x1="${15+i*25}" x2="${15+i*25}" y1="8" y2="16" stroke="#9bf"/><text x="${15+i*25}" y="27" fill="#9bf" font-size="9" text-anchor="middle">${n}</text>`).join('')+'<line x1="5" x2="175" y1="12" y2="12" stroke="#556"/><text x="52" y="8" fill="#f77" font-size="9">½ ✗</text>')},
+  coord:{t:'Coordinate',h:'The three [[exponent|exponents]] (L, M, T) used as a position: step L along the pink axis, M up, T along the yellow axis.',
+    v:SVG(150,80,`<line x1="40" y1="60" x2="140" y2="60" stroke="${LC}" stroke-width="2"/><line x1="40" y1="60" x2="40" y2="4" stroke="${MC}" stroke-width="2"/><line x1="40" y1="60" x2="6" y2="78" stroke="${TC}" stroke-width="2"/><path d="M40 60 L80 60 L80 40 L66 47" stroke="#9bf" fill="none" stroke-dasharray="3 2"/><circle cx="66" cy="47" r="4" fill="#9bf"/><text x="72" y="36" fill="#9bf" font-size="9">(2, 1, −1)</text><text x="128" y="74" fill="${LC}" font-size="9">L</text><text x="44" y="10" fill="${MC}" font-size="9">M</text><text x="12" y="70" fill="${TC}" font-size="9">T</text>`)},
+  unit:{t:'SI unit',h:'The agreed measuring stick. Dimensions ignore its size: a kilometre and a millimetre are both just L.',
+    v:SVG(170,30,`<rect x="2" y="6" width="150" height="6" fill="${LC}" opacity=".7"/><text x="2" y="26" fill="#aab" font-size="9">1 km</text><rect x="2" y="16" width="2" height="6" fill="${LC}"/><text x="60" y="26" fill="#aab" font-size="9">1 mm → both L</text>`)},
+  same:{t:'Dimensionally identical',h:'Same point ⇒ same [[exponent|exponents]], so they can be added or compared. Energy and torque are both L²·M·T⁻², even though torque is not energy.',
+    v:SVG(170,44,`<text x="0" y="12" fill="#aab" font-size="9">Energy</text><text x="0" y="38" fill="#aab" font-size="9">Torque</text><path d="M40 9 L110 22 M40 35 L110 22" stroke="#667" fill="none"/><circle cx="118" cy="22" r="7" fill="#c9a2ff"/><text x="130" y="26" fill="#c9a2ff" font-size="9">(2,1,−2)</text>`)},
+  dimensionless:{t:'Dimensionless',h:'All [[exponent|exponents]] are 0 — the origin. A pure number, usually a ratio: strain = Δlength ÷ length, so the Ls cancel.',
+    v:SVG(150,40,`<text x="0" y="16" fill="${LC}" font-size="11">m</text><line x1="0" x2="14" y1="20" y2="20" stroke="#aab"/><text x="0" y="34" fill="${LC}" font-size="11">m</text><text x="22" y="25" fill="#aab" font-size="11">= L¹⁻¹ = L⁰ = 1</text>`)},
+  commensurable:{t:'Commensurable',h:'Strictly, quantities of the same [[dimension|dimension]] are commensurable: they can be measured against each other. Two different points become comparable once you know the [[delta|step]] between them — here, a named quantity.',
+    v:SVG(170,40,`<circle cx="15" cy="22" r="6" fill="#c9a2ff"/><text x="2" y="38" fill="#aab" font-size="8">Force</text><path d="M24 22 L140 22" stroke="#9bf" stroke-width="2"/><path d="M140 17 L150 22 L140 27Z" fill="#9bf"/><circle cx="158" cy="22" r="6" fill="#d9a2ff"/><text x="132" y="38" fill="#aab" font-size="8">Energy</text><text x="62" y="16" fill="${LC}" font-size="9">× Length</text>`)},
+  vector:{t:'Vector',h:'An arrow from A to B. Its components are B − A: the [[delta|exponent difference]]. Moving along it means [[mult|multiplying]] by that dimension.',
+    v:SVG(160,50,`<circle cx="14" cy="38" r="5" fill="#9bf"/><path d="M18 35 L124 12" stroke="#ccd" stroke-width="2"/><path d="M118 8 L132 10 L122 19Z" fill="#ccd"/><circle cx="138" cy="9" r="5" fill="#fc8"/><text x="4" y="50" fill="#9bf" font-size="9">A</text><text x="144" y="22" fill="#fc8" font-size="9">B</text><text x="50" y="40" fill="#aab" font-size="9">Δ = B − A</text>`)},
+  delta:{t:'Exponent difference (Δ)',h:'Subtract coordinates. Energy (2,1,−2) − Force (1,1,−2) = (1,0,0) = L, so Energy = Force × Length. That works because [[mult|multiplying adds exponents]].',
+    v:SVG(180,48,`<text x="0" y="12" fill="#d9a2ff" font-size="10">(2, 1, −2)</text><text x="0" y="26" fill="#c9a2ff" font-size="10">− (1, 1, −2)</text><line x1="0" x2="80" y1="31" y2="31" stroke="#667"/><text x="0" y="44" fill="${LC}" font-size="10">= (1, 0, 0) → L</text>`)},
+  mult:{t:'Multiplying adds exponents',h:'L² × L³ = L⁵ because (L·L)·(L·L·L) has five Ls. Dividing subtracts them. Try it:',m:'mult'},
+  formula:{t:'Formula arrow',h:'A known law drawn as a [[vector|vector]]. F = ma is the arrow from acceleration to force; its step is mass.',
+    v:SVG(170,40,`<circle cx="12" cy="20" r="6" fill="#f9a"/><text x="0" y="38" fill="#aab" font-size="8">a</text><path d="M20 20 L140 20" stroke="#fc8" stroke-width="2"/><path d="M140 15 L150 20 L140 25Z" fill="#fc8"/><circle cx="158" cy="20" r="6" fill="#c9a2ff"/><text x="155" y="38" fill="#aab" font-size="8">F</text><text x="70" y="14" fill="${MC}" font-size="9">× m</text>`)},
+  symbol:{t:'Symbol',h:'The letter physicists write for a quantity. Case matters: F is force, f is frequency, T is a period, t is time.'},
+  projection:{t:'Projection',h:'How 3-D is flattened onto the screen: [[ortho|orthographic]] (parallel) or [[persp|perspective]] (converging).',
+    v:SVG(180,56,`<g stroke="#9bf" fill="none"><rect x="6" y="10" width="30" height="30"/><rect x="18" y="4" width="30" height="30"/><path d="M6 10 L18 4 M36 10 L48 4 M6 40 L18 34 M36 40 L48 34"/></g><text x="4" y="54" fill="#9bf" font-size="8">ortho</text><g stroke="#fc8" fill="none"><rect x="104" y="10" width="34" height="34"/><rect x="118" y="18" width="18" height="18"/><path d="M104 10 L118 18 M138 10 L136 18 M104 44 L118 36 M138 44 L136 36"/></g><text x="104" y="54" fill="#fc8" font-size="8">perspective</text>`)},
+  ortho:{t:'Orthographic',h:'Parallel rays: far things are not drawn smaller, so grid lines stay parallel — best for reading exact coordinates.',
+    v:SVG(120,36,`<g stroke="#9bf">${[0,1,2,3].map(i=>`<line x1="${10+i*25}" y1="4" x2="${10+i*25}" y2="32"/>`).join('')}</g>`)},
+  persp:{t:'Perspective',h:'Rays meet at your eye, so far things shrink. A wider [[fov|field of view]] exaggerates depth.',
+    v:SVG(120,36,`<g stroke="#fc8">${[0,1,2,3].map(i=>`<line x1="${10+i*33}" y1="34" x2="${50+i*7}" y2="2"/>`).join('')}</g>`)},
+  fov:{t:'Field of view',h:'The angle the camera sees. Small = telephoto (flat), large = wide-angle (deep).',
+    v:SVG(150,44,`<path d="M6 22 L70 10 L70 34Z" fill="#9bf" opacity=".35"/><text x="20" y="44" fill="#9bf" font-size="8">narrow</text><path d="M86 22 L146 0 L146 44Z" fill="#fc8" opacity=".35"/><text x="104" y="44" fill="#fc8" font-size="8">wide</text>`)},
+  colour:{t:'Colour = position',h:'Each point is coloured from its [[coord|coordinate]] in [[oklab|OKLAB]]: the L exponent sets green↔pink, T sets blue↔yellow, M sets darker↔lighter. Nearby points look alike.',
+    v:SVG(170,52,[['L',-3,3,c=>coordToColor(c,0,0)],['T',-4,1,c=>coordToColor(0,0,c)],['M',-1,1,c=>coordToColor(0,c,0)]].map(([s,a,b,f],i)=>`<defs><linearGradient id="g${s}"><stop offset="0" stop-color="${f(a).css}"/><stop offset="1" stop-color="${f(b).css}"/></linearGradient></defs><text x="0" y="${12+i*17}" fill="#aab" font-size="9">${s}</text><rect x="14" y="${4+i*17}" width="150" height="10" rx="3" fill="url(#g${s})"/>`).join(''))},
+  oklab:{t:'OKLAB',h:'A colour space designed so equal numeric steps look like equal colour changes — it is [[perceptual|perceptually uniform]].'},
+  perceptual:{t:'Perceptually uniform',h:'A step of the same size looks equally big anywhere in the space — unlike RGB, where some steps are barely visible and others jump.',
+    v:SVG(170,30,[0,1,2,3,4,5,6].map(i=>{const c=oklabToSRGB(.7,.12*Math.cos(i),.12*Math.sin(i)).map(x=>Math.round(Math.max(0,Math.min(1,x))*255));return`<rect x="${i*24}" y="4" width="22" height="22" rx="3" fill="rgb(${c})"/>`;}).join(''))},
+};
+// Glossary html already contains trusted markup; only expand [[links]] there.
+const glossHTML=t=>String(t).replace(/\[\[(\w+)\|([^\]]+)\]\]/g,(_,k,txt)=>`<span class="term" data-t="${k}" tabindex="0" role="button">${txt}</span>`);
+
+// Manipulatives inside tooltips
+const MANIP={
+  exp(el){
+    el.insertAdjacentHTML('beforeend',`<div class="mout"></div><div class="prow"><span class="pl">n</span><input type="range" min="-3" max="3" value="2" aria-label="Exponent"><span class="pv"></span></div>`);
+    const out=el.querySelector('.mout'), r=el.querySelector('input'), pv=el.querySelector('.pv');
+    const words={'-3':'per cubic metre','-2':'per square metre','-1':'per metre','0':'a pure number','1':'a length','2':'an area','3':'a volume'};
+    const shape=n=>n===0?'<circle cx="40" cy="30" r="4" fill="#9bf"/>':n===1?`<line x1="10" y1="40" x2="70" y2="40" stroke="${LC}" stroke-width="3"/>`:
+      n===2?`<rect x="20" y="10" width="40" height="40" fill="${LC}" opacity=".55" stroke="${LC}"/>`:
+      `<path d="M15 22 L45 22 L45 52 L15 52Z" fill="${LC}" opacity=".55" stroke="${LC}"/><path d="M15 22 L30 10 L60 10 L45 22Z M45 22 L60 10 L60 40 L45 52Z" fill="${LC}" opacity=".35" stroke="${LC}"/>`;
+    const draw=()=>{const n=+r.value; pv.textContent=n;
+      out.innerHTML=`<svg viewBox="0 0 230 60" width="230" height="60">${n<0?`<text x="0" y="36" fill="#aab" font-size="16">1 /</text><g transform="translate(30,0)">${shape(-n)}</g>`:shape(n)}<text x="${n<0?118:96}" y="26" fill="${LC}" font-size="14" font-weight="bold">L${n===1?'':supStr(n)}</text><text x="${n<0?118:96}" y="44" fill="#aab" font-size="9">${words[n]}</text></svg>`;};
+    r.addEventListener('input',draw); draw();
+  },
+  mult(el){
+    el.insertAdjacentHTML('beforeend',`<div class="mout"></div><div class="prow"><span class="pl">a</span><input type="range" min="-2" max="3" value="2" aria-label="First exponent"><span class="pv"></span></div><div class="prow"><span class="pl">b</span><input type="range" min="-2" max="3" value="1" aria-label="Second exponent"><span class="pv"></span></div>`);
+    const out=el.querySelector('.mout'), [ra,rb]=el.querySelectorAll('input'), [pa,pb]=el.querySelectorAll('.pv');
+    const blocks=(n,c,x0)=>[...Array(Math.abs(n))].map((_,i)=>`<rect x="${x0+i*13}" y="34" width="11" height="11" rx="2" fill="${n<0?'none':c}" stroke="${c}" stroke-dasharray="${n<0?'2 2':''}"/>`).join('');
+    const draw=()=>{const a=+ra.value,b=+rb.value,s=a+b; pa.textContent=a; pb.textContent=b;
+      const L=n=>n===1?'L':'L'+supStr(n);
+      out.innerHTML=`<svg viewBox="0 0 220 50" width="220" height="50"><text x="0" y="20" font-size="14" font-weight="bold"><tspan fill="#9bf">${L(a)}</tspan><tspan fill="#aab"> × </tspan><tspan fill="#fc8">${L(b)}</tspan><tspan fill="#aab"> = </tspan><tspan fill="${LC}">${L(s)}</tspan></text>${blocks(a,'#9bf',0)}${blocks(b,'#fc8',Math.abs(a)*13+6)}<text x="${(Math.abs(a)+Math.abs(b))*13+12}" y="44" fill="${LC}" font-size="10">→ ${a}+${b<0?'('+b+')':b} = ${s}</text></svg>`;};
+    ra.addEventListener('input',draw); rb.addEventListener('input',draw); draw();
+  },
+};
+
+// Nested tooltip stack
+const ttStack=[];
+function closeTT(from=0){while(ttStack.length>from){const t=ttStack.pop();t.el.remove();if(t.src)t.src.classList.remove('open');}}
+function openTT(key,anchor,src){
+  const g=GLOSS[key]; if(!g) return;
+  const parent=src&&src.closest('.tt'), lv=parent?+parent.dataset.lv+1:0;
+  if(ttStack[lv]&&ttStack[lv].key===key&&ttStack[lv].src===src){closeTT(lv);return;}
+  closeTT(lv);
+  const el=document.createElement('div'); el.className='tt'; el.dataset.lv=lv; el.setAttribute('role','tooltip');
+  const depth=['overview','detail','basics','basics'][Math.min(lv,3)];
+  el.innerHTML=`<div class="tth"><span>${esc(g.t)}</span><span class="ttd">${depth}</span></div>${g.v||''}<div class="ttb">${glossHTML(g.h)}</div>`;
+  if(g.m) MANIP[g.m](el);
+  document.body.appendChild(el);
+  const r=anchor.getBoundingClientRect(), w=el.offsetWidth, h=el.offsetHeight, vw=window.innerWidth, vh=window.innerHeight;
+  let x=Math.min(Math.max(8,r.left+r.width/2-w/2+lv*10),vw-w-8);
+  let y=r.bottom+6; if(y+h>vh-8) y=Math.max(8,r.top-h-6);
+  // A nested card goes below (or above) its whole parent card so the parent stays readable
+  if(parent){const pr=parent.getBoundingClientRect();
+    if(pr.bottom+6+h<=vh-8) y=pr.bottom+6; else if(pr.top-h-6>=8) y=pr.top-h-6;}
+  el.style.left=x+'px'; el.style.top=y+'px';
+  if(src) src.classList.add('open');
+  ttStack[lv]={el,key,src};
+}
+let ttHoverTimer=0;
+document.addEventListener('click',e=>{
+  const t=e.target.closest('.term');
+  if(t){openTT(t.dataset.t,t,t);e.preventDefault();e.stopPropagation();return;}
+});
+document.addEventListener('keydown',e=>{
+  const t=e.target.closest&&e.target.closest('.term');
+  if(t&&(e.key==='Enter'||e.key===' ')){openTT(t.dataset.t,t,t);e.preventDefault();e.stopPropagation();}
+},true);
+if(matchMedia('(hover:hover)').matches){
+  document.addEventListener('mouseover',e=>{
+    const t=e.target.closest('.term');
+    clearTimeout(ttHoverTimer);
+    if(t&&!t.classList.contains('open')) ttHoverTimer=setTimeout(()=>{if(!t.classList.contains('open'))openTT(t.dataset.t,t,t);},180);
+  });
+}
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('.tt,.term,#search'))closeTT(0);});
+
+// ── Tutorial definitions ──
+// step: {h: text with [[terms]], act?: what to do (shown while waiting), wait?: event name or ()=>bool,
+//        enter?: fn run on entering, btn?: [label, fn]}
+const lastVec=()=>userVecs[userVecs.length-1];
+const TUTS=[
+  {id:'points',title:'What the points are',blurb:'Lattice points, coordinates, shared points',steps:[
+    {h:'Each sphere is a [[point|lattice point]]. Its position is its [[coord|coordinate]] (L, M, T): the [[exponent|exponents]] of the [[base|base dimensions]] in that quantity’s [[dimension|dimension]].',
+     act:'Hover (or tap) any sphere.',wait:'point'},
+    {h:'Force sits at (1, 1, −2) because force = L¹·M¹·T⁻² (kg·m/s²). Every name listed at a point is [[same|dimensionally identical]] — Force, Weight, Drag and Thrust share one sphere.',
+     btn:['Show Force',()=>focusPoint(PT_OF_NAME.get('Force'),'Force')]},
+    {h:'The origin (0, 0, 0) holds the [[dimensionless|dimensionless]] numbers. The colours are positions too: [[colour|colour = position]].',
+     btn:['Show the origin',()=>focusPoint(PT_BY_KEY.get(keyOf(0,0,0)),'Strain')]},
+  ]},
+  {id:'vectors',title:'Drawing a vector',blurb:'Connect two points to get an equation',steps:[
+    {h:'Two [[commensurable|commensurable]] points can be joined by a [[vector|vector]]. Turn on drawing first.',act:'Press ✎ Draw vector (or V).',
+     wait:()=>drawMode,enter:()=>flashEl(drawBtn)},
+    {h:'Now click <b>Force</b>, then <b>Energy</b>.',act:'Draw from Force to Energy (any two points also work).',wait:'vector',
+     btn:['Centre on Force',()=>{centreOn(1,1,-2);}]},
+    {h:()=>{const v=lastVec(); if(!v) return 'Draw a vector to continue.';
+       const ok=v.from.key===keyOf(1,1,-2)&&v.to.key===keyOf(2,1,-2);
+       return (ok?'Its step is Δ = (1, 0, 0) — that is Length — so <b>Energy = Force × Length</b> (work = force × distance).'
+         :`Its step is Δ = ${esc(v.eq.delta)}, so <b>${esc(v.eq.primary)}</b>.`)+' The rule: [[delta|subtract coordinates]], because [[mult|multiplying adds exponents]]. The card at the bottom lists the equation — click it to copy.';}},
+  ]},
+  {id:'formulas',title:'Formula arrows',blurb:'Known laws as arrows',steps:[
+    {h:'Well-known laws are pre-drawn as [[formula|formula arrows]]. They start hidden.',act:'Open ⚙ Controls › Formulas and turn on Formula arrows.',
+     wait:()=>showFormulas,enter:()=>showControl('FORMULAS')},
+    {h:'Each arrow carries its law as a label.',act:'Hover (or tap) any arrow.',wait:'formula'},
+    {h:'F = ma runs from Acceleration to Force; its step is Mass. It is the same rule as your own [[vector|vectors]].',
+     btn:['Show F = ma',()=>{const fo=formulaObjs.find(f=>f.def.label==='F = ma');if(fo)focusFormula(fo);}]},
+  ]},
+  {id:'search',title:'Search',blurb:'Names, symbols, formulas, controls',steps:[
+    {h:'The search box finds quantities, their [[symbol|symbols]], formulas, operations, controls and these glossary terms.',
+     act:'Search for something — try “F”, “viscosity” or “÷” — and pick a result.',wait:'search',enter:()=>{flashEl(document.getElementById('search'));}},
+    {h:'Symbols are case-sensitive: F finds force, f finds frequency. Press / to jump to search at any time.'},
+  ]},
+  {id:'projection',title:'Projection',blurb:'Orthographic vs perspective',steps:[
+    {h:'The Projection slider changes the [[projection|projection]].',act:'Drag the slider all the way left to Ortho.',wait:()=>usingOrtho,enter:()=>showControl('PROJECTION')},
+    {h:'This is [[ortho|orthographic]]: grid lines stay parallel, so coordinates are easy to read. Slide right for [[persp|perspective]] with a wider [[fov|field of view]].'},
+  ]},
+  {id:'labels',title:'Labels & view',blurb:'Legibility, visibility, rotation',steps:[
+    {h:'Labels can be restyled for legibility.',act:'Pick a legibility effect under Labels.',wait:'labelfx',enter:()=>showControl('LABELS')},
+    {h:'Under Visibility you can dim spheres or labels. Space pauses rotation, R resets the view, arrow keys orbit.',enter:()=>showControl('VISIBILITY')},
+  ]},
+];
+
+// Persistence (best effort — the page works without storage)
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch{return d;}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}};
+const tutDone=new Set(store.get('pms.tutDone',[]));
+
+const helpBtn=document.getElementById('helpBtn'), tmenu=document.getElementById('tmenu'), coach=document.getElementById('coach');
+if(!store.get('pms.helpSeen',false)) helpBtn.classList.add('glow');
+function renderMenu(){
+  tmenu.innerHTML=`<div class="tmh">Tutorials <span>${tutDone.size}/${TUTS.length} done</span></div>`+
+    TUTS.map((t,i)=>`<button class="ti2${tutDone.has(t.id)?' done':''}" data-i="${i}"><span class="tck">${tutDone.has(t.id)?'✓':i+1}</span><span><b>${esc(t.title)}</b>${i===0&&!tutDone.has(t.id)?' <span class="tnew">start here</span>':''}<br><span class="tbl">${esc(t.blurb)}</span></span></button>`).join('')+
+    (tutDone.size?`<button class="treset">Reset progress</button>`:'');
+}
+function toggleMenu(show){
+  show=show??tmenu.style.display!=='block';
+  if(show){renderMenu();tmenu.style.display='block';}else tmenu.style.display='none';
+}
+helpBtn.addEventListener('click',()=>{
+  helpBtn.classList.remove('glow'); store.set('pms.helpSeen',true); toggleMenu();
+});
+tmenu.addEventListener('click',e=>{
+  const b=e.target.closest('.ti2'); if(b){toggleMenu(false);startTut(+b.dataset.i);return;}
+  if(e.target.closest('.treset')){tutDone.clear();store.set('pms.tutDone',[]);renderMenu();}
+});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#tmenu,#helpBtn'))tmenu.style.display='none';});
+
+let tut=null; // {i, step, off, poll}
+function stepWaitDone(st){return !st.wait||(typeof st.wait==='function'&&st.wait());}
+function renderCoach(){
+  if(!tut){coach.style.display='none';return;}
+  const T=TUTS[tut.i], st=T.steps[tut.step], last=tut.step===T.steps.length-1;
+  const h=typeof st.h==='function'?st.h():st.h;
+  const waiting=!tut.met&&!!st.wait;
+  coach.innerHTML=`<div class="ch"><span>${tutDone.has(T.id)?'✓ ':''}${esc(T.title)}</span><span class="cdots">${T.steps.map((_,i)=>`<i class="${i<tut.step?'d':i===tut.step?'c':''}"></i>`).join('')}</span><button class="vx" id="cX" title="Close tutorial" aria-label="Close tutorial">✕</button></div>`+
+    `<div class="cb">${glossHTML(h)}</div>`+
+    (st.act?`<div class="cact${waiting?'':' ok'}">${waiting?'▸':'✓'} ${esc(st.act)}</div>`:'')+
+    `<div class="cbtns">${tut.step>0?'<button class="pbtn" id="cBack">‹ Back</button>':''}`+
+    (st.btn?`<button class="pbtn" id="cDo">${esc(st.btn[0])}</button>`:'')+
+    (last?`<button class="pbtn on" id="cNext">${tut.i<TUTS.length-1?'Finish ✓ · next ›':'Finish ✓'}</button>`
+         :`<button class="pbtn${waiting?'':' on'}" id="cNext">${waiting?'Skip ›':'Next ›'}</button>`)+`</div>`;
+  coach.style.display='block';
+  coach.querySelector('#cX').onclick=endTut;
+  const bk=coach.querySelector('#cBack'); if(bk) bk.onclick=()=>goStep(tut.step-1);
+  const dd=coach.querySelector('#cDo'); if(dd) dd.onclick=st.btn[1];
+  coach.querySelector('#cNext').onclick=()=>{
+    if(!last) return goStep(tut.step+1);
+    finishTut();
+  };
+}
+function goStep(n){
+  if(!tut) return;
+  if(tut.off) tut.off(); tut.off=null; closeTT(0);
+  tut.step=n; const st=TUTS[tut.i].steps[n];
+  tut.met=stepWaitDone(st)&&typeof st.wait!=='string';
+  if(typeof st.wait==='string') tut.off=tutOn(st.wait,()=>{if(!tut.met){tut.met=true;renderCoach();}});
+  if(st.enter) st.enter();
+  renderCoach();
+}
+function startTut(i){endTut();tut={i,step:0,met:false,off:null};goStep(0);}
+function finishTut(){
+  const T=TUTS[tut.i]; tutDone.add(T.id); store.set('pms.tutDone',[...tutDone]);
+  toast(`Tutorial complete ✓ ${T.title}`);
+  const next=TUTS.findIndex((t,j)=>j>tut.i&&!tutDone.has(t.id));
+  endTut();
+  if(next>=0) startTut(next);
+}
+function endTut(){if(tut&&tut.off)tut.off();tut=null;closeTT(0);renderCoach();}
+// Poll function-style waits (state changes come from many places)
+setInterval(()=>{
+  if(!tut) return; const st=TUTS[tut.i].steps[tut.step];
+  if(typeof st.wait==='function'&&!tut.met&&st.wait()){tut.met=true;renderCoach();}
+},250);
+
+// Make tutorials and glossary terms findable from search
+TUTS.forEach((t,i)=>SEARCH_INDEX.push({kind:'tutorial',title:t.title,sub:t.blurb+(tutDone.has(t.id)?' · ✓ done':''),keys:['tutorial','help','guide','learn',t.blurb],sym:[],go:()=>startTut(i)}));
+Object.entries(GLOSS).forEach(([k,g])=>SEARCH_INDEX.push({kind:'term',title:g.t,sub:g.h.replace(/\[\[\w+\|([^\]]+)\]\]/g,'$1').replace(/<[^>]+>/g,'').slice(0,80)+'…',keys:[k,g.h.replace(/<[^>]+>/g,'')],sym:[],
+  go:()=>openTT(k,document.getElementById('sq'),null)}));
+
 // ── Toggle ────────────────────────────────────────────────────────────────────
 let panelOpen=false;
 function openPanel(){panelOpen=true;panel.classList.remove('closed');tab.classList.add('open');tab.querySelector('.ti').textContent='✕';tab.querySelector('.tl').textContent='Close';}
@@ -1241,6 +1663,7 @@ window.addEventListener('keydown',e=>{
   if(e.target.closest&&e.target.closest('input,select,textarea')) return;
   if(e.target.closest&&e.target.closest('button')&&(e.key===' '||e.key==='Enter')) return;
   KEYS[e.key]=true;
+  if(e.key==='/'){sq.focus();sq.select();e.preventDefault();return;}
   if(e.key===' '){autoRotOn=!autoRotOn;controls.autoRotate=autoRotOn;rotBtn.textContent=autoRotOn?'⏸ Pause':'▶ Rotate';rotBtn.style.color=autoRotOn?'#88aaff':'#aaaacc';e.preventDefault();}
   if(e.key==='r'||e.key==='R'){
     if(usingOrtho){controls.object=perspCam;controls.minDistance=2;controls.maxDistance=60;usingOrtho=false;activeCamera=perspCam;}
@@ -1254,6 +1677,7 @@ window.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     if(drawStart){drawStart=null;updateDrawUI();}
     else if(drawMode) setDrawMode(false);
+    else if(ttStack.length) closeTT(0);
     else if(overlayOn()) setOperator(null);
     else hideCard();
   }
@@ -1305,7 +1729,7 @@ function animate(){
     const cT=coordToColor(0,0,Math.max(-4,Math.min(1,n)));let[tx,ty]=toSc(0,0,n);drawLbl(tx,ty+24,String(n),cT.r,cT.g,cT.b,false,true);
   });
   // Pre-compute hover sets once — shared by label pass and 3D highlight pass
-  const anyHov=!!(hovered||hoveredFormula||hoveredUV||hoveredOp||hoveredCm);
+  const anyHov=!!(hovered||hoveredFormula||hoveredUV||hoveredOp||hoveredCm||focusPt||focusFo);
   const activeFos=new Set(), activePts=new Set(), activeOps=new Set();
   if(anyHov){
     if(hoveredFormula){
@@ -1316,6 +1740,11 @@ function animate(){
     if(hoveredCm) activePts.add(hoveredCm.pt);
     if(hoveredOp){(hoveredOp.law?opObjs:[hoveredOp]).forEach(o=>{activeOps.add(o);if(o.from)activePts.add(o.from);if(o.to)activePts.add(o.to);});}
     if(hovered) opObjs.forEach(o=>{if(o.from===hovered||o.to===hovered){activeOps.add(o);activePts.add(o.from);if(o.to)activePts.add(o.to);}});
+    if(focusPt) activePts.add(focusPt);
+    if(focusFo){
+      activeFos.add(focusFo);
+      PTS.forEach(pt=>{if(pt.key===focusFo.fromKey||pt.key===focusFo.toKey)activePts.add(pt);});
+    }
     if(hovered){
       activePts.add(hovered);
       formulaObjs.forEach(fo=>{
@@ -1335,7 +1764,7 @@ function animate(){
     PTS.map(pt=>{const[sx,sy,z]=toSc(pt.L,pt.M,pt.T);return{pt,sx,sy,z};})
       .sort((a,b)=>b.z-a.z)
       .forEach(({pt,sx,sy})=>{
-        const isActive=activePts.has(pt), isDirect=hovered===pt;
+        const isActive=activePts.has(pt), isDirect=hovered===pt||focusPt===pt;
         lc.globalAlpha=dim?(isActive?1:0.12):baseAlpha;
         const{r,g,b}=pt.col,isH=isDirect,n=pt.entries.length;
         const boost=dim?(isDirect?4:isActive?2:0):0;
@@ -1369,7 +1798,7 @@ function animate(){
     formulaObjs.forEach(fo=>{
       if(!fo.g.visible) return;
       const[sx,sy]=toSc(fo.mid.x,fo.mid.y,fo.mid.z);
-      const foActive=activeFos.has(fo), foDirect=hoveredFormula===fo;
+      const foActive=activeFos.has(fo), foDirect=hoveredFormula===fo||focusFo===fo;
       lc.globalAlpha=dim?(foActive?1:0.10):1;
       const foBoost=dim?(foDirect?3:foActive?2:0):0;
       lc.font=`bold ${Math.max(7,lblSize-1+foBoost)}px ${lblFont}`;
@@ -1407,6 +1836,18 @@ function animate(){
       lc.setLineDash([6,5]); lc.strokeStyle=drawStart.col.css; lc.lineWidth=2;
       lc.beginPath(); lc.moveTo(ax,ay); lc.lineTo(end[0],end[1]); lc.stroke(); lc.setLineDash([]);
     }
+  }
+  // Pulsing ring around a point picked from search
+  if(focusPt){
+    const[fx,fy]=toSc(focusPt.L,focusPt.M,focusPt.T), ph=(performance.now()%1400)/1400;
+    lc.strokeStyle=`rgba(200,215,255,${1-ph})`; lc.lineWidth=2;
+    lc.beginPath(); lc.arc(fx,fy,10+ph*18,0,Math.PI*2); lc.stroke();
+  }
+  // Smoothly re-centre the orbit on a searched-for point
+  if(camTween){
+    const t=Math.min(1,(performance.now()-camTween.t0)/650), e=t*t*(3-2*t);
+    controls.target.lerpVectors(camTween.from,camTween.to,e);
+    if(t>=1) camTween=null;
   }
   lc.shadowBlur=0;
 
