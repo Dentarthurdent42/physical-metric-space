@@ -253,18 +253,28 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // ── OKLAB ─────────────────────────────────────────────────────────────────────
-function oklabToSRGB(L,a,b){
+function oklabToLinear(L,a,b){
   const l_=L+0.3963377774*a+0.2158037573*b,m_=L-0.1055613458*a-0.0638541728*b,s_=L-0.0894841775*a-1.2914855480*b;
   const l=l_*l_*l_,m=m_*m_*m_,s=s_*s_*s_;
-  const rl=4.0767416621*l-3.3077115913*m+0.2309699292*s;
-  const gl=-1.2684380046*l+2.6097574011*m-0.3413193965*s;
-  const bl=-0.0041960863*l-0.7034186147*m+1.7076147010*s;
-  const g=c=>{c=Math.max(0,Math.min(1,c));return c<=0.0031308?12.92*c:1.055*Math.pow(c,1/2.4)-0.055};
-  return[g(rl),g(gl),g(bl)];
+  return[4.0767416621*l-3.3077115913*m+0.2309699292*s,
+    -1.2684380046*l+2.6097574011*m-0.3413193965*s,
+    -0.0041960863*l-0.7034186147*m+1.7076147010*s];
 }
+const gammaEnc=c=>{c=Math.max(0,Math.min(1,c));return c<=0.0031308?12.92*c:1.055*Math.pow(c,1/2.4)-0.055};
+function oklabToSRGB(L,a,b){return oklabToLinear(L,a,b).map(gammaEnc);}
+// Keep lightness and hue exact: if a colour falls outside sRGB, shrink only its chroma until it fits
+function oklabToSRGBMapped(L,a,b){
+  const ok=k=>oklabToLinear(L,a*k,b*k).every(c=>c>=-1e-4&&c<=1+1e-4);
+  if(ok(1)) return oklabToSRGB(L,a,b);
+  let lo=0,hi=1;
+  for(let i=0;i<14;i++){const mid=(lo+hi)/2;if(ok(mid))lo=mid;else hi=mid;}
+  return oklabToSRGB(L,a*lo,b*lo);
+}
+// Position → colour. M (mass) sets lightness and is the vertical axis, so higher points are
+// clearly brighter and lower ones darker; L and T set the hue plane (a, b).
 function coordToColor(dL,dM,dT){
-  const oL=0.65+(dM/1.5)*0.12, oa=(dL/3)*0.22, ob=(dT/4)*0.24;
-  const[r,g,b]=oklabToSRGB(oL,oa,ob);
+  const oL=Math.max(0.36,Math.min(0.9,0.64+dM*0.2)), oa=(dL/3)*0.22, ob=(dT/4)*0.24;
+  const[r,g,b]=oklabToSRGBMapped(oL,oa,ob);
   const ri=Math.round(Math.max(0,Math.min(1,r))*255);
   const gi=Math.round(Math.max(0,Math.min(1,g))*255);
   const bi=Math.round(Math.max(0,Math.min(1,b))*255);
