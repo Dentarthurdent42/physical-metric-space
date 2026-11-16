@@ -1047,7 +1047,7 @@ function showCard(uv){
   const row=(t,cls='veq')=>`<div class="${cls}" data-copy="${esc(t)}" title="Click to copy">${esc(t)}</div>`;
   vcard.innerHTML=
     `<div class="vhead"><span><span style="color:${sc.css}">${esc(nm(a))}</span> <span style="color:#7d7d92">→</span> <span style="color:${ec.css}">${esc(nm(b))}</span></span><button class="vx" id="vcardX" title="Close">✕</button></div>`+
-    `<div class="vsub">Δ = (${sgn(eq.dL)}, ${sgn(eq.dM)}, ${sgn(eq.dT)}) = ${esc(eq.delta)}</div>`+
+    `<div class="vsub">Δ = (${sgn(eq.dL)}, ${sgn(eq.dM)}, ${sgn(eq.dT)}, ${sgn(eq.dA)}) = ${esc(eq.delta)}</div>`+
     (eq.named.length?eq.named.map((n,i)=>row(n.eq,i?'veq alt':'veq')).join(''):'<div class="vsub">No named quantity spans this step.</div>')+
     row(eq.generic,'veq gen')+
     (eq.known.length?`<div class="vlbl">Known formulas</div>`+eq.known.map(k=>row(k,'veq known')).join(''):'')+
@@ -1141,7 +1141,7 @@ let hovered=null, hoveredFormula=null, hoveredUV=null, hoveredCm=null, lastMouse
 // Returns {pt, fo, uv, op} for whatever is under the given client coordinates (at most one is set).
 // While drawing, only points are pickable so arrows never block endpoint selection.
 function hitAt(cx,cy){
-  mouse.x=(cx/W)*2-1; mouse.y=-(cy/H)*2+1;
+  mouse.x=(cx/W)*2-1; mouse.y=-((cy-VT)/H)*2+1;
   ray.setFromCamera(mouse,activeCamera);
   const targets=drawMode?pickMeshes:[...(showFormulas&&!overlayOn()?formulaPickMeshes:[]),...opPickMeshes,...uvPickMeshes,...beadPickMeshes,...pickMeshes];
   const hits=ray.intersectObjects(targets).sort((a,b)=>a.distance-b.distance);
@@ -1760,7 +1760,7 @@ document.addEventListener('pointerdown',e=>{if(!e.target.closest('.tt,.term,#sea
 const lastVec=()=>userVecs[userVecs.length-1];
 const TUTS=[
   {id:'points',title:'What the points are',blurb:'Lattice points, coordinates, shared points',steps:[
-    {h:'Each sphere is a [[point|lattice point]]. Its position is its [[coord|coordinate]] (L, M, T): the [[exponent|exponents]] of the [[base|base dimensions]] in that quantity’s [[dimension|dimension]].',
+    {h:'Each sphere is a [[point|lattice point]]. Its position is its [[coord|coordinate]] (L, M, T, A): the [[exponent|exponents]] of the [[base|base dimensions]] in that quantity’s [[dimension|dimension]].',
      act:'Hover (or tap) any sphere.',wait:'point'},
     {h:'Force sits at (1, 1, −2) because force = L¹·M¹·T⁻² (kg·m/s²). Every name listed at a point is [[same|dimensionally identical]] — Force, Weight, Drag and Thrust share one sphere, and are all one kind.',
      btn:['Show Force',()=>focusPoint(PT_OF_NAME.get('Force'),'Force')]},
@@ -1921,16 +1921,23 @@ window.addEventListener('keyup',e=>{KEYS[e.key]=false;});
 
 // The 3D view never sits under the controls: it ends just above the dock, or above the
 // panel while that is open, so whatever a control changes stays in sight.
+// Likewise it starts below any hint or tutorial card shown at the top left.
+var VT=0;
 function layoutView(){
-  const dockEl=document.getElementById('dock');
+  const dockEl=document.getElementById('dock'), tlEl=document.getElementById('tl');
   const edge=panelOpen?panel.offsetTop:dockEl.offsetTop;
-  W=window.innerWidth; H=Math.max(140,Math.round(edge-8));
+  const tlH=tlEl.offsetHeight;
+  VT=tlH>0?Math.round(tlEl.offsetTop+tlH+8):0;
+  if(edge-8-VT<160) VT=Math.max(0,Math.round(edge-8-160));
+  c3d.style.top=VT+'px'; clbl.style.top=VT+'px';
+  W=window.innerWidth; H=Math.max(140,Math.round(edge-8-VT));
   renderer.setSize(W,H); perspCam.aspect=W/H; perspCam.updateProjectionMatrix();
   const h=ORTHO_H, asp=W/H;
   orthoCam.left=-h*asp; orthoCam.right=h*asp; orthoCam.updateProjectionMatrix();
   syncLC();
 }
 window.addEventListener('resize',layoutView);
+if(window.ResizeObserver) new ResizeObserver(()=>layoutView()).observe(document.getElementById('tl'));
 layoutView();
 
 // ── Render loop ───────────────────────────────────────────────────────────────
@@ -2066,7 +2073,7 @@ function animate(){
     lc.beginPath(); lc.arc(ax,ay,11,0,Math.PI*2); lc.stroke();
     let end=null;
     if(hovered&&hovered!==drawStart){const[bx,by]=toSc(hovered.pos.x,hovered.pos.y,hovered.pos.z);end=[bx,by];}
-    else if(lastMouse) end=[lastMouse.x,lastMouse.y];
+    else if(lastMouse) end=[lastMouse.x,lastMouse.y-VT];
     if(end){
       lc.setLineDash([6,5]); lc.strokeStyle=drawStart.col.css; lc.lineWidth=2;
       lc.beginPath(); lc.moveTo(ax,ay); lc.lineTo(end[0],end[1]); lc.stroke(); lc.setLineDash([]);
