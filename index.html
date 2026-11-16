@@ -200,6 +200,18 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
 .mout{min-height:50px;margin:4px 0 2px;font-family:'Courier New',monospace}
 .mout svg{max-width:100%;height:auto;font-family:'Courier New',monospace}
 .tt .prow .pl,.tt .prow .pv{font:10px 'Courier New',monospace;min-width:14px}
+@media (max-width:600px){
+  #panel{top:auto;left:0;right:0;bottom:0;width:auto;height:52%;border-left:none;
+    border-top:1px solid rgba(255,255,255,.14);border-radius:12px 12px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.6)}
+  #panel.closed{transform:translateY(100%)}
+  #tab{top:auto;bottom:14px;right:12px;transform:none;width:auto;height:40px;padding:0 12px;
+    flex-direction:row;gap:6px;border:1px solid rgba(255,255,255,.14);border-radius:8px}
+  #tab.open{right:12px;bottom:calc(52% + 8px)}
+  .tl{writing-mode:horizontal-tb;transform:none;font-size:9px}
+  body.panel-open #vcard{bottom:calc(52% + 8px);max-height:30%}
+  body.panel-open #badge{display:none}
+  body.panel-open #tl{max-height:calc(48% - 70px);overflow-y:auto}
+}
 #toast{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:60;
   max-width:calc(100% - 32px);padding:5px 12px;border-radius:6px;background:rgba(30,40,90,.95);
   border:1px solid rgba(120,150,255,.35);font:11px 'Courier New',monospace;color:#dde6ff;
@@ -1875,8 +1887,8 @@ Object.entries(GLOSS).forEach(([k,g])=>SEARCH_INDEX.push({kind:'term',title:g.t,
 
 // ── Toggle ────────────────────────────────────────────────────────────────────
 let panelOpen=false;
-function openPanel(){panelOpen=true;panel.classList.remove('closed');tab.classList.add('open');tab.querySelector('.ti').textContent='✕';tab.querySelector('.tl').textContent='Close';}
-function closePanel(){panelOpen=false;panel.classList.add('closed');tab.classList.remove('open');tab.querySelector('.ti').textContent='⚙';tab.querySelector('.tl').textContent='Controls';}
+function openPanel(){panelOpen=true;document.body.classList.add('panel-open');panel.classList.remove('closed');tab.classList.add('open');tab.querySelector('.ti').textContent='✕';tab.querySelector('.tl').textContent='Close';}
+function closePanel(){panelOpen=false;document.body.classList.remove('panel-open');panel.classList.add('closed');tab.classList.remove('open');tab.querySelector('.ti').textContent='⚙';tab.querySelector('.tl').textContent='Controls';}
 tab.addEventListener('click',()=>panelOpen?closePanel():openPanel());
 if(window.innerWidth>600) openPanel();
 
@@ -1944,7 +1956,7 @@ function animate(){
   if(sliceMode()){
     const c=dimColor('A',VIEW.slice);
     lc.font=`bold ${lblSize+3}px ${lblFont}`; lc.textAlign='right'; lc.fillStyle=c.css;
-    lc.fillText(`slice A = ${VIEW.slice}`,W-(panelOpen?232:48),H-18); lc.textAlign='center';
+    lc.fillText(`slice A = ${VIEW.slice}`,W-(panelOpen&&W>600?232:48),panelOpen&&W<=600?H*0.48-14:H-18); lc.textAlign='center';
   }
   // Pre-compute hover sets once — shared by label pass and 3D highlight pass
   const anyHov=!!(hovered||hoveredFormula||hoveredUV||hoveredOp||hoveredCm||focusPt||focusFo);
