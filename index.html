@@ -139,7 +139,7 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
         The origin — the single point at (0, 0, 0) — is the home of all dimensionless quantities: strain, Mach number, Reynolds number, angles.
       </p>
       <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:20px">
-        Hover over any sphere for a tooltip; click it to copy its name. Arrows show familiar formulas — and with <strong style="color:#aaccff">✎ Draw vector</strong> you can connect any two points to see the equation that links them. Use the controls panel (⚙) to adjust projection, labels, and rotation. Keyboard: arrow keys orbit, space pauses, R resets, V draws.
+        Hover over any sphere for a tooltip; click it to copy its name. Turn on formula arrows in the controls panel to see familiar formulas, and with <strong style="color:#aaccff">✎ Draw vector</strong> you can connect any two points to see the equation that links them. Use the controls panel (⚙) to adjust projection, labels, and rotation. Keyboard: arrow keys orbit, space pauses, R resets, V draws.
       </p>
       <button onclick="document.getElementById('preface').style.display='none'" style="background:rgba(80,110,220,.22);border:1px solid rgba(100,140,255,.4);border-radius:7px;color:#aaccff;font:12px 'Courier New',monospace;padding:10px 14px;cursor:pointer">Enter visualization</button>
     </div>
@@ -439,7 +439,7 @@ function makeArrow(from,to,{SR,CR,opacity,emissive=0}){
   else g.quaternion.setFromUnitVectors(up,dir);
   return{g,shaftMat,coneMat,pm,shaftLen,sc,ec};
 }
-let showFormulas=true;
+let showFormulas=false;
 const formulaObjs=[], formulaPickMeshes=[];
 // Pre-cache point keys for fast lookup
 PTS.forEach(pt=>{pt.key=`${pt.L},${pt.M},${pt.T}`;});
@@ -769,31 +769,6 @@ function acc(title,content,open=true){
   sec.append(head,body); return sec;
 }
 
-// OKLAB swatch
-(()=>{
-  const div=document.createElement('div');
-  const sw=document.createElement('canvas'); sw.width=114; sw.height=48;
-  const sx=sw.getContext('2d'), sid=sx.createImageData(114,48);
-  for(let py=0;py<48;py++) for(let px=0;px<114;px++){
-    const dL=-3+(px/113)*6,dT=1-(py/47)*5,[r,g,b]=oklabToSRGB(.65,(dL/3)*.22,(dT/4)*.24);
-    const i=(py*114+px)*4;sid.data[i]=Math.round(Math.max(0,Math.min(1,r))*255);sid.data[i+1]=Math.round(Math.max(0,Math.min(1,g))*255);sid.data[i+2]=Math.round(Math.max(0,Math.min(1,b))*255);sid.data[i+3]=255;
-  }
-  sx.putImageData(sid,0,0);sx.font='bold 7px monospace';sx.fillStyle='rgba(0,0,0,.5)';sx.textAlign='center';sx.fillText('L →',102,45);sx.fillText('T ↑',7,9);
-  sw.style.cssText='border-radius:4px;border:1px solid rgba(255,255,255,.08);flex-shrink:0;';
-  const sv=document.createElement('canvas'); sv.width=13; sv.height=48;
-  const svx=sv.getContext('2d'), svd=svx.createImageData(13,48);
-  for(let py=0;py<48;py++){const dM=1-(py/47)*2,oL=.65+(dM/1.5)*.12,[r,g,b]=oklabToSRGB(oL,0,0);for(let px=0;px<13;px++){const i=(py*13+px)*4;svd.data[i]=Math.round(Math.max(0,Math.min(1,r))*255);svd.data[i+1]=Math.round(Math.max(0,Math.min(1,g))*255);svd.data[i+2]=Math.round(Math.max(0,Math.min(1,b))*255);svd.data[i+3]=255;}}
-  svx.putImageData(svd,0,0);svx.font='bold 7px monospace';svx.fillStyle='rgba(0,0,0,.45)';svx.textAlign='center';svx.fillText('M',6,7);svx.fillText('↕',6,44);
-  sv.style.cssText='border-radius:4px;border:1px solid rgba(255,255,255,.08);flex-shrink:0;';
-  const row=document.createElement('div');row.style.cssText='display:flex;gap:5px;align-items:center;margin-bottom:7px;';row.append(sw,sv);div.appendChild(row);
-  [['L-exp','a (green↔red)',-3,0,0,3,0,0],['T-exp','b (blue↔yel)',0,0,-4,0,0,1],['M-exp','lightness',0,-1,0,0,1,0]].forEach(([d,desc,...c])=>{
-    const cn=coordToColor(c[0],c[1],c[2]),cp=coordToColor(c[3],c[4],c[5]);
-    const r2=document.createElement('div');r2.style.cssText='display:flex;align-items:center;gap:5px;margin:2px 0;font-size:9px;';
-    r2.innerHTML=`<span style="display:inline-block;width:20px;height:5px;border-radius:2px;background:linear-gradient(to right,${cn.css},${cp.css});flex-shrink:0"></span><span style="color:#4a5f88">${d} → ${desc}</span>`;
-    div.appendChild(r2);
-  });
-  panel.appendChild(acc('OKLAB COLOR SPACE',div,false));
-})();
 
 function updFov(s){
   if(!fovValLbl) return;
@@ -891,38 +866,26 @@ function updFov(s){
   panel.appendChild(acc('VIEW',div,true));
 })();
 
-// Formulas
+// Formulas — a single show/hide toggle (hidden by default)
+let formulaBtn;
+function setFormulas(on){
+  showFormulas=on;
+  formulaObjs.forEach(({g})=>g.visible=on);
+  if(formulaBtn){
+    formulaBtn.textContent=on?'◉ Formula arrows':'○ Formula arrows';
+    formulaBtn.classList.toggle('on',on);
+  }
+}
 (()=>{
   const div=document.createElement('div');
   const tr=document.createElement('div'); tr.className='prow';
-  const tb=document.createElement('button'); tb.className='pbtn on'; tb.textContent='◉ Visible';
-  tb.style.color='#aaccff';
-  tb.addEventListener('click',()=>{
-    showFormulas=!showFormulas;
-    formulaObjs.forEach(({g})=>g.visible=showFormulas);
-    tb.textContent=showFormulas?'◉ Visible':'○ Hidden';
-    tb.classList.toggle('on',showFormulas);
-    tb.style.color=showFormulas?'#aaccff':'#aaaacc';
-  });
-  tb.addEventListener('mousedown',e=>e.stopPropagation());
-  tr.appendChild(tb); div.appendChild(tr);
-  const list=document.createElement('div'); list.style.cssText='margin-top:6px;';
-  FORMULA_DEFS.forEach(def=>{
-    const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:6px;margin:4px 0;';
-    const sc=coordToColor(...def.from),ec=coordToColor(...def.to);
-    const midCss=`rgb(${Math.round((sc.r+ec.r)/2)},${Math.round((sc.g+ec.g)/2)},${Math.round((sc.b+ec.b)/2)})`;
-    row.innerHTML=`<span style="display:inline-block;width:18px;height:3px;background:linear-gradient(to right,${sc.css},${ec.css});border-radius:2px;flex-shrink:0"></span>`+
-      `<span style="color:${midCss};font:bold 9px 'Courier New',monospace;flex-shrink:0">${def.label}</span>`+
-      `<span style="color:#2a3a55;font-size:8px">${def.desc}</span>`;
-    list.appendChild(row);
-  });
-  div.appendChild(list);
-  const note=document.createElement('div');
-  note.style.cssText='margin-top:8px;font-size:8px;color:#2a3a55;line-height:1.6;border-top:1px solid rgba(255,255,255,.05);padding-top:6px;';
-  note.textContent='V=IR, F=qE etc. involve electric current (A) — a 4th dimension outside this L·M·T space.';
-  div.appendChild(note);
+  formulaBtn=document.createElement('button'); formulaBtn.className='pbtn';
+  formulaBtn.title='Show arrows for well-known formulas (F = ma, E = mc², …)';
+  formulaBtn.addEventListener('click',()=>setFormulas(!showFormulas));
+  formulaBtn.addEventListener('mousedown',e=>e.stopPropagation());
+  tr.appendChild(formulaBtn); div.appendChild(tr);
   panel.appendChild(acc('FORMULAS',div,true));
+  setFormulas(showFormulas);
 })();
 
 // Vectors
@@ -1038,7 +1001,7 @@ function animate(){
     if(hoveredUV){activePts.add(hoveredUV.from);activePts.add(hoveredUV.to);}
     if(hovered){
       activePts.add(hovered);
-      formulaObjs.forEach(fo=>{
+      if(showFormulas) formulaObjs.forEach(fo=>{
         if(fo.fromKey===hovered.key||fo.toKey===hovered.key){
           activeFos.add(fo);
           PTS.forEach(pt=>{if(pt.key===fo.fromKey||pt.key===fo.toKey)activePts.add(pt);});
@@ -1118,15 +1081,15 @@ function animate(){
       if(fo.shaftMat.opacity!==op){fo.shaftMat.opacity=op;fo.shaftMat.needsUpdate=true;}
       if(fo.coneMat.opacity!==op){fo.coneMat.opacity=op;fo.coneMat.needsUpdate=true;}
     });
-    if(metricsVis!=='hidden'){
-      const baseOp=metricsVis==='low'?0.18:1;
-      PTS.forEach(pt=>{
-        if(!pt.vis.visible) return;
-        const op=anyHov?(activePts.has(pt)?1.0:Math.min(baseOp,0.15)):baseOp;
-        const tr=op<1;
-        if(pt.vis.material.opacity!==op||pt.vis.material.transparent!==tr){pt.vis.material.opacity=op;pt.vis.material.transparent=tr;pt.vis.material.needsUpdate=true;}
-      });
-    }
+  }
+  if(metricsVis!=='hidden'){
+    const baseOp=metricsVis==='low'?0.18:1;
+    PTS.forEach(pt=>{
+      if(!pt.vis.visible) return;
+      const op=anyHov?(activePts.has(pt)?1.0:Math.min(baseOp,0.15)):baseOp;
+      const tr=op<1;
+      if(pt.vis.material.opacity!==op||pt.vis.material.transparent!==tr){pt.vis.material.opacity=op;pt.vis.material.transparent=tr;pt.vis.material.needsUpdate=true;}
+    });
   }
 
   renderer.render(scene,activeCamera);
