@@ -81,7 +81,9 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
   -webkit-tap-highlight-color:transparent;transition:background .12s}
 .pbtn:hover,.pbtn:active{background:rgba(255,255,255,.1)}
 .pbtn.on{background:rgba(80,110,220,.25);border-color:rgba(100,140,255,.45);color:#aaccff}
-#drawBtn{position:absolute;top:58px;left:12px;z-index:6;padding:8px 12px;border-radius:7px;
+#tools{position:absolute;top:58px;left:12px;z-index:25;display:flex;gap:6px;align-items:flex-start;
+  max-width:calc(100% - 58px)}
+#drawBtn{flex-shrink:0;padding:8px 12px;border-radius:7px;white-space:nowrap;
   border:1px solid rgba(255,255,255,.1);background:rgba(4,4,18,.88);cursor:pointer;
   font:11px 'Courier New',monospace;color:#aabbee;touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;transition:background .12s}
@@ -109,6 +111,31 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
 .vfoot{color:#334;font-size:8.5px;margin-top:6px}
 .vrow{display:flex;align-items:center;gap:6px;margin:4px 0}
 .vrow .veq{flex:1;font-size:9px;font-weight:normal;padding:3px 5px}
+#search{position:static;width:230px;min-width:0;flex:0 1 230px}
+#sq{width:100%;padding:8px 26px 8px 28px;border-radius:7px;border:1px solid rgba(255,255,255,.1);
+  background:rgba(4,4,18,.88);color:#dde6ff;font:12px 'Courier New',monospace;outline:none;
+  -webkit-appearance:none;appearance:none}
+#sq::-webkit-search-cancel-button{display:none}
+@media (pointer:coarse){#sq{font-size:16px;padding-top:6px;padding-bottom:6px}}
+#sq:focus{border-color:rgba(120,150,255,.5);background:rgba(8,10,34,.96)}
+#sq::placeholder{color:#556}
+.sqi{position:relative;float:left;width:0;left:9px;top:8px;font-size:11px;color:#556;pointer-events:none}
+#sqx{position:relative;float:right;margin-top:-30px;margin-right:2px;display:none;background:none;border:none;color:#667;
+  cursor:pointer;font-size:12px;padding:4px 6px}
+#sres{display:none;position:absolute;left:0;top:calc(100% + 4px);max-height:min(55vh,420px);overflow-y:auto;border-radius:8px;
+  background:rgba(4,4,18,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 28px rgba(0,0,0,.8);
+  font:11px/1.4 'Courier New',monospace;color:#dde;width:min(340px,calc(100vw - 24px))}
+.sr{display:flex;align-items:flex-start;gap:7px;padding:7px 9px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05)}
+.sr:last-child{border-bottom:none}
+.sr.act,.sr:hover{background:rgba(80,110,220,.2)}
+.srk{flex-shrink:0;font-size:8px;letter-spacing:.06em;text-transform:uppercase;padding:2px 4px;border-radius:3px;
+  margin-top:1px;min-width:52px;text-align:center;border:1px solid currentColor;opacity:.85}
+.srt{font-weight:bold;color:#eef}
+.srs{color:#778;font-size:9.5px;margin-top:1px}
+.sr mark{background:rgba(120,150,255,.35);color:inherit;border-radius:2px}
+.snone{padding:9px;color:#667;font-size:10px}
+.flash{animation:flash 1.4s ease-out 2}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(140,170,255,.9)}100%{box-shadow:0 0 0 12px rgba(140,170,255,0)}}
 #toast{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:60;
   max-width:calc(100% - 32px);padding:5px 12px;border-radius:6px;background:rgba(30,40,90,.95);
   border:1px solid rgba(120,150,255,.35);font:11px 'Courier New',monospace;color:#dde6ff;
@@ -139,7 +166,7 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
         The origin — the single point at (0, 0, 0) — is the home of all dimensionless quantities: strain, Mach number, Reynolds number, angles.
       </p>
       <p style="font:13px/1.8 Georgia,serif;color:#b0b4cc;margin-bottom:20px">
-        Hover over any sphere for a tooltip; click it to copy its name. Turn on formula arrows in the controls panel to see familiar formulas, and with <strong style="color:#aaccff">✎ Draw vector</strong> you can connect any two points to see the equation that links them. Use the controls panel (⚙) to adjust projection, labels, and rotation. Keyboard: arrow keys orbit, space pauses, R resets, V draws.
+        Hover over any sphere for a tooltip; click it to copy its name. Turn on formula arrows in the controls panel to see familiar formulas, and with <strong style="color:#aaccff">✎ Draw vector</strong> you can connect any two points to see the equation that links them. Use the controls panel (⚙) to adjust projection, labels, and rotation. Search (/) finds any quantity, symbol, formula or control. Keyboard: arrow keys orbit, space pauses, R resets, V draws.
       </p>
       <button onclick="document.getElementById('preface').style.display='none'" style="background:rgba(80,110,220,.22);border:1px solid rgba(100,140,255,.4);border-radius:7px;color:#aaccff;font:12px 'Courier New',monospace;padding:10px 14px;cursor:pointer">Enter visualization</button>
     </div>
@@ -148,7 +175,15 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid rgba(255,255,255,
     <div style="font:bold 10px 'Courier New',monospace;color:#8899ff;letter-spacing:.04em">DIMENSIONAL ANALYSIS</div>
     <div style="font:8.5px 'Courier New',monospace;color:#2c3f60;margin-top:2px">Physical metrics · L M T exponent space · OKLAB color</div>
   </div>
-  <button id="drawBtn" title="Draw a vector between two points (V)">✎ Draw vector</button>
+  <div id="tools">
+    <button id="drawBtn" title="Draw a vector between two points (V)">✎ Draw vector</button>
+    <div id="search">
+      <span class="sqi">⌕</span>
+      <input id="sq" type="search" placeholder="Search: force, F, ×, labels…" autocomplete="off" spellcheck="false" aria-label="Search quantities, symbols, formulas and controls">
+      <button id="sqx" title="Clear search" aria-label="Clear search">✕</button>
+      <div id="sres" role="listbox"></div>
+    </div>
+  </div>
   <div id="drawHint"></div>
   <div id="vcard"></div>
   <div id="toast"></div>
@@ -321,6 +356,10 @@ RAW.forEach(([name,L,M,T])=>{
   GROUPS.get(k).entries.push(name);
 });
 const PTS=[...GROUPS.values()];
+// Conventional variable symbols for each named quantity (used by search and the info card)
+const SYMBOLS={'Length':['l','L','x'],'Displacement':['x','Δx','s','d'],'Wavelength':['λ'],'Arm / Lever':['r'],'Area':['A'],'Cross-section':['A','σ'],'Volume':['V'],'Wavenumber':['k','ν̃'],'Curvature':['κ'],'Velocity':['v','u'],'Speed of Light':['c'],'Acceleration':['a'],'Free-fall g':['g'],'Jerk':['j'],'Snap / Jounce':['s'],'Vol. Flow Rate':['Q'],'Kinematic Viscosity':['ν'],'Diffusivity':['D'],'Thermal Diffusivity':['α'],'Spec. Ang. Mom.':['h'],'Grav. Potential':['Φ','V'],'Specific Energy':['ε','e'],'Absorbed Dose (Gy)':['D'],'Dose Equivalent':['H'],'Std. Grav. Param GM':['μ','GM'],'Strain':['ε'],'Angle (rad)':['θ','φ'],'Mach Number':['Ma','M'],'Reynolds Number':['Re'],'Coeff. of Restitution':['e'],'Time':['t'],'Period':['T'],'Half-life':['t½'],'Frequency':['f','ν'],'Angular Velocity':['ω'],'Angular Frequency ω':['ω'],'Radioactivity (Bq)':['A'],'Angular Acceleration':['α'],'Mass':['m','M'],'Linear Density':['λ','μ'],'Surface Density':['σ'],'Volume Density':['ρ'],'Moment of Inertia':['I'],'Specific Volume':['v'],'Mass Flow Rate':['ṁ'],'Mech. Impedance':['Z'],'Mech. Admittance':['Y'],'Momentum':['p'],'Impulse':['J'],'Angular Momentum':['L'],'Action (ℏ)':['ℏ','S'],'Angular Impulse':['ΔL'],'Force':['F'],'Weight':['W'],'Drag':['F_D','D'],'Thrust':['T'],'Tension':['T'],'Lift':['L','F_L'],'Energy':['E'],'Work':['W'],'Heat (Q)':['Q'],'Torque':['τ'],'Enthalpy':['H'],'Helmholtz Energy':['F','A'],'Power':['P'],'Radiant Flux':['Φₑ'],'Luminosity':['L'],'Pressure':['P','p'],'Stress':['σ'],"Young's Modulus":['E'],'Shear Modulus':['G'],'Bulk Modulus':['K'],'Yield Strength':['σᵧ'],'Surface Tension':['γ'],'Spring Constant':['k'],'Stiffness':['k'],'Dynamic Viscosity':['μ','η'],'Intensity (W/m²)':['I'],'Power Density':['p'],'Spec. Power (W/kg)':['P/m'],'Irradiance':['Eₑ'],'Grav. Constant G':['G']};
+const PT_OF_NAME=new Map();
+PTS.forEach(pt=>pt.entries.forEach(n=>PT_OF_NAME.set(n,pt)));
 document.getElementById('badge').textContent=`${RAW.length} metrics · ${PTS.length} unique coordinates`;
 
 const pickMeshes=[];
@@ -610,7 +649,8 @@ function showCard(uv){
   vcard.style.display='block';
   document.getElementById('vcardX').addEventListener('click',hideCard);
 }
-function hideCard(){selectedUV=null;vcard.style.display='none';}
+function hideCard(){selectedUV=null;focusPt=null;focusFo=null;vcard.style.display='none';}
+let focusPt=null, focusFo=null;
 
 // ── Draw mode ─────────────────────────────────────────────────────────────────
 const drawBtn=document.getElementById('drawBtn'), drawHint=document.getElementById('drawHint');
@@ -759,6 +799,7 @@ c3d.addEventListener('pointerup',e=>{
 
 // ── Panel ─────────────────────────────────────────────────────────────────────
 let rotBtn, fovSlider, fovValLbl;
+const SECTIONS={};
 function acc(title,content,open=true){
   const sec=document.createElement('div'); sec.className='psec';
   const head=document.createElement('div'); head.className='ph';
@@ -766,7 +807,9 @@ function acc(title,content,open=true){
   const body=document.createElement('div'); body.className='pb'; body.style.maxHeight=open?'600px':'0px';
   body.appendChild(content);
   head.addEventListener('click',()=>{const arr=head.querySelector('.ph-arr'),op=arr.classList.contains('open');arr.classList.toggle('open',!op);body.style.maxHeight=op?'0px':'600px';});
-  sec.append(head,body); return sec;
+  sec.append(head,body);
+  SECTIONS[title]={sec,open(){head.querySelector('.ph-arr').classList.add('open');body.style.maxHeight='600px';}};
+  return sec;
 }
 
 
@@ -861,7 +904,7 @@ function updFov(s){
   rb.addEventListener('mousedown',e=>e.stopPropagation());
   row.append(rotBtn,rb);
   const hint=document.createElement('div'); hint.style.cssText='font-size:8px;color:#1e2a40;margin-top:6px;line-height:1.8;';
-  hint.textContent='←→↑↓ orbit · scroll/pinch zoom · Space pause · R reset · V draw vector · click a label to copy';
+  hint.textContent='←→↑↓ orbit · scroll/pinch zoom · Space pause · R reset · V draw vector · / search · click a label to copy';
   div.append(row,hint);
   panel.appendChild(acc('VIEW',div,true));
 })();
@@ -919,6 +962,124 @@ function renderVecList(){
   updateDrawUI(); renderVecList();
 })();
 
+// ── Search ────────────────────────────────────────────────────────────────────
+// One flat index of everything worth finding. Each entry: {kind, title, sub, keys[], sym[], go()}.
+// Tutorials (and anything else) can push more entries later via SEARCH_INDEX.push(...).
+let camTween=null;
+function centreOn(x,y,z){camTween={t0:performance.now(),from:controls.target.clone(),to:new THREE.Vector3(x,y,z)};}
+function focusPoint(pt,name){
+  hideCard(); focusPt=pt; centreOn(pt.L,pt.M,pt.T);
+  const c=pt.col, syms=n=>(SYMBOLS[n]||[]).join(', ');
+  const rel=FORMULA_DEFS.filter(d=>d.from.join(',')===pt.key||d.to.join(',')===pt.key);
+  vcard.innerHTML=`<div class="vhead"><span style="color:${c.css}">${esc(name||nm(pt))}</span><button class="vx" id="vcardX" title="Close">✕</button></div>`+
+    `<div class="vsub">${esc(dimStr(pt.L,pt.M,pt.T))} · coordinate (${pt.L}, ${pt.M}, ${pt.T})</div>`+
+    `<div class="vlbl">Quantities at this point</div>`+
+    pt.entries.map(n=>`<div class="veq alt" data-copy="${esc(n)}" title="Click to copy">${esc(n)}${syms(n)?` <span style="color:#778">· ${esc(syms(n))}</span>`:''}</div>`).join('')+
+    (rel.length?`<div class="vlbl">Formulas touching it</div>`+rel.map(d=>`<div class="veq known" data-copy="${esc(d.label)}">${esc(d.label)}  (${esc(d.desc)})</div>`).join(''):'');
+  vcard.style.display='block';
+  document.getElementById('vcardX').addEventListener('click',hideCard);
+}
+function focusFormula(fo){
+  hideCard(); setFormulas(true); focusFo=fo; centreOn(fo.mid.x,fo.mid.y,fo.mid.z);
+  const d=fo.def, fp=PT_BY_KEY.get(fo.fromKey), tp=PT_BY_KEY.get(fo.toKey);
+  vcard.innerHTML=`<div class="vhead"><span>${esc(d.label)}</span><button class="vx" id="vcardX" title="Close">✕</button></div>`+
+    `<div class="vsub">${esc(d.desc)}</div>`+
+    `<div class="veq alt"><span style="color:${fp.col.css}">${esc(nm(fp))}</span> → <span style="color:${tp.col.css}">${esc(nm(tp))}</span></div>`+
+    `<div class="vfoot">Formula arrows are now on — toggle them in ⚙ Controls › Formulas</div>`;
+  vcard.style.display='block';
+  document.getElementById('vcardX').addEventListener('click',hideCard);
+}
+function flashEl(el){if(!el)return;el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');}
+function showControl(section){
+  openPanel(); const S=SECTIONS[section]; if(!S) return;
+  S.open(); S.sec.scrollIntoView({block:'nearest',behavior:'smooth'}); flashEl(S.sec);
+}
+const SEARCH_INDEX=[];
+// Quantities: one entry per name
+RAW.forEach(([name])=>{
+  const pt=PT_OF_NAME.get(name);
+  SEARCH_INDEX.push({kind:'quantity',title:name,sub:`${dimStr(pt.L,pt.M,pt.T)}${(SYMBOLS[name]||[]).length?' · '+SYMBOLS[name].join(', '):''}`,
+    keys:[name],sym:SYMBOLS[name]||[],go:()=>focusPoint(pt,name)});
+});
+// Formulas / operations
+formulaObjs.forEach(fo=>{
+  const d=fo.def;
+  SEARCH_INDEX.push({kind:'formula',title:d.label,sub:d.desc,keys:[d.label,d.desc,d.desc.includes('×')?'multiply times product':'',d.desc.includes('÷')?'divide divided quotient per':''],sym:[],go:()=>focusFormula(fo)});
+});
+// Operations and controls (features + their tooltips)
+[
+  ['operation','Multiply quantities (×)','Adds exponents: move along a vector',['multiply','times','product','×','*','add exponents'],()=>{setDrawMode(true);flashEl(drawBtn);}],
+  ['operation','Divide quantities (÷)','Subtracts exponents: the reverse vector',['divide','quotient','per','÷','/','subtract exponents'],()=>{setDrawMode(true);flashEl(drawBtn);}],
+  ['operation','Power of a quantity (x²)','Scales the exponent vector',['power','square','squared','cube','exponent','^'],()=>focusPoint(PT_BY_KEY.get('2,0,0'),'Area')],
+  ['control','Draw vector','Connect two points to get the equation linking them (V)',['draw','vector','arrow','connect','equation','line'],()=>{setDrawMode(true);flashEl(drawBtn);}],
+  ['control','Clear all vectors','Remove every drawn vector',['clear','delete','remove','vectors'],()=>showControl('VECTORS')],
+  ['control','Formula arrows','Show/hide arrows for known formulas',['formula','formulas','arrows','show','hide','known'],()=>showControl('FORMULAS')],
+  ['control','Projection / field of view','Orthographic ↔ wide-angle perspective',['projection','orthographic','ortho','perspective','fov','field of view','zoom','lens'],()=>showControl('PROJECTION')],
+  ['control','Label size & typeface','Font size, typeface and legibility effect',['label','labels','size','font','typeface','halo','outline','shadow','pill','glow','legibility'],()=>showControl('LABELS')],
+  ['control','Visibility','Dim or hide spheres and labels',['visibility','hide','dim','spheres','opacity','low','off'],()=>showControl('VISIBILITY')],
+  ['control','Pause / rotate','Toggle auto-rotation (Space)',['pause','rotate','rotation','spin','auto','space'],()=>showControl('VIEW')],
+  ['control','Reset view','Return the camera to its start (R)',['reset','home','camera','view','recenter'],()=>{showControl('VIEW');window.dispatchEvent(new KeyboardEvent('keydown',{key:'r'}));}],
+  ['control','Hover tooltip','Hover a sphere to see every quantity at that point; click to copy',['tooltip','hover','copy','clipboard','info'],()=>focusPoint(PT_BY_KEY.get('1,1,-2'),'Force')],
+  ['control','Dimensionless origin','(0,0,0): strain, angle, Mach & Reynolds numbers',['origin','dimensionless','zero','unitless','ratio'],()=>focusPoint(PT_BY_KEY.get('0,0,0'),'Strain')],
+].forEach(([kind,title,sub,keys,go])=>SEARCH_INDEX.push({kind,title,sub,keys,sym:[],go}));
+
+const KIND_COL={quantity:'#8fb',formula:'#fc8',operation:'#f9c',control:'#9bf',tutorial:'#ff9',term:'#c9f'};
+const norm=t=>String(t).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'');
+function scoreEntry(en,q,qn){
+  let best=0;
+  // Symbols are case-sensitive: "F" is force, "f" is frequency
+  for(const s of en.sym){ if(s===q) best=Math.max(best,100); else if(norm(s)===qn) best=Math.max(best,70); }
+  const t=norm(en.title);
+  if(t===qn) best=Math.max(best,95);
+  else if(t.startsWith(qn)) best=Math.max(best,85);
+  else if(new RegExp('\\b'+qn.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).test(t)) best=Math.max(best,75);
+  else if(qn.length>1&&t.includes(qn)) best=Math.max(best,60);
+  for(const k of en.keys){ const kn=norm(k); if(!kn) continue;
+    if(kn===qn) best=Math.max(best,65); else if(qn.length>1&&kn.includes(qn)) best=Math.max(best,45); }
+  if(norm(en.sub).includes(qn)&&qn.length>1) best=Math.max(best,30);
+  return best;
+}
+function hl(text,qn){
+  const t=String(text), i=qn.length>0?norm(t).indexOf(qn):-1;
+  if(i<0) return esc(t);
+  return esc(t.slice(0,i))+'<mark>'+esc(t.slice(i,i+qn.length))+'</mark>'+esc(t.slice(i+qn.length));
+}
+const sq=document.getElementById('sq'), sres=document.getElementById('sres'), sqx=document.getElementById('sqx');
+let sHits=[], sAct=0;
+function runSearch(){
+  const q=sq.value.trim(), qn=norm(q);
+  sqx.style.display=q?'block':'none';
+  if(!q){sres.style.display='none';sHits=[];return;}
+  sHits=SEARCH_INDEX.map(en=>({en,sc:scoreEntry(en,q,qn)})).filter(h=>h.sc>0)
+    .sort((a,b)=>b.sc-a.sc||a.en.title.length-b.en.title.length).slice(0,14);
+  sAct=0;
+  sres.innerHTML=sHits.length?sHits.map((h,i)=>{
+    const en=h.en,col=KIND_COL[en.kind]||'#aab', symHit=en.sym.find(s=>s===q||norm(s)===qn);
+    return `<div class="sr${i===sAct?' act':''}" data-i="${i}" role="option"><span class="srk" style="color:${col}">${en.kind}</span>`+
+      `<div><div class="srt">${hl(en.title,qn)}${symHit?` <span style="color:${col}">(${esc(symHit)})</span>`:''}</div><div class="srs">${qn.length>1?hl(en.sub,qn):esc(en.sub)}</div></div></div>`;
+  }).join(''):`<div class="snone">No matches for “${esc(q)}”</div>`;
+  sres.style.display='block';
+}
+function pickHit(i){
+  const h=sHits[i]; if(!h) return;
+  sres.style.display='none'; sq.blur(); h.en.go();
+}
+function markAct(){sres.querySelectorAll('.sr').forEach((el,i)=>el.classList.toggle('act',i===sAct));
+  const a=sres.querySelector('.sr.act'); if(a) a.scrollIntoView({block:'nearest'});}
+sq.addEventListener('input',runSearch);
+sq.addEventListener('focus',()=>{if(sq.value.trim())runSearch();});
+sq.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'){sAct=Math.min(sHits.length-1,sAct+1);markAct();e.preventDefault();}
+  else if(e.key==='ArrowUp'){sAct=Math.max(0,sAct-1);markAct();e.preventDefault();}
+  else if(e.key==='Enter'){pickHit(sAct);e.preventDefault();}
+  else if(e.key==='Escape'){sq.value='';runSearch();sq.blur();}
+  e.stopPropagation();
+});
+sres.addEventListener('pointerdown',e=>e.preventDefault()); // keep focus so the click lands
+sres.addEventListener('click',e=>{const r=e.target.closest('.sr');if(r)pickHit(+r.dataset.i);});
+sqx.addEventListener('click',()=>{sq.value='';runSearch();hideCard();sq.focus();});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#search'))sres.style.display='none';});
+
 // ── Toggle ────────────────────────────────────────────────────────────────────
 let panelOpen=false;
 function openPanel(){panelOpen=true;panel.classList.remove('closed');tab.classList.add('open');tab.querySelector('.ti').textContent='✕';tab.querySelector('.tl').textContent='Close';}
@@ -931,6 +1092,7 @@ const KEYS={};
 window.addEventListener('keydown',e=>{
   if(e.target.closest&&e.target.closest('input,select,textarea')) return;
   KEYS[e.key]=true;
+  if(e.key==='/'){sq.focus();sq.select();e.preventDefault();return;}
   if(e.key===' '){autoRotOn=!autoRotOn;controls.autoRotate=autoRotOn;rotBtn.textContent=autoRotOn?'⏸ Pause':'▶ Rotate';rotBtn.style.color=autoRotOn?'#88aaff':'#aaaacc';e.preventDefault();}
   if(e.key==='r'||e.key==='R'){
     if(usingOrtho){controls.object=perspCam;controls.minDistance=2;controls.maxDistance=60;usingOrtho=false;activeCamera=perspCam;}
@@ -991,7 +1153,7 @@ function animate(){
     const cT=coordToColor(0,0,Math.max(-4,Math.min(1,n)));let[tx,ty]=toSc(0,0,n);drawLbl(tx,ty+24,String(n),cT.r,cT.g,cT.b,false,true);
   });
   // Pre-compute hover sets once — shared by label pass and 3D highlight pass
-  const anyHov=!!(hovered||hoveredFormula||hoveredUV);
+  const anyHov=!!(hovered||hoveredFormula||hoveredUV||focusPt||focusFo);
   const activeFos=new Set(), activePts=new Set();
   if(anyHov){
     if(hoveredFormula){
@@ -999,6 +1161,11 @@ function animate(){
       PTS.forEach(pt=>{if(pt.key===hoveredFormula.fromKey||pt.key===hoveredFormula.toKey)activePts.add(pt);});
     }
     if(hoveredUV){activePts.add(hoveredUV.from);activePts.add(hoveredUV.to);}
+    if(focusPt) activePts.add(focusPt);
+    if(focusFo){
+      activeFos.add(focusFo);
+      PTS.forEach(pt=>{if(pt.key===focusFo.fromKey||pt.key===focusFo.toKey)activePts.add(pt);});
+    }
     if(hovered){
       activePts.add(hovered);
       if(showFormulas) formulaObjs.forEach(fo=>{
@@ -1015,7 +1182,7 @@ function animate(){
     PTS.map(pt=>{const[sx,sy,z]=toSc(pt.L,pt.M,pt.T);return{pt,sx,sy,z};})
       .sort((a,b)=>b.z-a.z)
       .forEach(({pt,sx,sy})=>{
-        const isActive=activePts.has(pt), isDirect=hovered===pt;
+        const isActive=activePts.has(pt), isDirect=hovered===pt||focusPt===pt;
         lc.globalAlpha=anyHov?(isActive?1:0.12):baseAlpha;
         const{r,g,b}=pt.col,isH=isDirect,n=pt.entries.length;
         const boost=anyHov?(isDirect?4:isActive?2:0):0;
@@ -1028,7 +1195,7 @@ function animate(){
     formulaObjs.forEach(fo=>{
       if(!fo.g.visible) return;
       const[sx,sy]=toSc(fo.mid.x,fo.mid.y,fo.mid.z);
-      const foActive=activeFos.has(fo), foDirect=hoveredFormula===fo;
+      const foActive=activeFos.has(fo), foDirect=hoveredFormula===fo||focusFo===fo;
       lc.globalAlpha=anyHov?(foActive?1:0.10):1;
       const foBoost=anyHov?(foDirect?3:foActive?2:0):0;
       lc.font=`bold ${Math.max(7,lblSize-1+foBoost)}px ${lblFont}`;
@@ -1066,6 +1233,18 @@ function animate(){
       lc.setLineDash([6,5]); lc.strokeStyle=drawStart.col.css; lc.lineWidth=2;
       lc.beginPath(); lc.moveTo(ax,ay); lc.lineTo(end[0],end[1]); lc.stroke(); lc.setLineDash([]);
     }
+  }
+  // Pulsing ring around a point picked from search
+  if(focusPt){
+    const[fx,fy]=toSc(focusPt.L,focusPt.M,focusPt.T), ph=(performance.now()%1400)/1400;
+    lc.strokeStyle=`rgba(200,215,255,${1-ph})`; lc.lineWidth=2;
+    lc.beginPath(); lc.arc(fx,fy,10+ph*18,0,Math.PI*2); lc.stroke();
+  }
+  // Smoothly re-centre the orbit on a searched-for point
+  if(camTween){
+    const t=Math.min(1,(performance.now()-camTween.t0)/650), e=t*t*(3-2*t);
+    controls.target.lerpVectors(camTween.from,camTween.to,e);
+    if(t>=1) camTween=null;
   }
   lc.shadowBlur=0;
 
