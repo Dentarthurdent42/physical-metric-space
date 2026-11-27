@@ -154,6 +154,8 @@ body.dock-scroll #dock{overflow-y:auto;overscroll-behavior:contain}
 body.dock-side.dock-compact #search{position:fixed;z-index:46;top:var(--sb-top,12px);width:var(--db-h);
   visibility:hidden;opacity:0;transition:width .2s cubic-bezier(.4,0,.2,1),opacity .12s,visibility 0s linear .2s}
 body.dock-side.dock-compact #search .sqbox{box-shadow:0 10px 30px rgba(0,0,0,.45)}
+body.dock-side.dock-compact #sq{background:rgba(8,10,34,.98)}
+:root[data-theme=light] body.dock-side.dock-compact #sq{background:#fff}
 :root[data-theme=light] body.dock-side.dock-compact #search .sqbox{box-shadow:0 8px 24px rgba(30,40,90,.22)}
 body.dock-side.dock-compact.search-open #search{visibility:visible;opacity:1;transition:width .2s cubic-bezier(.4,0,.2,1),opacity .12s}
 body.dock-left.dock-compact #search{left:var(--sb-left,12px)}
@@ -2657,8 +2659,16 @@ function measureSearchNeed(){
 }
 // body.searching drives the highlight + scrim; it follows focus inside the search box
 document.getElementById('search').addEventListener('focusin',()=>document.body.classList.add('searching'));
+// Leaving the field closes it in the icon column too. That covers every way out, including iOS's
+// keyboard "Done", which blurs without any tap reaching the page (it used to leave the open field behind).
 document.getElementById('search').addEventListener('focusout',e=>{
-  if(!e.relatedTarget||!e.relatedTarget.closest('#search')) document.body.classList.remove('searching');});
+  if(e.relatedTarget&&e.relatedTarget.closest('#search')) return;
+  document.body.classList.remove('searching');
+  if(searchIsButton()&&document.body.classList.contains('search-open')) setSearchOpen(false);
+});
+// Taps that must not blur the field: the clear button, and the magnifier (which then toggles it shut)
+sqx.addEventListener('pointerdown',e=>e.preventDefault());
+searchBtn.addEventListener('pointerdown',e=>{if(document.body.classList.contains('search-open'))e.preventDefault();});
 function openSearch(){ if(searchIsButton()) setSearchOpen(true); else sq.focus(); }
 searchBtn.addEventListener('click',()=>setSearchOpen(!document.body.classList.contains('search-open')));
 document.addEventListener('pointerdown',e=>{
