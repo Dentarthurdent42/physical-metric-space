@@ -154,6 +154,8 @@ body.dock-scroll #dock{overflow-y:auto;overscroll-behavior:contain}
 body.dock-side.dock-compact #search{position:fixed;z-index:46;top:var(--sb-top,12px);width:var(--db-h);
   visibility:hidden;opacity:0;transition:width .2s cubic-bezier(.4,0,.2,1),opacity .12s,visibility 0s linear .2s}
 body.dock-side.dock-compact #search .sqbox{box-shadow:0 10px 30px rgba(0,0,0,.45)}
+body.dock-side.dock-compact #sq{background:rgba(8,10,34,.98)}
+:root[data-theme=light] body.dock-side.dock-compact #sq{background:#fff}
 :root[data-theme=light] body.dock-side.dock-compact #search .sqbox{box-shadow:0 8px 24px rgba(30,40,90,.22)}
 body.dock-side.dock-compact.search-open #search{visibility:visible;opacity:1;transition:width .2s cubic-bezier(.4,0,.2,1),opacity .12s}
 body.dock-left.dock-compact #search{left:var(--sb-left,12px)}
@@ -191,7 +193,10 @@ body.dock-side #toast{bottom:max(12px,env(safe-area-inset-bottom,0px));left:calc
 .ph:hover{color:#a9bdf0}
 .ph-arr{font-size:10px;color:#637dbb;transition:transform .18s;pointer-events:none}
 .ph-arr.open{transform:rotate(180deg)}
+/* Clipped only while it animates: once open, overflow is visible so the buttons' raised
+   shadows aren't cut off at the section's edges (.pb.shown). */
 .pb{overflow:hidden;transition:max-height .22s ease}
+.pb.shown{overflow:visible}
 .prow{display:flex;align-items:center;gap:6px;margin:4px 0}
 .pl{color:#667fb3;font-size:9px;flex-shrink:0}
 .pv{color:#8899cc;font-size:9px;min-width:34px;text-align:right;flex-shrink:0}
@@ -211,13 +216,15 @@ select{width:100%;background:rgba(6,6,26,.99);border:1px solid transparent;box-s
   cursor:pointer;font:10px 'Courier New',monospace;color:#7d7d90;text-align:center;
   touch-action:manipulation;-webkit-tap-highlight-color:transparent;
   transition:background .12s,color .12s}
-.seg:hover,.seg:active{background:var(--db-hover);color:#aab}
+.seg:active{background:var(--db-hover);color:#aab}
+@media (hover:hover){.seg:hover{background:var(--db-hover);color:#aab}}
 .seg.on{background:var(--db-on-bg);border-color:var(--db-on-bd);color:var(--db-on-ink);box-shadow:var(--db-raise-on)}
 .pbtn{flex:1;padding:9px 0;border-radius:6px;border:1px solid transparent;
   background:var(--db-bg);box-shadow:var(--db-raise);cursor:pointer;font:11px 'Courier New',monospace;
   color:#aaaacc;text-align:center;touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;transition:background .12s}
-.pbtn:hover,.pbtn:active{background:var(--db-hover)}
+.pbtn:active{background:var(--db-hover)}
+@media (hover:hover){.pbtn:hover{background:var(--db-hover)}}
 .pbtn.on{background:var(--db-on-bg);border-color:var(--db-on-bd);color:var(--db-on-ink);box-shadow:var(--db-raise-on)}
 #drawHint{position:relative;z-index:6;display:none;
   max-width:calc(100% - 32px);padding:6px 12px;border-radius:7px;background:rgba(40,50,120,.85);
@@ -368,7 +375,7 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
 :root[data-theme=light] #dock{background:#f8f9fd;border-color:rgba(50,70,160,.2);box-shadow:0 10px 32px rgba(30,40,90,.18)}
 :root[data-theme=light] #panel{background:#f8f9fd;border-color:rgba(50,70,160,.18);color:#445;box-shadow:0 12px 40px rgba(30,40,90,.2)}
 :root[data-theme=light] .seg,:root[data-theme=light] .pbtn{color:#3a4a7a}
-:root[data-theme=light] .seg:hover,:root[data-theme=light] .pbtn:hover{color:#223}
+@media (hover:hover){:root[data-theme=light] .seg:hover,:root[data-theme=light] .pbtn:hover{color:#223}}
 :root[data-theme=light] .seg.on,:root[data-theme=light] .pbtn.on{color:var(--db-on-ink)}
 :root[data-theme=light] .tmh,:root[data-theme=light] .ch{color:#3a4fd0}
 :root[data-theme=light] #helpBtn.glow{border-color:rgba(60,90,220,.8);animation-name:helpGlowL}
@@ -1760,11 +1767,16 @@ function acc(title,content,open=true){
   const sec=document.createElement('div'); sec.className='psec';
   const head=document.createElement('div'); head.className='ph';
   head.innerHTML=`${title}<span class="ph-arr ${open?'open':''}">▾</span>`;
-  const body=document.createElement('div'); body.className='pb'; body.style.maxHeight=open?'1000px':'0px';
+  const body=document.createElement('div'); body.className='pb'+(open?' shown':''); body.style.maxHeight=open?'1000px':'0px';
   body.appendChild(content);
-  head.addEventListener('click',()=>{const arr=head.querySelector('.ph-arr'),op=arr.classList.contains('open');arr.classList.toggle('open',!op);body.style.maxHeight=op?'0px':'1000px';});
+  const setOpen=o=>{
+    head.querySelector('.ph-arr').classList.toggle('open',o);
+    if(o){ body.style.maxHeight='1000px'; body.addEventListener('transitionend',()=>{if(body.style.maxHeight!=='0px')body.classList.add('shown');},{once:true}); }
+    else { body.classList.remove('shown'); body.style.maxHeight='0px'; }
+  };
+  head.addEventListener('click',()=>setOpen(!head.querySelector('.ph-arr').classList.contains('open')));
   sec.append(head,body);
-  SECTIONS[title]={sec,open(){head.querySelector('.ph-arr').classList.add('open');body.style.maxHeight='1000px';}};
+  SECTIONS[title]={sec,open(){setOpen(true);}};
   return sec;
 }
 
@@ -2657,8 +2669,16 @@ function measureSearchNeed(){
 }
 // body.searching drives the highlight + scrim; it follows focus inside the search box
 document.getElementById('search').addEventListener('focusin',()=>document.body.classList.add('searching'));
+// Leaving the field closes it in the icon column too. That covers every way out, including iOS's
+// keyboard "Done", which blurs without any tap reaching the page (it used to leave the open field behind).
 document.getElementById('search').addEventListener('focusout',e=>{
-  if(!e.relatedTarget||!e.relatedTarget.closest('#search')) document.body.classList.remove('searching');});
+  if(e.relatedTarget&&e.relatedTarget.closest('#search')) return;
+  document.body.classList.remove('searching');
+  if(searchIsButton()&&document.body.classList.contains('search-open')) setSearchOpen(false);
+});
+// Taps that must not blur the field: the clear button, and the magnifier (which then toggles it shut)
+sqx.addEventListener('pointerdown',e=>e.preventDefault());
+searchBtn.addEventListener('pointerdown',e=>{if(document.body.classList.contains('search-open'))e.preventDefault();});
 function openSearch(){ if(searchIsButton()) setSearchOpen(true); else sq.focus(); }
 searchBtn.addEventListener('click',()=>setSearchOpen(!document.body.classList.contains('search-open')));
 document.addEventListener('pointerdown',e=>{
