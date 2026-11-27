@@ -100,17 +100,36 @@ body.dock-side .dbtn{grid-column:1/-1;width:auto;min-width:0;justify-content:fle
 body.dock-side #tab{order:1}
 body.dock-side #dockBtn{order:2;grid-column:1}
 body.dock-side #themeBtn{order:3;grid-column:2}
-/* Too short for a labelled column: search on top, then the controls as a grid of icon squares */
-body.dock-side.dock-compact #dock{grid-template-columns:repeat(4,var(--db-h));justify-content:space-between}
-body.dock-side.dock-compact .dbtn{grid-column:auto;width:var(--db-h);justify-content:center}
-body.dock-side.dock-compact #themeBtn{grid-column:span 3;justify-self:end}
+/* Icon column (narrow or short screens): one column of icon squares; search is a button that
+   opens the field beside the bar, and the switch turns upright to fit the column */
+#searchBtn{display:none}
+body.dock-side.dock-compact{--dw:50px}
+body.dock-side.dock-compact #dock{display:flex;flex-direction:column;align-items:center}
+body.dock-side.dock-compact #searchBtn{display:flex;order:-1}
+body.dock-side.dock-compact .dbtn{width:var(--db-h);justify-content:center}
+body.dock-side.dock-compact #themeBtn{padding:0;height:auto}
+body.dock-side.dock-compact .sw{width:26px;height:46px}
+body.dock-side.dock-compact .knob{top:22px}
+body.dock-side.dock-compact .dsw[aria-checked=true] .knob{transform:translateY(-20px)}
+body.dock-scroll #dock{overflow-y:auto;overscroll-behavior:contain}
+body.dock-side.dock-compact #search{display:none;position:fixed;z-index:46;top:max(12px,env(safe-area-inset-top,0px));
+  width:min(300px,calc(100vw - var(--dw) - 48px));padding:6px;border-radius:14px;
+  background:rgba(10,12,36,.96);border:1px solid rgba(150,170,255,.2);box-shadow:0 12px 40px rgba(0,0,0,.55)}
+:root[data-theme=light] body.dock-side.dock-compact #search{background:#f8f9fd;border-color:rgba(50,70,160,.2);box-shadow:0 10px 32px rgba(30,40,90,.18)}
+body.dock-side.dock-compact.search-open #search{display:block}
+body.dock-left.dock-compact #search{left:calc(var(--dw) + max(12px,env(safe-area-inset-left,0px)) + 10px)}
+body.dock-right.dock-compact #search{right:calc(var(--dw) + max(12px,env(safe-area-inset-right,0px)) + 10px)}
+body.dock-side.dock-compact #sres{position:absolute;top:calc(100% + 8px);left:0;right:auto;max-height:calc(100vh - 90px)}
 body.dock-side #panel{top:max(12px,env(safe-area-inset-top,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));height:auto;width:var(--pw)}
 body.dock-left #panel{left:calc(var(--dw) + max(12px,env(safe-area-inset-left,0px)) + 12px);right:auto}
 body.dock-right #panel{right:calc(var(--dw) + max(12px,env(safe-area-inset-right,0px)) + 12px);left:auto}
 body.dock-side #panel.closed{transform:translateX(0) scale(.98)}
-body.dock-side #sres,body.dock-side #tmenu{top:0;bottom:auto;max-height:calc(100vh - 24px)}
-body.dock-left #sres,body.dock-left #tmenu{left:calc(100% + 10px);right:auto}
-body.dock-right #sres,body.dock-right #tmenu{right:calc(100% + 10px);left:auto}
+/* Popovers beside a side dock are fixed to the viewport, so a scrolling column can't clip them.
+   (That needs the dock to have no backdrop-filter, which would otherwise contain them.) */
+body.dock-side #dock{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(10,12,36,.94)}
+body.dock-side #sres,body.dock-side #tmenu{position:fixed;top:max(12px,env(safe-area-inset-top,0px));bottom:auto;max-height:calc(100vh - 24px)}
+body.dock-left #sres,body.dock-left #tmenu{left:calc(var(--dw) + max(12px,env(safe-area-inset-left,0px)) + 10px);right:auto}
+body.dock-right #sres,body.dock-right #tmenu{right:calc(var(--dw) + max(12px,env(safe-area-inset-right,0px)) + 10px);left:auto}
 body.dock-side #tl{left:var(--L,12px);max-width:calc(100% - var(--L,12px) - var(--R,12px))}
 body.dock-side #vcard,body.dock-side.panel-open #vcard{left:var(--L,12px);bottom:max(12px,env(safe-area-inset-bottom,0px));max-height:calc(100% - 24px)}
 body.dock-side #toast{bottom:max(12px,env(safe-area-inset-bottom,0px));left:calc(var(--L,12px) + (100% - var(--L,12px) - var(--R,12px)) / 2)}
@@ -394,6 +413,7 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
       <button id="helpBtn" class="dbtn glow" title="Tutorials" aria-label="Tutorials"><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg><span class="lb">Help</span></button>
       <div id="tmenu" role="menu"></div>
       <button id="drawBtn" class="dbtn" title="Draw a vector between two points (V)"><svg class="ico" aria-hidden="true"><use href="#i-draw"/></svg><span class="lb">Draw vector</span></button>
+      <button id="searchBtn" class="dbtn" title="Search (/)" aria-label="Search" aria-expanded="false"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><span class="lb">Search</span></button>
       <div id="search">
         <span class="sqi"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg></span>
         <input id="sq" type="search" placeholder="force, F, ÷, help…" autocomplete="off" spellcheck="false" aria-label="Search quantities, symbols, formulas and controls">
@@ -2346,7 +2366,7 @@ const TUTS=[
   ]},
   {id:'search',title:'Search',blurb:'Names, symbols, formulas, controls',steps:[
     {h:'The search box finds quantities, their [[symbol|symbols]], formulas, operations, controls and these glossary terms.',
-     act:'Search for something — try “F”, “viscosity” or “÷” — and pick a result.',wait:'search',enter:()=>{flashEl(document.getElementById('search'));}},
+     act:'Search for something — try “F”, “viscosity” or “÷” — and pick a result.',wait:'search',enter:()=>{flashEl(searchIsButton()?searchBtn:document.getElementById('search'));}},
     {h:'Symbols are case-sensitive: F finds force, f finds frequency. Press / to jump to search at any time.'},
   ]},
   {id:'projection',title:'Projection',blurb:'Orthographic vs perspective',steps:[
@@ -2473,7 +2493,7 @@ window.addEventListener('keydown',e=>{
   if(e.target.closest&&e.target.closest('input,select,textarea')) return;
   if(e.target.closest&&e.target.closest('button')&&(e.key===' '||e.key==='Enter')) return;
   KEYS[e.key]=true;
-  if(e.key==='/'){sq.focus();sq.select();e.preventDefault();return;}
+  if(e.key==='/'){openSearch();sq.select();e.preventDefault();return;}
   if(e.key===' '){setAutoRot(!autoRotOn);e.preventDefault();}
   if(e.key==='r'||e.key==='R'){
     if(usingOrtho){controls.object=perspCam;controls.minDistance=2;controls.maxDistance=60;usingOrtho=false;activeCamera=perspCam;}
@@ -2531,15 +2551,33 @@ const dockEl=document.getElementById('dock'), dockBtn=document.getElementById('d
 const DOCKS=['bottom','left','right'];
 let dockPref=store.get('pms.dock','bottom'); if(!DOCKS.includes(dockPref)) dockPref='bottom';
 const canSide=()=>window.innerWidth>window.innerHeight&&window.innerWidth>=560;
-// Bottom bar: compact when the row overflows or would squeeze search below 150px.
-// Side column: compact when the labelled column is taller than the screen.
+// Bottom bar: icons only when the row overflows or would squeeze search below 150px.
+// Side column: labelled only on wide screens (>=1000px) where it fits; otherwise a single
+// column of icons, which scrolls (body.dock-scroll) if even that is taller than the screen.
+const SIDE_LABELS_MIN_W=1000;
 function fitDock(){
-  const B=document.body; B.classList.remove('dock-compact');
-  const tight=B.classList.contains('dock-side')
-    ?dockEl.scrollHeight>dockEl.clientHeight+1
+  const B=document.body; B.classList.remove('dock-compact','dock-scroll');
+  const side=B.classList.contains('dock-side'), over=()=>dockEl.scrollHeight>dockEl.clientHeight+1;
+  const tight=side
+    ?window.innerWidth<SIDE_LABELS_MIN_W||over()
     :dockEl.scrollWidth>dockEl.clientWidth+1||sq.offsetWidth<150;
   B.classList.toggle('dock-compact',tight);
+  if(side&&tight&&over()) B.classList.add('dock-scroll');
+  if(!(side&&tight)) setSearchOpen(false);
 }
+// In the icon column search is a button; it opens the field beside the bar
+const searchBtn=document.getElementById('searchBtn');
+const searchIsButton=()=>document.body.classList.contains('dock-side')&&document.body.classList.contains('dock-compact');
+function setSearchOpen(o){
+  document.body.classList.toggle('search-open',o);
+  searchBtn.classList.toggle('on',o); searchBtn.setAttribute('aria-expanded',String(o));
+  if(o) sq.focus(); else sres.style.display='none';
+}
+function openSearch(){ if(searchIsButton()) setSearchOpen(true); else sq.focus(); }
+searchBtn.addEventListener('click',()=>setSearchOpen(!document.body.classList.contains('search-open')));
+document.addEventListener('pointerdown',e=>{
+  if(document.body.classList.contains('search-open')&&!e.target.closest('#search,#searchBtn')) setSearchOpen(false);});
+sq.addEventListener('keydown',e=>{if(e.key==='Escape'&&searchIsButton()){setSearchOpen(false);searchBtn.focus();}});
 function applyDock(){
   const can=canSide(), m=can?dockPref:'bottom';
   document.body.classList.toggle('can-side',can);
