@@ -36,6 +36,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#06061a}
   background:rgba(10,12,36,.72);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
   border:1px solid rgba(150,170,255,.2);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.55)}
 #tools{display:contents}
+/* Dock controls share one shape (36px, 10px corners), one border, one ink, one icon set */
+.ico{width:18px;height:18px;display:block;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+#helpBtn,#shareBtn,#themeBtn{display:flex;align-items:center;justify-content:center;padding:0}
 #panel{position:absolute;left:12px;right:12px;bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 60px);
   height:min(46vh,440px);z-index:44;overflow-y:auto;
   display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));align-content:start;
@@ -50,7 +53,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#06061a}
 #tab:hover{background:rgba(255,255,255,.1)}
 #tab.open{background:rgba(80,110,220,.3);border-color:rgba(100,140,255,.5)}
 /* Fixed icon slot so swapping ⚙ for ✕ never resizes the button (iOS draws ⚙ as a wide emoji otherwise) */
-.ti{display:inline-block;width:18px;text-align:center;font-family:'Segoe UI Symbol','Apple Symbols',sans-serif;font-size:16px;color:#8899ff;pointer-events:none;line-height:1}
+.ti{display:inline-block;width:18px;height:18px;pointer-events:none}
 .tl{font:11px/1 'Courier New',monospace;color:#aabbee;pointer-events:none;min-width:8ch;text-align:left}
 .psec{padding:8px 13px;border-bottom:1px solid rgba(255,255,255,.06);border-right:1px solid rgba(255,255,255,.04);min-width:0}
 .ph{color:#667fb6;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
@@ -139,9 +142,10 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
 @media (pointer:coarse){#sq{font-size:16px}}
 #sq:focus{border-color:rgba(120,150,255,.5);background:rgba(8,10,34,.96)}
 #sq::placeholder{color:#7d7d92}
-.sqi{position:relative;float:left;width:0;left:10px;top:10px;font-size:11px;color:#7d7d92;pointer-events:none}
-#sqx{position:relative;float:right;margin-top:-32px;margin-right:2px;display:none;background:none;border:none;color:#7d7d90;
-  cursor:pointer;font-size:12px;padding:4px 6px}
+.sqi{position:relative;float:left;width:0;height:0;left:10px;top:11px;color:#7d7d92;pointer-events:none}
+.sqi .ico,#sqx .ico{width:14px;height:14px}
+#sqx{position:relative;float:right;margin-top:-33px;margin-right:3px;display:none;background:none;border:none;color:#7d7d90;
+  cursor:pointer;padding:8px}
 #sres{display:none;position:absolute;left:0;bottom:calc(100% + 10px);max-height:min(55vh,420px);overflow-y:auto;border-radius:12px;
   background:rgba(4,4,18,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 28px rgba(0,0,0,.8);
   font:11px/1.4 'Courier New',monospace;color:#dde;width:min(380px,calc(100vw - 24px))}
@@ -156,8 +160,8 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
 .snone{padding:9px;color:#7d7d90;font-size:10px}
 .flash{animation:flash 1.4s ease-out 2}
 @keyframes flash{0%{box-shadow:0 0 0 0 rgba(140,170,255,.9)}100%{box-shadow:0 0 0 12px rgba(140,170,255,0)}}
-#helpBtn{flex-shrink:0;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.14);
-  background:rgba(255,255,255,.04);color:#cce0ff;font:bold 15px 'Courier New',monospace;cursor:pointer;
+#helpBtn{flex-shrink:0;width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);color:#aabbee;font:bold 15px 'Courier New',monospace;cursor:pointer;
   touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #helpBtn:hover{background:rgba(255,255,255,.1)}
 #helpBtn.glow{border-color:rgba(160,190,255,.9);animation:helpGlow 1.6s ease-in-out infinite}
@@ -215,12 +219,12 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
   border:1px solid rgba(120,150,255,.35);font:11px 'Courier New',monospace;color:#dde6ff;
   pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 :root{--acc:#aaccff;--pv:#8899cc;color-scheme:dark}
-#themeBtn{flex-shrink:0;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.14);
-  background:rgba(255,255,255,.04);color:#cce0ff;font:15px/1 'Courier New',monospace;cursor:pointer;
+#themeBtn{flex-shrink:0;width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);color:#aabbee;font:15px/1 'Courier New',monospace;cursor:pointer;
   touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #themeBtn:hover{background:rgba(255,255,255,.1)}
-#shareBtn{flex-shrink:0;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.14);
-  background:rgba(255,255,255,.04);color:#cce0ff;font:15px/1 'Courier New',monospace;cursor:pointer;
+#shareBtn{flex-shrink:0;width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);color:#aabbee;font:15px/1 'Courier New',monospace;cursor:pointer;
   touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #shareBtn:hover{background:rgba(255,255,255,.1)}
 .plink{display:block;margin-top:7px;color:var(--acc);text-decoration:none;font-size:10px}
@@ -245,10 +249,16 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
 :root[data-theme=light] #tab:hover,:root[data-theme=light] #drawBtn:hover,:root[data-theme=light] #helpBtn:hover,:root[data-theme=light] #themeBtn:hover,:root[data-theme=light] #shareBtn:hover,
 :root[data-theme=light] .seg:hover,:root[data-theme=light] .pbtn:hover{background:rgba(30,40,90,.1);color:#223}
 :root[data-theme=light] #tab.open,:root[data-theme=light] #drawBtn.on,:root[data-theme=light] .seg.on,:root[data-theme=light] .pbtn.on{background:rgba(60,90,220,.14);border-color:rgba(60,90,220,.45);color:#1f4fbf}
-:root[data-theme=light] .ti,:root[data-theme=light] .tmh,:root[data-theme=light] .ch{color:#3a4fd0}
+:root[data-theme=light] .tmh,:root[data-theme=light] .ch{color:#3a4fd0}
 :root[data-theme=light] .tl{color:#3a4a7a}
-:root[data-theme=light] #helpBtn{color:#1f4fbf}
-:root[data-theme=light] #helpBtn.glow{border-color:rgba(60,90,220,.8)}
+:root[data-theme=light] #helpBtn.glow{border-color:rgba(60,90,220,.8);animation-name:helpGlowL}
+@keyframes helpGlowL{0%,100%{box-shadow:0 0 4px 1px rgba(60,90,220,.35)}50%{box-shadow:0 0 16px 5px rgba(60,90,220,.45);color:#1f4fbf}}
+@media (hover:none){
+  #tab:hover,#drawBtn:hover,#helpBtn:hover,#themeBtn:hover,#shareBtn:hover{background:rgba(255,255,255,.04)}
+  :root[data-theme=light] #tab:hover,:root[data-theme=light] #drawBtn:hover,:root[data-theme=light] #helpBtn:hover,:root[data-theme=light] #themeBtn:hover,:root[data-theme=light] #shareBtn:hover{background:#eef1f8;color:#3a4a7a}
+  #tab.open:hover,#drawBtn.on:hover{background:rgba(80,110,220,.3)}
+  :root[data-theme=light] #tab.open:hover,:root[data-theme=light] #drawBtn.on:hover{background:rgba(60,90,220,.14);color:#1f4fbf}
+}
 :root[data-theme=light] .psec{border-color:rgba(30,40,90,.08)}
 :root[data-theme=light] .ph,:root[data-theme=light] .vlbl{color:#4a5f99}
 :root[data-theme=light] .ph:hover{color:#1f3a8a}
@@ -327,21 +337,32 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
   <div id="vcard"></div>
   <div id="toast"></div>
   <div id="panel" class="closed" aria-label="Controls"></div>
-  <div id="dock">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- One icon set for the dock: 24px grid, 1.8 stroke, round caps, inherits text colour -->
+  <symbol id="i-help" viewBox="0 0 24 24"><path d="M8.6 9.2a3.4 3.4 0 0 1 6.8.2c0 2.3-3.4 2.8-3.4 5.1"/><path d="M12 18.6v.01"/></symbol>
+  <symbol id="i-draw" viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.4-4.4"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A7.8 7.8 0 0 1 9.5 4.5a7.8 7.8 0 1 0 10 10z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+  <symbol id="i-controls" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+</svg>
+<div id="dock">
   <div id="tools">
-      <button id="helpBtn" class="glow" title="Tutorials" aria-label="Tutorials">?</button>
+      <button id="helpBtn" class="glow" title="Tutorials" aria-label="Tutorials"><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg></button>
       <div id="tmenu" role="menu"></div>
-      <button id="drawBtn" title="Draw a vector between two points (V)"><span class="ic">✎</span><span class="lb">Draw vector</span></button>
+      <button id="drawBtn" title="Draw a vector between two points (V)"><svg class="ico" aria-hidden="true"><use href="#i-draw"/></svg><span class="lb">Draw vector</span></button>
       <div id="search">
-        <span class="sqi">⌕</span>
+        <span class="sqi"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg></span>
         <input id="sq" type="search" placeholder="force, F, ÷, help…" autocomplete="off" spellcheck="false" aria-label="Search quantities, symbols, formulas and controls">
-        <button id="sqx" title="Clear search" aria-label="Clear search">✕</button>
+        <button id="sqx" title="Clear search" aria-label="Clear search"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button>
         <div id="sres" role="listbox"></div>
       </div>
     </div>
-    <button id="shareBtn" title="Copy a link to this exact view" aria-label="Share a link to this view">🔗</button>
+    <button id="shareBtn" title="Copy a link to this exact view" aria-label="Share a link to this view"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg></button>
     <button id="themeBtn" title="Switch light / dark" aria-label="Switch light / dark theme"></button>
-    <button id="tab" title="Controls" aria-label="Controls"><span class="ti">⚙&#xFE0E;</span><span class="tl">Controls</span></button>
+    <button id="tab" title="Controls" aria-label="Controls"><span class="ti"><svg class="ico" aria-hidden="true"><use href="#i-controls"/></svg></span><span class="tl">Controls</span></button>
     <div id="badge"></div>
   </div>
 </div>
@@ -1416,11 +1437,12 @@ function hideCard(){selectedUV=null;focusPt=null;focusFo=null;vcard.style.displa
 let focusPt=null, focusFo=null;
 
 // ── Draw mode ─────────────────────────────────────────────────────────────────
+const ICON=n=>`<svg class="ico" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 const drawBtn=document.getElementById('drawBtn'), drawHint=document.getElementById('drawHint');
 let panelDrawBtn=null;
 function updateDrawUI(){
   const txt=drawMode?'✕ Stop drawing':'✎ Draw vector';
-  drawBtn.innerHTML=drawMode?'<span class="ic">✕</span><span class="lb">Stop drawing</span>':'<span class="ic">✎</span><span class="lb">Draw vector</span>';
+  drawBtn.innerHTML=ICON(drawMode?'x':'draw')+(drawMode?'<span class="lb">Stop drawing</span>':'<span class="lb">Draw vector</span>');
   drawBtn.classList.toggle('on',drawMode);
   if(panelDrawBtn){panelDrawBtn.textContent=txt;panelDrawBtn.classList.toggle('on',drawMode);}
   c3d.style.cursor=drawMode?'crosshair':'';
@@ -2315,7 +2337,7 @@ function applyTheme(t){
   document.documentElement.dataset.theme=t; setTH(); LIFT_CACHE.clear();
   scene.background.setHex(TH.bg); buildAxes();
   PTS.forEach(pt=>{if(pt.glow){pt.glow.material.blending=isLight()?THREE.NormalBlending:THREE.AdditiveBlending;pt.glow.material.needsUpdate=true;}});
-  themeBtn.textContent=isLight()?'☾':'☀';
+  themeBtn.innerHTML=ICON(isLight()?'moon':'sun');
   themeBtn.title=isLight()?'Switch to dark mode':'Switch to light mode';
 }
 themeBtn.addEventListener('click',()=>{const t=isLight()?'dark':'light';try{localStorage.setItem('theme',t);}catch{}applyTheme(t);});
@@ -2400,8 +2422,8 @@ Object.entries(GLOSS).forEach(([k,g])=>SEARCH_INDEX.push({kind:'term',title:g.t,
 
 // ── Toggle ────────────────────────────────────────────────────────────────────
 let panelOpen=false;
-function openPanel(){panelOpen=true;document.body.classList.add('panel-open');requestAnimationFrame(()=>typeof layoutView==='function'&&layoutView());panel.classList.remove('closed');tab.classList.add('open');tab.querySelector('.ti').textContent='✕';tab.querySelector('.tl').textContent='Close';}
-function closePanel(){panelOpen=false;document.body.classList.remove('panel-open');requestAnimationFrame(()=>typeof layoutView==='function'&&layoutView());panel.classList.add('closed');tab.classList.remove('open');tab.querySelector('.ti').textContent='⚙\uFE0E';tab.querySelector('.tl').textContent='Controls';}
+function openPanel(){panelOpen=true;document.body.classList.add('panel-open');requestAnimationFrame(()=>typeof layoutView==='function'&&layoutView());panel.classList.remove('closed');tab.classList.add('open');tab.querySelector('.ti').innerHTML=ICON('x');tab.querySelector('.tl').textContent='Close';}
+function closePanel(){panelOpen=false;document.body.classList.remove('panel-open');requestAnimationFrame(()=>typeof layoutView==='function'&&layoutView());panel.classList.add('closed');tab.classList.remove('open');tab.querySelector('.ti').innerHTML=ICON('controls');tab.querySelector('.tl').textContent='Controls';}
 tab.addEventListener('click',()=>panelOpen?closePanel():openPanel());
 
 // ── Keyboard ──────────────────────────────────────────────────────────────────
