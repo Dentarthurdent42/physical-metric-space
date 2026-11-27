@@ -117,10 +117,12 @@ body.dock-side.dock-compact .sw{width:26px;height:46px}
 body.dock-side.dock-compact .knob{top:22px}
 body.dock-side.dock-compact .dsw[aria-checked=true] .knob{transform:translateY(-20px)}
 /* Two or more columns: the switch lies flat across the bottom row, spanning every column */
-body.dock-side.dock-compact.dock-multi .dsw{grid-column:1/-1;grid-row:-2/-1;justify-self:center;padding:0 6px}
-body.dock-side.dock-compact.dock-multi .sw{width:46px;height:26px}
-body.dock-side.dock-compact.dock-multi .knob{top:2px}
-body.dock-side.dock-compact.dock-multi .dsw[aria-checked=true] .knob{transform:translateX(20px)}
+/* ...and fills that row: a button-sized track whose knob slides the full width */
+body.dock-side.dock-compact.dock-multi .dsw{grid-column:1/-1;grid-row:-2/-1;justify-self:stretch;padding:0;height:var(--db-h)}
+body.dock-side.dock-compact.dock-multi .sw{width:100%;height:var(--db-h);border-radius:var(--db-r)}
+body.dock-side.dock-compact.dock-multi .knob{top:2px;left:2px;width:30px;height:30px;border-radius:calc(var(--db-r) - 2px);transition:left .2s cubic-bezier(.4,0,.2,1)}
+body.dock-side.dock-compact.dock-multi .knob .ico{width:16px;height:16px}
+body.dock-side.dock-compact.dock-multi .dsw[aria-checked=true] .knob{transform:none;left:calc(100% - 32px)}
 /* last resort, past three columns */
 body.dock-scroll #dock{overflow-y:auto;overscroll-behavior:contain}
 body.dock-side.dock-compact #search{display:none;position:fixed;z-index:46;top:max(12px,env(safe-area-inset-top,0px));
