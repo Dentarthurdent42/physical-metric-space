@@ -97,20 +97,26 @@ body.dock-right #dock{right:max(12px,env(safe-area-inset-right,0px));left:auto}
 body.dock-side #dock{display:grid;grid-template-columns:1fr auto;align-content:start}
 body.dock-side #search{order:-1;grid-column:1/-1;width:100%}
 body.dock-side .dbtn{grid-column:1/-1;width:auto;min-width:0;justify-content:flex-start}
-body.dock-side #tab{order:1}
-body.dock-side #dockBtn{order:2;grid-column:1}
-body.dock-side #themeBtn{order:3;grid-column:2}
+/* (.class:where(#id) keeps these at class specificity so the icon-grid rules can reset them) */
+body.dock-side .dbtn:where(#tab){order:1}
+body.dock-side .dbtn:where(#dockBtn){order:2;grid-column:1}
+body.dock-side .dsw:where(#themeBtn){order:3;grid-column:2}
 /* Icon column (narrow or short screens): one column of icon squares; search is a button that
    opens the field beside the bar, and the switch turns upright to fit the column */
 #searchBtn{display:none}
-body.dock-side.dock-compact{--dw:50px}
-body.dock-side.dock-compact #dock{display:flex;flex-direction:column;align-items:center}
+/* --cols/--rows are set by fitDock: as many columns as it takes to fit the screen height,
+   items split evenly between them (filled top to bottom, then the next column) */
+body.dock-side.dock-compact{--dw:calc(var(--cols,1) * var(--db-h) + (var(--cols,1) - 1) * 6px + 14px)}
+body.dock-side.dock-compact #dock{display:grid;grid-auto-flow:column;grid-template-rows:repeat(var(--rows,7),auto);
+  grid-template-columns:repeat(var(--cols,1),var(--db-h));justify-content:center;align-items:center;justify-items:center}
 body.dock-side.dock-compact #searchBtn{display:flex;order:-1}
+body.dock-side.dock-compact .dbtn,body.dock-side.dock-compact .dsw{grid-column:auto}
 body.dock-side.dock-compact .dbtn{width:var(--db-h);justify-content:center}
 body.dock-side.dock-compact #themeBtn{padding:0;height:auto}
 body.dock-side.dock-compact .sw{width:26px;height:46px}
 body.dock-side.dock-compact .knob{top:22px}
 body.dock-side.dock-compact .dsw[aria-checked=true] .knob{transform:translateY(-20px)}
+/* last resort, past three columns */
 body.dock-scroll #dock{overflow-y:auto;overscroll-behavior:contain}
 body.dock-side.dock-compact #search{display:none;position:fixed;z-index:46;top:max(12px,env(safe-area-inset-top,0px));
   width:min(300px,calc(100vw - var(--dw) - 48px));padding:6px;border-radius:14px;
@@ -2552,17 +2558,25 @@ const DOCKS=['bottom','left','right'];
 let dockPref=store.get('pms.dock','bottom'); if(!DOCKS.includes(dockPref)) dockPref='bottom';
 const canSide=()=>window.innerWidth>window.innerHeight&&window.innerWidth>=560;
 // Bottom bar: icons only when the row overflows or would squeeze search below 150px.
-// Side column: labelled only on wide screens (>=1000px) where it fits; otherwise a single
-// column of icons, which scrolls (body.dock-scroll) if even that is taller than the screen.
+// Side column: labelled only on wide screens (>=1000px) where it fits; otherwise icons in as
+// few columns as fit the screen height (items split evenly). Scrolling only past 3 columns.
 const SIDE_LABELS_MIN_W=1000;
 function fitDock(){
   const B=document.body; B.classList.remove('dock-compact','dock-scroll');
+  B.style.removeProperty('--cols'); B.style.removeProperty('--rows');
   const side=B.classList.contains('dock-side'), over=()=>dockEl.scrollHeight>dockEl.clientHeight+1;
   const tight=side
     ?window.innerWidth<SIDE_LABELS_MIN_W||over()
     :dockEl.scrollWidth>dockEl.clientWidth+1||sq.offsetWidth<150;
   B.classList.toggle('dock-compact',tight);
-  if(side&&tight&&over()) B.classList.add('dock-scroll');
+  if(side&&tight){
+    const n=[...dockEl.querySelectorAll('.dbtn,.dsw')].filter(e=>getComputedStyle(e).display!=='none').length;
+    for(let c=1;c<=3;c++){
+      B.style.setProperty('--cols',c); B.style.setProperty('--rows',Math.ceil(n/c));
+      if(!over()) break;
+    }
+    if(over()) B.classList.add('dock-scroll');
+  }
   if(!(side&&tight)) setSearchOpen(false);
 }
 // In the icon column search is a button; it opens the field beside the bar
