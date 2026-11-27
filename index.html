@@ -29,7 +29,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#06061a}
 #tl{position:absolute;top:12px;left:12px;z-index:25;display:flex;flex-direction:column;align-items:flex-start;gap:8px;
   max-width:calc(100% - 58px);pointer-events:none}
 #tl>*{pointer-events:auto}
-#badge{flex-shrink:0;padding:0 6px;font:10px 'Courier New',monospace;color:#6380aa;pointer-events:none;white-space:nowrap}
 /* Bottom dock: every control lives in one glass bar; the panel rises above it */
 #dock{position:absolute;left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:45;
   display:flex;align-items:center;gap:6px;padding:6px;width:max-content;max-width:calc(100% - 24px);
@@ -209,7 +208,9 @@ body.panel-open #vcard{bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 7
 body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:auto}
 @media (max-width:600px){
   #dock{left:8px;right:8px;transform:none;width:auto;max-width:none}
-  #drawBtn .lb,#tab .tl,#badge{display:none}
+  #drawBtn .lb,#tab .tl{display:none}
+  /* Icon-only on phones: same 36px square as ?, link and theme */
+  #drawBtn,#tab{width:36px;padding:0;justify-content:center}
   #panel{left:8px;right:8px;height:min(42vh,400px);grid-template-columns:1fr}
   body.panel-open #vcard{bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 70px + min(42vh,400px))}
   body.panel-open #tl{max-height:calc(100% - min(42vh,400px) - 110px)}
@@ -243,7 +244,6 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
 :root[data-theme=light] #dock,:root[data-theme=light] #panel{-webkit-backdrop-filter:none;backdrop-filter:none}
 :root[data-theme=light] #dock{background:#f8f9fd;border-color:rgba(50,70,160,.2);box-shadow:0 10px 32px rgba(30,40,90,.18)}
 :root[data-theme=light] #panel{background:#f8f9fd;border-color:rgba(50,70,160,.18);color:#445;box-shadow:0 12px 40px rgba(30,40,90,.2)}
-:root[data-theme=light] #badge{color:#5a6c94}
 :root[data-theme=light] #tab,:root[data-theme=light] #drawBtn,:root[data-theme=light] #helpBtn,:root[data-theme=light] #themeBtn,:root[data-theme=light] #shareBtn,
 :root[data-theme=light] .seg,:root[data-theme=light] .pbtn{background:#eef1f8;border-color:rgba(30,40,90,.16);color:#3a4a7a}
 :root[data-theme=light] #tab:hover,:root[data-theme=light] #drawBtn:hover,:root[data-theme=light] #helpBtn:hover,:root[data-theme=light] #themeBtn:hover,:root[data-theme=light] #shareBtn:hover,
@@ -363,7 +363,6 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
     <button id="shareBtn" title="Copy a link to this exact view" aria-label="Share a link to this view"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg></button>
     <button id="themeBtn" title="Switch light / dark" aria-label="Switch light / dark theme"></button>
     <button id="tab" title="Controls" aria-label="Controls"><span class="ti"><svg class="ico" aria-hidden="true"><use href="#i-controls"/></svg></span><span class="tl">Controls</span></button>
-    <div id="badge"></div>
   </div>
 </div>
 <script type="module">
@@ -952,7 +951,6 @@ function placePoints(){
       });
     });
   }
-  document.getElementById('badge').textContent=`${PTS.filter(p=>!p.off).reduce((n,p)=>n+p.entries.length,0)} of ${ENTRIES.length} metrics · ${PTS.filter(p=>p.lead).length} spheres`;
   applyMetricsVis();
 }
 
