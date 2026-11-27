@@ -40,7 +40,48 @@ html,body{width:100%;height:100%;overflow:hidden;background:#06061a}
 #tab{min-width:calc(50px + 8ch);justify-content:center}
 /* Dock controls share one shape (36px, 10px corners), one border, one ink, one icon set */
 .ico{width:18px;height:18px;display:block;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-#helpBtn,#shareBtn,#themeBtn{display:flex;align-items:center;justify-content:center;padding:0}
+#helpBtn,#shareBtn,#themeBtn,#dockBtn{display:flex;align-items:center;justify-content:center;gap:6px}
+#helpBtn,#shareBtn,#dockBtn{width:auto;padding:0 12px;font:12px/1 'Courier New',monospace;white-space:nowrap}
+.lb{pointer-events:none}
+/* Light/dark is a switch, not a button: the knob carries the current mode's icon */
+#themeBtn{padding:0 6px}
+.sw{position:relative;display:block;width:46px;height:26px;border-radius:13px;pointer-events:none;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);transition:background .2s,border-color .2s}
+.knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:#aabbee;color:#0a0c24;transition:transform .2s cubic-bezier(.4,0,.2,1)}
+.knob .ico{width:13px;height:13px;stroke-width:2.2}
+#themeBtn[aria-checked=true] .knob{transform:translateX(20px)}
+#themeBtn[aria-checked=true] .sw{background:rgba(80,110,220,.35);border-color:rgba(100,140,255,.5)}
+#themeBtn:focus-visible .sw{outline:2px solid rgba(140,170,255,.8);outline-offset:2px}
+/* Not enough room for labels: every icon button becomes the same 36px square */
+#dock.compact .lb,#dock.compact .tl{display:none}
+#dock.compact #drawBtn,#dock.compact #tab,#dock.compact #helpBtn,#dock.compact #shareBtn,#dock.compact #dockBtn{width:36px;min-width:0;padding:0;justify-content:center}
+#dockBtn{display:none}
+body.can-side #dockBtn{display:flex}
+/* Side dock (landscape only): the bar becomes a column on the left or right, the panel opens beside it,
+   and everything that used to sit above the bar moves out of its way via --L / --R */
+:root{--dw:184px;--pw:min(340px,36vw)}
+body.dock-left{--L:calc(var(--dw) + max(12px,env(safe-area-inset-left,0px)) + 12px)}
+body.dock-right{--R:calc(var(--dw) + max(12px,env(safe-area-inset-right,0px)) + 12px)}
+body.dock-left.panel-open{--L:calc(var(--dw) + var(--pw) + max(12px,env(safe-area-inset-left,0px)) + 24px)}
+body.dock-right.panel-open{--R:calc(var(--dw) + var(--pw) + max(12px,env(safe-area-inset-right,0px)) + 24px)}
+body.dock-side #dock{top:max(12px,env(safe-area-inset-top,0px));bottom:auto;transform:none;width:var(--dw);max-width:none;
+  max-height:calc(100% - 24px);flex-direction:column;align-items:stretch}
+body.dock-left #dock{left:max(12px,env(safe-area-inset-left,0px));right:auto}
+body.dock-right #dock{right:max(12px,env(safe-area-inset-right,0px));left:auto}
+body.dock-side #search{order:-1;flex:0 0 auto;width:100%}
+body.dock-side #drawBtn,body.dock-side #tab,body.dock-side #helpBtn,body.dock-side #shareBtn,body.dock-side #dockBtn{width:auto;min-width:0;justify-content:flex-start}
+body.dock-side #themeBtn{justify-content:flex-start;padding:0 6px}
+body.dock-side #panel{top:max(12px,env(safe-area-inset-top,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));height:auto;width:var(--pw)}
+body.dock-left #panel{left:calc(var(--dw) + max(12px,env(safe-area-inset-left,0px)) + 12px);right:auto}
+body.dock-right #panel{right:calc(var(--dw) + max(12px,env(safe-area-inset-right,0px)) + 12px);left:auto}
+body.dock-side #panel.closed{transform:translateX(0) scale(.98)}
+body.dock-side #sres,body.dock-side #tmenu{top:0;bottom:auto;max-height:calc(100vh - 24px)}
+body.dock-left #sres,body.dock-left #tmenu{left:calc(100% + 10px);right:auto}
+body.dock-right #sres,body.dock-right #tmenu{right:calc(100% + 10px);left:auto}
+body.dock-side #tl{left:var(--L,12px);max-width:calc(100% - var(--L,12px) - var(--R,12px))}
+body.dock-side #vcard,body.dock-side.panel-open #vcard{left:var(--L,12px);bottom:max(12px,env(safe-area-inset-bottom,0px));max-height:calc(100% - 24px)}
+body.dock-side #toast{bottom:max(12px,env(safe-area-inset-bottom,0px));left:calc(var(--L,12px) + (100% - var(--L,12px) - var(--R,12px)) / 2)}
 #panel{position:absolute;left:12px;right:12px;bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 60px);
   height:min(46vh,440px);z-index:44;overflow-y:auto;
   display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));align-content:start;
@@ -162,8 +203,8 @@ input.nin.bad{border-color:rgba(255,90,90,.7)}
 .snone{padding:9px;color:#7d7d90;font-size:10px}
 .flash{animation:flash 1.4s ease-out 2}
 @keyframes flash{0%{box-shadow:0 0 0 0 rgba(140,170,255,.9)}100%{box-shadow:0 0 0 12px rgba(140,170,255,0)}}
-#helpBtn{flex-shrink:0;width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);color:#aabbee;font:bold 15px 'Courier New',monospace;cursor:pointer;
+#helpBtn{flex-shrink:0;min-width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);color:#aabbee;cursor:pointer;
   touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #helpBtn:hover{background:rgba(255,255,255,.1)}
 #helpBtn.glow{border-color:rgba(160,190,255,.9);animation:helpGlow 1.6s ease-in-out infinite}
@@ -211,9 +252,6 @@ body.panel-open #vcard{bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 7
 body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:auto}
 @media (max-width:600px){
   #dock{left:8px;right:8px;transform:none;width:auto;max-width:none}
-  #drawBtn .lb,#tab .tl{display:none}
-  /* Icon-only on phones: same 36px square as ?, link and theme */
-  #drawBtn,#tab{width:36px;min-width:0;padding:0;justify-content:center}
   #panel{left:8px;right:8px;height:min(42vh,400px);grid-template-columns:1fr}
   body.panel-open #vcard{bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 70px + min(42vh,400px))}
   body.panel-open #tl{max-height:calc(100% - min(42vh,400px) - 110px)}
@@ -223,14 +261,14 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
   border:1px solid rgba(120,150,255,.35);font:11px 'Courier New',monospace;color:#dde6ff;
   pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 :root{--acc:#aaccff;--pv:#8899cc;color-scheme:dark}
-#themeBtn{flex-shrink:0;width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);color:#aabbee;font:15px/1 'Courier New',monospace;cursor:pointer;
+#themeBtn{flex-shrink:0;height:36px;border-radius:10px;border:1px solid transparent;
+  background:none;color:#aabbee;cursor:pointer;
   touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-#themeBtn:hover{background:rgba(255,255,255,.1)}
-#shareBtn{flex-shrink:0;width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);color:#aabbee;font:15px/1 'Courier New',monospace;cursor:pointer;
+#themeBtn:hover .sw{border-color:rgba(160,180,255,.45)}
+#shareBtn,#dockBtn{flex-shrink:0;min-width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);color:#aabbee;cursor:pointer;
   touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-#shareBtn:hover{background:rgba(255,255,255,.1)}
+#shareBtn:hover,#dockBtn:hover{background:rgba(255,255,255,.1)}
 .plink{display:block;margin-top:7px;color:var(--acc);text-decoration:none;font-size:10px}
 .plink:hover{text-decoration:underline}
 /* ── Light theme: same layout, inverted surfaces, darker inks ── */
@@ -247,18 +285,20 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
 :root[data-theme=light] #dock,:root[data-theme=light] #panel{-webkit-backdrop-filter:none;backdrop-filter:none}
 :root[data-theme=light] #dock{background:#f8f9fd;border-color:rgba(50,70,160,.2);box-shadow:0 10px 32px rgba(30,40,90,.18)}
 :root[data-theme=light] #panel{background:#f8f9fd;border-color:rgba(50,70,160,.18);color:#445;box-shadow:0 12px 40px rgba(30,40,90,.2)}
-:root[data-theme=light] #tab,:root[data-theme=light] #drawBtn,:root[data-theme=light] #helpBtn,:root[data-theme=light] #themeBtn,:root[data-theme=light] #shareBtn,
+:root[data-theme=light] #tab,:root[data-theme=light] #drawBtn,:root[data-theme=light] #helpBtn,:root[data-theme=light] #shareBtn,:root[data-theme=light] #dockBtn,
 :root[data-theme=light] .seg,:root[data-theme=light] .pbtn{background:#eef1f8;border-color:rgba(30,40,90,.16);color:#3a4a7a}
-:root[data-theme=light] #tab:hover,:root[data-theme=light] #drawBtn:hover,:root[data-theme=light] #helpBtn:hover,:root[data-theme=light] #themeBtn:hover,:root[data-theme=light] #shareBtn:hover,
+:root[data-theme=light] #tab:hover,:root[data-theme=light] #drawBtn:hover,:root[data-theme=light] #helpBtn:hover,:root[data-theme=light] #shareBtn:hover,:root[data-theme=light] #dockBtn:hover,
 :root[data-theme=light] .seg:hover,:root[data-theme=light] .pbtn:hover{background:rgba(30,40,90,.1);color:#223}
 :root[data-theme=light] #tab.open,:root[data-theme=light] #drawBtn.on,:root[data-theme=light] .seg.on,:root[data-theme=light] .pbtn.on{background:rgba(60,90,220,.14);border-color:rgba(60,90,220,.45);color:#1f4fbf}
 :root[data-theme=light] .tmh,:root[data-theme=light] .ch{color:#3a4fd0}
 :root[data-theme=light] .tl{color:#3a4a7a}
+:root[data-theme=light] .sw{background:rgba(30,40,90,.1);border-color:rgba(30,40,90,.18)}
+:root[data-theme=light] .knob{background:#fff;color:#3a4a7a;box-shadow:0 1px 3px rgba(30,40,90,.3)}
 :root[data-theme=light] #helpBtn.glow{border-color:rgba(60,90,220,.8);animation-name:helpGlowL}
 @keyframes helpGlowL{0%,100%{box-shadow:0 0 4px 1px rgba(60,90,220,.35)}50%{box-shadow:0 0 16px 5px rgba(60,90,220,.45);color:#1f4fbf}}
 @media (hover:none){
-  #tab:hover,#drawBtn:hover,#helpBtn:hover,#themeBtn:hover,#shareBtn:hover{background:rgba(255,255,255,.04)}
-  :root[data-theme=light] #tab:hover,:root[data-theme=light] #drawBtn:hover,:root[data-theme=light] #helpBtn:hover,:root[data-theme=light] #themeBtn:hover,:root[data-theme=light] #shareBtn:hover{background:#eef1f8;color:#3a4a7a}
+  #tab:hover,#drawBtn:hover,#helpBtn:hover,#shareBtn:hover,#dockBtn:hover{background:rgba(255,255,255,.04)}
+  :root[data-theme=light] #tab:hover,:root[data-theme=light] #drawBtn:hover,:root[data-theme=light] #helpBtn:hover,:root[data-theme=light] #shareBtn:hover,:root[data-theme=light] #dockBtn:hover{background:#eef1f8;color:#3a4a7a}
   #tab.open:hover,#drawBtn.on:hover{background:rgba(80,110,220,.3)}
   :root[data-theme=light] #tab.open:hover,:root[data-theme=light] #drawBtn.on:hover{background:rgba(60,90,220,.14);color:#1f4fbf}
 }
@@ -349,11 +389,14 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
   <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A7.8 7.8 0 0 1 9.5 4.5a7.8 7.8 0 1 0 10 10z"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+  <symbol id="i-dock-bottom" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 15h17"/></symbol>
+  <symbol id="i-dock-left" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9 4.5v15"/></symbol>
+  <symbol id="i-dock-right" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M15 4.5v15"/></symbol>
   <symbol id="i-controls" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
 </svg>
 <div id="dock">
   <div id="tools">
-      <button id="helpBtn" class="glow" title="Tutorials" aria-label="Tutorials"><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg></button>
+      <button id="helpBtn" class="glow" title="Tutorials" aria-label="Tutorials"><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg><span class="lb">Help</span></button>
       <div id="tmenu" role="menu"></div>
       <button id="drawBtn" title="Draw a vector between two points (V)"><svg class="ico" aria-hidden="true"><use href="#i-draw"/></svg><span class="lb">Draw vector</span></button>
       <div id="search">
@@ -363,8 +406,9 @@ body.panel-open #tl{max-height:calc(100% - min(46vh,440px) - 110px);overflow-y:a
         <div id="sres" role="listbox"></div>
       </div>
     </div>
-    <button id="shareBtn" title="Copy a link to this exact view" aria-label="Share a link to this view"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg></button>
-    <button id="themeBtn" title="Switch light / dark" aria-label="Switch light / dark theme"></button>
+    <button id="shareBtn" title="Copy a link to this exact view" aria-label="Share a link to this view"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg><span class="lb">Share</span></button>
+    <button id="themeBtn" role="switch" aria-checked="false" title="Dark mode" aria-label="Dark mode"><span class="sw"><span class="knob"></span></span></button>
+    <button id="dockBtn" title="Move the toolbar" aria-label="Move the toolbar"><svg class="ico" aria-hidden="true"><use href="#i-dock-left"/></svg><span class="lb">Dock</span></button>
     <button id="tab" title="Controls" aria-label="Controls"><span class="ti"><svg class="ico" aria-hidden="true"><use href="#i-controls"/></svg></span><span class="tl">Controls</span></button>
   </div>
 </div>
@@ -1546,7 +1590,7 @@ let hovered=null, hoveredFormula=null, hoveredUV=null, hoveredCm=null, lastMouse
 // Returns {pt, fo, uv, op} for whatever is under the given client coordinates (at most one is set).
 // While drawing, only points are pickable so arrows never block endpoint selection.
 function hitAt(cx,cy){
-  mouse.x=(cx/W)*2-1; mouse.y=-((cy-VT)/H)*2+1;
+  mouse.x=((cx-VL)/W)*2-1; mouse.y=-((cy-VT)/H)*2+1;
   ray.setFromCamera(mouse,activeCamera);
   const targets=drawMode?pickMeshes:[...(showFormulas&&!overlayOn()?formulaPickMeshes:[]),...opPickMeshes,...uvPickMeshes,...beadPickMeshes,...pickMeshes];
   const hits=ray.intersectObjects(targets).sort((a,b)=>a.distance-b.distance);
@@ -1601,7 +1645,7 @@ function pick(e,force=false){
       tip.innerHTML=newOp.tipHtml;
     }
   }
-  if(newPt||newFo||newUV||newOp||newCm){tip.style.display='block';tip.style.left=Math.min(src.clientX+14,W-244)+'px';tip.style.top=Math.max(4,src.clientY-60)+'px';}
+  if(newPt||newFo||newUV||newOp||newCm){tip.style.display='block';tip.style.left=Math.min(src.clientX+14,window.innerWidth-244)+'px';tip.style.top=Math.max(4,src.clientY-60)+'px';}
   else tip.style.display='none';
 }
 c3d.addEventListener('mousemove',pick);
@@ -2338,8 +2382,9 @@ function applyTheme(t){
   document.documentElement.dataset.theme=t; setTH(); LIFT_CACHE.clear();
   scene.background.setHex(TH.bg); buildAxes();
   PTS.forEach(pt=>{if(pt.glow){pt.glow.material.blending=isLight()?THREE.NormalBlending:THREE.AdditiveBlending;pt.glow.material.needsUpdate=true;}});
-  themeBtn.innerHTML=ICON(isLight()?'moon':'sun');
-  themeBtn.title=isLight()?'Switch to dark mode':'Switch to light mode';
+  themeBtn.querySelector('.knob').innerHTML=ICON(isLight()?'sun':'moon');
+  themeBtn.setAttribute('aria-checked',String(!isLight()));
+  themeBtn.title=isLight()?'Dark mode: off':'Dark mode: on';
 }
 themeBtn.addEventListener('click',()=>{const t=isLight()?'dark':'light';try{localStorage.setItem('theme',t);}catch{}applyTheme(t);});
 matchMedia('(prefers-color-scheme: light)').addEventListener('change',e=>{
@@ -2458,21 +2503,58 @@ window.addEventListener('keyup',e=>{KEYS[e.key]=false;});
 // The 3D view never sits under the controls: it ends just above the dock, or above the
 // panel while that is open, so whatever a control changes stays in sight.
 // Likewise it starts below any hint or tutorial card shown at the top left.
-var VT=0;
+var VT=0, VL=0;
 function layoutView(){
   const dockEl=document.getElementById('dock'), tlEl=document.getElementById('tl');
-  const edge=panelOpen?panel.offsetTop:dockEl.offsetTop;
+  const side=document.body.classList.contains('dock-side'), right=document.body.classList.contains('dock-right');
+  const edge=side?window.innerHeight:panelOpen?panel.offsetTop:dockEl.offsetTop;
+  // Side dock: the view takes what is left beside the bar (and beside the panel while it is open)
+  const inner=panelOpen&&side?panel:dockEl;
+  VL=side&&!right?Math.round(inner.offsetLeft+inner.offsetWidth+8):0;
+  const VR=side&&right?Math.round(window.innerWidth-inner.offsetLeft+8):0;
   const tlH=tlEl.offsetHeight;
   VT=tlH>0?Math.round(tlEl.offsetTop+tlH+8):0;
   if(edge-8-VT<160) VT=Math.max(0,Math.round(edge-8-160));
-  c3d.style.top=VT+'px'; clbl.style.top=VT+'px';
-  W=window.innerWidth; H=Math.max(140,Math.round(edge-8-VT));
+  c3d.style.top=VT+'px'; clbl.style.top=VT+'px'; c3d.style.left=VL+'px'; clbl.style.left=VL+'px';
+  W=Math.max(200,window.innerWidth-VL-VR); H=Math.max(140,Math.round(edge-8-VT));
   renderer.setSize(W,H); perspCam.aspect=W/H; perspCam.updateProjectionMatrix();
   const h=ORTHO_H, asp=W/H;
   orthoCam.left=-h*asp; orthoCam.right=h*asp; orthoCam.updateProjectionMatrix();
   syncLC();
 }
 window.addEventListener('resize',layoutView);
+
+// ── Dock position and labels ─────────────────────────────────────────────────
+// Labels show whenever they fit; otherwise every button drops to its icon (the .compact class).
+// In landscape the bar can also sit as a column on the left or right (remembered per browser).
+const dockEl=document.getElementById('dock'), dockBtn=document.getElementById('dockBtn');
+const DOCKS=['bottom','left','right'];
+let dockPref=store.get('pms.dock','bottom'); if(!DOCKS.includes(dockPref)) dockPref='bottom';
+const canSide=()=>window.innerWidth>window.innerHeight&&window.innerWidth>=560;
+function fitDock(){
+  dockEl.classList.remove('compact');
+  if(document.body.classList.contains('dock-side')) return;
+  if(dockEl.scrollWidth>dockEl.clientWidth+1||sq.offsetWidth<150) dockEl.classList.add('compact');
+}
+function applyDock(){
+  const can=canSide(), m=can?dockPref:'bottom';
+  document.body.classList.toggle('can-side',can);
+  document.body.classList.toggle('dock-side',m!=='bottom');
+  document.body.classList.toggle('dock-left',m==='left');
+  document.body.classList.toggle('dock-right',m==='right');
+  const next=DOCKS[(DOCKS.indexOf(m)+1)%DOCKS.length];
+  dockBtn.querySelector('use').setAttribute('href','#i-dock-'+next);
+  dockBtn.title='Dock the toolbar '+(next==='bottom'?'at the bottom':'on the '+next);
+  dockBtn.setAttribute('aria-label',dockBtn.title);
+  fitDock(); layoutView();
+}
+dockBtn.addEventListener('click',()=>{
+  const cur=document.body.classList.contains('dock-left')?'left':document.body.classList.contains('dock-right')?'right':'bottom';
+  dockPref=DOCKS[(DOCKS.indexOf(cur)+1)%DOCKS.length]; store.set('pms.dock',dockPref); applyDock();
+});
+window.addEventListener('resize',applyDock);
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(applyDock);
+applyDock();
 if(window.ResizeObserver) new ResizeObserver(()=>layoutView()).observe(document.getElementById('tl'));
 layoutView();
 
@@ -2796,7 +2878,7 @@ function animate(){
     lc.beginPath(); lc.arc(ax,ay,11,0,Math.PI*2); lc.stroke();
     let end=null;
     if(hovered&&hovered!==drawStart){const[bx,by]=toSc(hovered.pos.x,hovered.pos.y,hovered.pos.z);end=[bx,by];}
-    else if(lastMouse) end=[lastMouse.x,lastMouse.y-VT];
+    else if(lastMouse) end=[lastMouse.x-VL,lastMouse.y-VT];
     if(end){
       lc.setLineDash([6,5]); lc.strokeStyle=drawStart.col.css; lc.lineWidth=2;
       lc.beginPath(); lc.moveTo(ax,ay); lc.lineTo(end[0],end[1]); lc.stroke(); lc.setLineDash([]);
