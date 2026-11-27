@@ -37,7 +37,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#06061a}
 /* ── Dock ──────────────────────────────────────────────────────────────────────
    Every dock button is a .dbtn and reads the --db-* tokens, so a theme or a new button
    never needs its own selector list. The light/dark switch is a .dsw.
-   State: #dock.compact = labels don't fit (icons only, all the same square).
+   State on <body>: .dock-compact = labels don't fit (icons only, all the same square);
+   .panel-over = side dock on a narrow screen, so the Controls panel floats over the view.
    <body>.dock-side + .dock-left/.dock-right = the bar is a column on that edge;
    <body>.can-side = landscape, so the Dock button is offered. */
 :root{
@@ -45,7 +46,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#06061a}
   --db-bg:rgba(255,255,255,.04);--db-bd:rgba(255,255,255,.12);--db-ink:#aabbee;--db-hover:rgba(255,255,255,.1);
   --db-on-bg:rgba(80,110,220,.3);--db-on-bd:rgba(100,140,255,.5);--db-on-ink:#cce0ff;
   --sw-bg:rgba(255,255,255,.1);--sw-bd:rgba(255,255,255,.16);--sw-knob:#aabbee;--sw-knob-ink:#0a0c24;--sw-shadow:none;
-  --dw:184px;--pw:min(340px,36vw)}
+  --dw:212px;--pw:min(340px,36vw)}
 :root[data-theme=light]{
   --db-bg:#eef1f8;--db-bd:rgba(30,40,90,.16);--db-ink:#3a4a7a;--db-hover:rgba(30,40,90,.1);
   --db-on-bg:rgba(60,90,220,.14);--db-on-bd:rgba(60,90,220,.45);--db-on-ink:#1f4fbf;
@@ -64,8 +65,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#06061a}
 /* Fixed icon slot so swapping icons never resizes the button */
 .ti{display:inline-block;width:18px;height:18px;pointer-events:none}
 /* Buttons with two labels keep one width for both, content centred */
-#drawBtn{min-width:calc(50px + 12ch)}
-#tab{min-width:calc(50px + 8ch)}
+/* (class-level specificity on purpose, so compact/side rules can override it) */
+.dbtn:where(#drawBtn){min-width:calc(50px + 12ch)}
+.dbtn:where(#tab){min-width:calc(50px + 8ch)}
 /* Light/dark switch: the knob carries the current mode's icon */
 .dsw{flex-shrink:0;display:flex;align-items:center;height:var(--db-h);padding:0 6px;border:none;background:none;
   border-radius:var(--db-r);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -79,21 +81,29 @@ html,body{width:100%;height:100%;overflow:hidden;background:#06061a}
 @media (hover:hover){.dsw:hover .sw{border-color:var(--db-on-bd)}}
 .dsw:focus-visible{outline:none}
 .dsw:focus-visible .sw{outline:2px solid var(--db-on-bd);outline-offset:2px}
-#dock.compact .lb{display:none}
-#dock.compact .dbtn{width:var(--db-h);min-width:0;padding:0}
+body.dock-compact .lb{display:none}
+body.dock-compact .dbtn{width:var(--db-h);min-width:0;padding:0}
 #dockBtn{display:none}
 body.can-side #dockBtn{display:flex}
 /* Side dock: everything that used to sit above the bar moves out of its way via --L / --R */
 body.dock-left{--L:calc(var(--dw) + max(12px,env(safe-area-inset-left,0px)) + 12px)}
 body.dock-right{--R:calc(var(--dw) + max(12px,env(safe-area-inset-right,0px)) + 12px)}
-body.dock-left.panel-open{--L:calc(var(--dw) + var(--pw) + max(12px,env(safe-area-inset-left,0px)) + 24px)}
-body.dock-right.panel-open{--R:calc(var(--dw) + var(--pw) + max(12px,env(safe-area-inset-right,0px)) + 24px)}
+body.dock-left.panel-open:not(.panel-over){--L:calc(var(--dw) + var(--pw) + max(12px,env(safe-area-inset-left,0px)) + 24px)}
+body.dock-right.panel-open:not(.panel-over){--R:calc(var(--dw) + var(--pw) + max(12px,env(safe-area-inset-right,0px)) + 24px)}
 body.dock-side #dock{top:max(12px,env(safe-area-inset-top,0px));bottom:auto;transform:none;width:var(--dw);max-width:none;
   max-height:calc(100% - 24px);flex-direction:column;align-items:stretch}
 body.dock-left #dock{left:max(12px,env(safe-area-inset-left,0px));right:auto}
 body.dock-right #dock{right:max(12px,env(safe-area-inset-right,0px));left:auto}
-body.dock-side #search{order:-1;flex:0 0 auto;width:100%}
-body.dock-side .dbtn{width:auto;min-width:0;justify-content:flex-start}
+body.dock-side #dock{display:grid;grid-template-columns:1fr auto;align-content:start}
+body.dock-side #search{order:-1;grid-column:1/-1;width:100%}
+body.dock-side .dbtn{grid-column:1/-1;width:auto;min-width:0;justify-content:flex-start}
+body.dock-side #tab{order:1}
+body.dock-side #dockBtn{order:2;grid-column:1}
+body.dock-side #themeBtn{order:3;grid-column:2}
+/* Too short for a labelled column: search on top, then the controls as a grid of icon squares */
+body.dock-side.dock-compact #dock{grid-template-columns:repeat(4,var(--db-h));justify-content:space-between}
+body.dock-side.dock-compact .dbtn{grid-column:auto;width:var(--db-h);justify-content:center}
+body.dock-side.dock-compact #themeBtn{grid-column:span 3;justify-self:end}
 body.dock-side #panel{top:max(12px,env(safe-area-inset-top,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));height:auto;width:var(--pw)}
 body.dock-left #panel{left:calc(var(--dw) + max(12px,env(safe-area-inset-left,0px)) + 12px);right:auto}
 body.dock-right #panel{right:calc(var(--dw) + max(12px,env(safe-area-inset-right,0px)) + 12px);left:auto}
@@ -2497,7 +2507,9 @@ function layoutView(){
   const side=document.body.classList.contains('dock-side'), right=document.body.classList.contains('dock-right');
   const edge=side?window.innerHeight:panelOpen?panel.offsetTop:dockEl.offsetTop;
   // Side dock: the view takes what is left beside the bar (and beside the panel while it is open)
-  const inner=panelOpen&&side?panel:dockEl;
+  // On a narrow screen the panel floats over the view instead of squeezing it (body.panel-over)
+  document.body.classList.toggle('panel-over',side&&window.innerWidth-dockEl.offsetWidth-panel.offsetWidth-48<420);
+  const inner=panelOpen&&side&&!document.body.classList.contains('panel-over')?panel:dockEl;
   VL=side&&!right?Math.round(inner.offsetLeft+inner.offsetWidth+8):0;
   const VR=side&&right?Math.round(window.innerWidth-inner.offsetLeft+8):0;
   const tlH=tlEl.offsetHeight;
@@ -2513,16 +2525,20 @@ function layoutView(){
 window.addEventListener('resize',layoutView);
 
 // ── Dock position and labels ─────────────────────────────────────────────────
-// Labels show whenever they fit; otherwise every button drops to its icon (the .compact class).
+// Labels show whenever they fit; otherwise every button drops to its icon (body.dock-compact).
 // In landscape the bar can also sit as a column on the left or right (remembered per browser).
 const dockEl=document.getElementById('dock'), dockBtn=document.getElementById('dockBtn');
 const DOCKS=['bottom','left','right'];
 let dockPref=store.get('pms.dock','bottom'); if(!DOCKS.includes(dockPref)) dockPref='bottom';
 const canSide=()=>window.innerWidth>window.innerHeight&&window.innerWidth>=560;
+// Bottom bar: compact when the row overflows or would squeeze search below 150px.
+// Side column: compact when the labelled column is taller than the screen.
 function fitDock(){
-  dockEl.classList.remove('compact');
-  if(document.body.classList.contains('dock-side')) return;
-  if(dockEl.scrollWidth>dockEl.clientWidth+1||sq.offsetWidth<150) dockEl.classList.add('compact');
+  const B=document.body; B.classList.remove('dock-compact');
+  const tight=B.classList.contains('dock-side')
+    ?dockEl.scrollHeight>dockEl.clientHeight+1
+    :dockEl.scrollWidth>dockEl.clientWidth+1||sq.offsetWidth<150;
+  B.classList.toggle('dock-compact',tight);
 }
 function applyDock(){
   const can=canSide(), m=can?dockPref:'bottom';
@@ -2532,6 +2548,7 @@ function applyDock(){
   document.body.classList.toggle('dock-right',m==='right');
   const next=DOCKS[(DOCKS.indexOf(m)+1)%DOCKS.length];
   dockBtn.querySelector('use').setAttribute('href','#i-dock-'+next);
+  dockBtn.querySelector('.lb').textContent='Dock '+next;
   dockBtn.title='Dock the toolbar '+(next==='bottom'?'at the bottom':'on the '+next);
   dockBtn.setAttribute('aria-label',dockBtn.title);
   fitDock(); layoutView();
